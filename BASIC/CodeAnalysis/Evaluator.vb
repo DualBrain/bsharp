@@ -27,6 +27,7 @@ Namespace Basic.CodeAnalysis
         Case BoundNodeKind.VariableDeclaration : EvaluateVariableDeclaration(CType(node, BoundVariableDeclaration))
         Case BoundNodeKind.IfStatement : EvaluateIfStatement(CType(node, BoundIfStatement))
         Case BoundNodeKind.WhileStatement : EvaluateWhileStatement(CType(node, BoundWhileStatement))
+        Case BoundNodeKind.ForStatement : EvaluateForStatement(CType(node, BoundForStatement))
         Case BoundNodeKind.ExpressionStatement : EvaluateExpressionStatement(CType(node, BoundExpressionStatement))
         Case Else
           Throw New Exception($"Unexpected kind {node.Kind}")
@@ -60,6 +61,17 @@ Namespace Basic.CodeAnalysis
       While CBool(EvaluateExpression(node.Condition))
         EvaluateStatement(node.Body)
       End While
+    End Sub
+
+    Private Sub EvaluateForStatement(node As BoundForStatement)
+      Dim lowerBound = CInt(EvaluateExpression(node.LowerBound))
+      Dim upperBound = CInt(EvaluateExpression(node.UpperBound))
+      Dim stepper = 1
+      If node.Stepper IsNot Nothing Then stepper = CInt(EvaluateExpression(node.Stepper))
+      For index = lowerBound To upperBound Step stepper
+        m_variables(node.Variable) = index
+        EvaluateStatement(node.Body)
+      Next
     End Sub
 
     Private Sub EvaluateExpressionStatement(node As BoundExpressionStatement)

@@ -73,6 +73,14 @@ a * a }", 100)>
   wend
   result
 }", 55)>
+    <InlineData("
+{ 
+  dim result = 0
+  for i = 1 to 10
+    let result = result + i
+  next
+  result
+}", 55)>
     Public Sub Evaluator_Computes_CorrectValues(text As String, expectedValue As Object)
       AssertValue(text, expectedValue)
     End Sub

@@ -79,6 +79,7 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.DimKeyword, SyntaxKind.ConstKeyword : Return ParseVariableDeclaration()
         Case SyntaxKind.IfKeyword : Return ParseIfStatement()
         Case SyntaxKind.WhileKeyword : Return ParseWhileStatement()
+        Case SyntaxKind.ForKeyword : Return ParseForStatement()
         Case Else : Return ParseExpressionStatement()
       End Select
     End Function
@@ -178,6 +179,24 @@ Namespace Basic.CodeAnalysis.Syntax
         Dim endingWhilekeyword = MatchToken(SyntaxKind.WhileKeyword)
       End If
       Return New WhileStatementSyntax(keyword, condition, statement)
+    End Function
+
+    Private Function ParseForStatement() As StatementSyntax
+      'TODO: Probably start here to parse `For Each ...`
+      Dim keyword = MatchToken(SyntaxKind.ForKeyword)
+      Dim identifier = MatchToken(SyntaxKind.IdentifierToken)
+      Dim equalsToken = MatchToken(SyntaxKind.EqualToken)
+      Dim lowerBound = ParseExpression()
+      Dim toToken = MatchToken(SyntaxKind.ToKeyword)
+      Dim upperBound = ParseExpression()
+      Dim stepper As ExpressionSyntax = Nothing
+      If Peek(0).Kind = SyntaxKind.StepKeyword Then
+        Dim stepToken = MatchToken(SyntaxKind.StepKeyword)
+        stepper = ParseExpression()
+      End If
+      Dim body = ParseStatement()
+      Dim nextToken = MatchToken(SyntaxKind.NextKeyword)
+      Return New ForStatementSyntax(identifier, lowerBound, upperBound, stepper, body)
     End Function
 
     Private Function ParseExpressionStatement() As ExpressionStatementSyntax

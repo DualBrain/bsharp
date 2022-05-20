@@ -56,6 +56,7 @@ Namespace Basic.CodeAnalysis.Binding
         Case SyntaxKind.VariableDeclaration : Return BindVariableDeclaration(CType(syntax, VariableDeclarationSyntax))
         Case SyntaxKind.IfStatement : Return BindIfStatement(CType(syntax, IfStatementSyntax))
         Case SyntaxKind.WhileStatement : Return BindWhileStatement(CType(syntax, WhileStatementSyntax))
+        Case SyntaxKind.ForStatement : Return BindForStatement(CType(syntax, ForStatementSyntax))
         Case SyntaxKind.ExpressionStatement : Return BindExpressionStatement(CType(syntax, ExpressionStatementSyntax))
         Case Else
           Throw New Exception($"Unexpected syntax {syntax.Kind}")
@@ -99,6 +100,28 @@ Namespace Basic.CodeAnalysis.Binding
       Dim condition = BindExpression(syntax.Condition, GetType(Boolean))
       Dim statement = BindStatement(syntax.Body)
       Return New BoundWhileStatement(condition, statement)
+    End Function
+
+    Private Function BindForStatement(syntax As ForStatementSyntax) As BoundStatement
+
+      Dim lowerBound = BindExpression(syntax.LowerBound, GetType(Integer))
+      Dim upperBound = BindExpression(syntax.UpperBound, GetType(Integer))
+      Dim stepper = If(syntax.Stepper Is Nothing, Nothing, BindExpression(syntax.Stepper, GetType(Integer)))
+
+      m_scope = New BoundScope(m_scope)
+
+      Dim name = syntax.Variable.Text
+      Dim variable = New VariableSymbol(name, True, GetType(Integer))
+      If Not m_scope.TryDeclare(variable) Then
+        m_diagnostics.ReportVariableAlreadyDeclared(syntax.Variable.Span, name)
+      End If
+
+      Dim body = BindStatement(syntax.Body)
+
+      m_scope = m_scope.Parent
+
+      Return New BoundForStatement(variable, lowerBound, upperBound, stepper, body)
+
     End Function
 
     Private Function BindExpressionStatement(syntax As ExpressionStatementSyntax) As BoundStatement

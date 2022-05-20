@@ -55,6 +55,11 @@
     ElseIfKeyword
     ElseKeyword
     WhileKeyword
+    WendKeyword
+    ForKeyword
+    ToKeyword
+    StepKeyword
+    NextKeyword
 
     ' Nodes
     CompilationUnit
@@ -66,6 +71,7 @@
     IfStatement
     ElseClause
     WhileStatement
+    ForStatement
 
     ' Expressions
     LiteralExpression
@@ -74,7 +80,7 @@
     BinaryExpression
     ParenthesizedExpression
     AssignmentExpression
-    WendKeyword
+
   End Enum
 
 End Namespace

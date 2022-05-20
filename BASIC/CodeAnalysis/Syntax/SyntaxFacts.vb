@@ -84,8 +84,14 @@ Namespace Basic.CodeAnalysis.Syntax
         Case "then" : Return SyntaxKind.ThenKeyword
         Case "elseIf" : Return SyntaxKind.ElseIfKeyword
         Case "else" : Return SyntaxKind.ElseKeyword
+
         Case "while" : Return SyntaxKind.WhileKeyword
         Case "wend" : Return SyntaxKind.WendKeyword
+
+        Case "for" : Return SyntaxKind.ForKeyword
+        Case "to" : Return SyntaxKind.ToKeyword
+        Case "step" : Return SyntaxKind.StepKeyword
+        Case "next" : Return SyntaxKind.NextKeyword
 
         Case "const" : Return SyntaxKind.ConstKeyword
         Case "dim" : Return SyntaxKind.DimKeyword
@@ -114,6 +120,11 @@ Namespace Basic.CodeAnalysis.Syntax
 
         Case SyntaxKind.WhileKeyword : Return "while"
         Case SyntaxKind.WendKeyword : Return "wend"
+
+        Case SyntaxKind.ForKeyword : Return "for"
+        Case SyntaxKind.ToKeyword : Return "to"
+        Case SyntaxKind.StepKeyword : Return "step"
+        Case SyntaxKind.NextKeyword : Return "next"
 
         Case SyntaxKind.IfKeyword : Return "if"
         Case SyntaxKind.ThenKeyword : Return "then"

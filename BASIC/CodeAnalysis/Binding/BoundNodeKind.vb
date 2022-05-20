@@ -8,6 +8,7 @@
     ExpressionStatement
     IfStatement
     WhileStatement
+    ForStatement
 
     ' Expressions
     LiteralExpression
