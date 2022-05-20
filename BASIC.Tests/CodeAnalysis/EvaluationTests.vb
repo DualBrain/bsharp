@@ -105,7 +105,7 @@ a * a }", 100)>
 
     End Sub
 
-    '<Fact>
+    <Fact>
     Public Sub Evaluator_BlockStatement_NoInfiniteLoop()
 
       Dim text = "
@@ -133,7 +133,7 @@ a * a }", 100)>
 
     End Sub
 
-    '<Fact>
+    <Fact>
     Public Sub Evaluator_NameExpression_Reports_NoErrorForInsertedToken()
 
       Dim text = "1 + []"

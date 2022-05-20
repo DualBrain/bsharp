@@ -207,10 +207,25 @@ Namespace Basic.CodeAnalysis.Syntax
     Private Function ParseBlockStatement() As BlockStatementSyntax
       Dim statements = ImmutableArray.CreateBuilder(Of StatementSyntax)
       Dim openBraceToken = MatchToken(SyntaxKind.OpenBraceToken)
+      Dim startToken = Current()
       While Current.Kind <> SyntaxKind.EndOfFileToken AndAlso
             Current.Kind <> SyntaxKind.CloseBraceToken
+
+        startToken = Current()
         Dim statement = ParseStatement()
         statements.Add(statement)
+
+        ' If ParseStatement did not consume any tokens,
+        ' let's skip the current token and continue in 
+        ' order to avoid an infinite loop.
+        '
+        ' We do not need to report an error, because we've
+        ' already tried to parse an experession statement
+        ' and reported one.
+        If Current() Is startToken Then
+          NextToken()
+        End If
+
       End While
       Dim closeBraceToken = MatchToken(SyntaxKind.CloseBraceToken)
       Return New BlockStatementSyntax(openBraceToken, statements.ToImmutable, closeBraceToken)
