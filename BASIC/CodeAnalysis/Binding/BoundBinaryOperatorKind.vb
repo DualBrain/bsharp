@@ -15,6 +15,7 @@
     LogicalOrElse
 
     XorOperation
+    LogicalXor
     InpOperation
     ModOperation
     ImpOperation
@@ -28,6 +29,7 @@
     LessThan
     LessThanEqual
     Raise
+
   End Enum
 
 End Namespace

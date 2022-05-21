@@ -9,10 +9,9 @@ Namespace Basic.CodeAnalysis.Syntax
 
       Dim parser = New Parser(text)
       Dim root = parser.ParseCompilationUnit
-      Dim diagnostics = parser.Diagnostics.ToImmutableArray
 
       Me.Text = text
-      Me.Diagnostics = diagnostics
+      Me.Diagnostics = parser.Diagnostics.ToImmutableArray()
       Me.Root = root
 
     End Sub

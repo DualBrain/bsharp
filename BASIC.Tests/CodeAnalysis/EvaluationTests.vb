@@ -32,6 +32,30 @@ Namespace Global.BASIC.Tests.CodeAnalysis
     <InlineData("not true", False)>
     <InlineData("not false", True)>
     <InlineData("not false", True)>
+    <InlineData("true andalso true", True)>
+    <InlineData("false orelse false", False)>
+    <InlineData("false or false", False)>
+    <InlineData("false or true", True)>
+    <InlineData("true or false", True)>
+    <InlineData("true or true", True)>
+    <InlineData("false and false", False)>
+    <InlineData("false and true", False)>
+    <InlineData("true and false", False)>
+    <InlineData("true and true", True)>
+    <InlineData("false xor false", False)>
+    <InlineData("false xor true", True)>
+    <InlineData("true xor false", True)>
+    <InlineData("true xor true", False)>
+    <InlineData("1 or 2", 3)>
+    <InlineData("1 or 0", 1)>
+    <InlineData("1 and 2", 0)>
+    <InlineData("1 and 0", 0)>
+    <InlineData("1 xor 0", 1)>
+    <InlineData("0 xor 1", 1)>
+    <InlineData("1 xor 2", 3)>
+    <InlineData("dim a = 10", 10)>
+    <InlineData("{ dim a = 10
+(a * a) }", 100)>
     <InlineData("{ dim a = 0
 let a = 10
 a * a }", 100)>

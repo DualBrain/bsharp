@@ -13,7 +13,6 @@ Namespace BASIC.CodeAnalysis.Syntax
                                                          k.ToString.EndsWith("Token")).
                               ToList
 
-
       Dim testedTokenKinds = GetTokens.Concat(GetSeparators).Select(Function(t) t.Kind)
       Dim untestedTokenKinds = New SortedSet(Of SyntaxKind)(tokenKinds)
       untestedTokenKinds.Remove(SyntaxKind.BadToken)
@@ -40,10 +39,10 @@ Namespace BASIC.CodeAnalysis.Syntax
       Dim text = t1Text & t2Text
       Dim tokens = SyntaxTree.ParseTokens(text).ToArray
       Assert.Equal(2, tokens.Length)
-      Assert.Equal(tokens(0).Kind, t1Kind)
-      Assert.Equal(tokens(0).Text, t1Text)
-      Assert.Equal(tokens(1).Kind, t2Kind)
-      Assert.Equal(tokens(1).Text, t2Text)
+      Assert.Equal(t1Kind, tokens(0).Kind)
+      Assert.Equal(t1Text, tokens(0).Text)
+      Assert.Equal(t2Kind, tokens(1).Kind)
+      Assert.Equal(t2Text, tokens(1).Text)
     End Sub
 
     <Theory>
@@ -54,12 +53,12 @@ Namespace BASIC.CodeAnalysis.Syntax
       Dim text = t1Text & separatorText & t2Text
       Dim tokens = SyntaxTree.ParseTokens(text).ToArray
       Assert.Equal(3, tokens.Length)
-      Assert.Equal(tokens(0).Kind, t1Kind)
-      Assert.Equal(tokens(0).Text, t1Text)
-      Assert.Equal(tokens(1).Kind, separatorKind)
-      Assert.Equal(tokens(1).Text, separatorText)
-      Assert.Equal(tokens(2).Kind, t2Kind)
-      Assert.Equal(tokens(2).Text, t2Text)
+      Assert.Equal(t1Kind, tokens(0).Kind)
+      Assert.Equal(t1Text, tokens(0).Text)
+      Assert.Equal(separatorKind, tokens(1).Kind)
+      Assert.Equal(separatorText, tokens(1).Text)
+      Assert.Equal(t2Kind, tokens(2).Kind)
+      Assert.Equal(t2Text, tokens(2).Text)
     End Sub
 
     Public Shared Iterator Function GetTokensData() As IEnumerable(Of Object())

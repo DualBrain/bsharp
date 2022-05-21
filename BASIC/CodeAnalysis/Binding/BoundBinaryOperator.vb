@@ -65,6 +65,7 @@ Namespace Basic.CodeAnalysis.Binding
        New BoundBinaryOperator(SyntaxKind.OrKeyword, BoundBinaryOperatorKind.OrOperation, GetType(Integer)),
        New BoundBinaryOperator(SyntaxKind.OrElseKeyword, BoundBinaryOperatorKind.LogicalOrElse, GetType(Boolean)),
        New BoundBinaryOperator(SyntaxKind.XorKeyword, BoundBinaryOperatorKind.XorOperation, GetType(Integer)),
+       New BoundBinaryOperator(SyntaxKind.XorKeyword, BoundBinaryOperatorKind.LogicalXor, GetType(Boolean)),
        New BoundBinaryOperator(SyntaxKind.EqvKeyword, BoundBinaryOperatorKind.EqvOperation, GetType(Integer), GetType(Boolean)),
        New BoundBinaryOperator(SyntaxKind.EqvKeyword, BoundBinaryOperatorKind.LogicalEqv, GetType(Boolean)),
        New BoundBinaryOperator(SyntaxKind.ImpKeyword, BoundBinaryOperatorKind.LogicalImp, GetType(Integer), GetType(Boolean)),

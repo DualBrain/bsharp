@@ -159,6 +159,7 @@ Namespace Basic.CodeAnalysis
         Case BoundBinaryOperatorKind.LogicalOrElse : Return CBool(left) OrElse CBool(right)
 
         Case BoundBinaryOperatorKind.XorOperation : Return CInt(left) Xor CInt(right)
+        Case BoundBinaryOperatorKind.LogicalXor : Return CBool(left) Xor CBool(right)
         Case BoundBinaryOperatorKind.EqvOperation : Return CBool(left) = CBool(right)
         Case BoundBinaryOperatorKind.ImpOperation : Return CBool(left) AndAlso Not CBool(right)
 
