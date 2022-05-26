@@ -1,18 +1,20 @@
-﻿Namespace Basic.CodeAnalysis.Binding
+﻿Imports System.Collections.Immutable
+
+Namespace Basic.CodeAnalysis.Binding
 
   Friend NotInheritable Class BoundIfStatement
     Inherits BoundStatement
 
-    Public Sub New(condition As BoundExpression, thenStatement As BoundStatement, elseStatement As BoundStatement)
+    Public Sub New(condition As BoundExpression, thenStatements As ImmutableArray(Of BoundStatement), elseStatements As ImmutableArray(Of BoundStatement))
       Me.Condition = condition
-      Me.ThenStatement = thenStatement
-      Me.Elsestatement = elseStatement
+      Me.ThenStatements = thenStatements
+      Me.ElseStatements = elseStatements
     End Sub
 
     Public Overrides ReadOnly Property Kind As BoundNodeKind = BoundNodeKind.IfStatement
     Public ReadOnly Property Condition As BoundExpression
-    Public ReadOnly Property ThenStatement As BoundStatement
-    Public ReadOnly Property ElseStatement As BoundStatement
+    Public ReadOnly Property ThenStatements As ImmutableArray(Of BoundStatement)
+    Public ReadOnly Property ElseStatements As ImmutableArray(Of BoundStatement)
 
   End Class
 

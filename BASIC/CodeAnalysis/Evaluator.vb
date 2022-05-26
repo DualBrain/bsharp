@@ -49,11 +49,15 @@ Namespace Basic.CodeAnalysis
     Private Sub EvaluateIfStatement(node As BoundIfStatement)
       Dim condition = CBool(EvaluateExpression(node.Condition))
       If condition Then
-        If node.ThenStatement IsNot Nothing Then
-          EvaluateStatement(node.ThenStatement)
-        End If
-      ElseIf node.ElseStatement IsNot Nothing Then
-        EvaluateStatement(node.ElseStatement)
+        For Each statement In node.ThenStatements
+          EvaluateStatement(statement)
+        Next
+        'EvaluateStatement(node.ThenStatements)
+      Else 'If node.ElseStatement IsNot Nothing Then
+        'EvaluateStatement(node.ElseStatements)
+        For Each statement In node.ElseStatements
+          EvaluateStatement(statement)
+        Next
       End If
     End Sub
 

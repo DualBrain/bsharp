@@ -6,7 +6,7 @@ Namespace Basic.CodeAnalysis.Syntax
   Friend NotInheritable Class Parser
 
     Private ReadOnly m_diagnostics As New DiagnosticBag
-    'Private ReadOnly m_text As SourceText
+    Private ReadOnly m_text As SourceText
     Private ReadOnly m_tokens As ImmutableArray(Of SyntaxToken)
 
     Private m_position As Integer
@@ -27,7 +27,7 @@ Namespace Basic.CodeAnalysis.Syntax
 
       Loop While token.Kind <> SyntaxKind.EndOfFileToken
 
-      'm_text = text
+      m_text = text
       m_tokens = tokens.ToImmutableArray
       m_diagnostics.AddRange(lexer.Diagnostics)
 
@@ -119,43 +119,50 @@ Namespace Basic.CodeAnalysis.Syntax
       ' ? If {condition} Then {statement} ElseIf {condition} Then {statement} Else {statement} End If
       ' ? If {condition} Then {statement} ElseIf {condition} Then {statement} ElseIf {condition} Then {statement} Else {statement} End If
 
+      ' When parsing a IF statement,
+      ' need to determine which type style...
+      ' single-line or multi-line.
+      ' Single-line can have an optional (empty) ELSE clause.
+
+      ' In all cases, IF, condition, and THEN are required...
       Dim beginningIfKeyword = MatchToken(SyntaxKind.IfKeyword)
       Dim condition = ParseExpression()
       Dim thenKeyword = MatchToken(SyntaxKind.ThenKeyword)
 
-      Dim statement As StatementSyntax = Nothing
-      If Peek(0).Kind = SyntaxKind.EndKeyword AndAlso
-         Peek(1).Kind = SyntaxKind.IfKeyword Then
-        ' empty block.
-      Else
-        statement = ParseStatement()
-      End If
+      ' At this point we need to determine if
+      ' there is either a CR/LF or comment.
+
+      Dim thenLine = m_text.GetLineIndex(thenKeyword.Span.Start)
+      Dim peekLine = m_text.GetLineIndex(Peek(0).Span.Start)
+
+      Dim multiLine = peekLine > thenLine
+
+      Dim statements = ParseStatements()
 
       Dim elseExists = (Peek(0).Kind = SyntaxKind.ElseKeyword)
 
       'TODO: Need to handle 0 or more ElseIf blocks.
+
       Dim elseClause = ParseElseClause()
 
-      Dim endIfExists = (Peek(0).Kind = SyntaxKind.EndKeyword AndAlso Peek(1).Kind = SyntaxKind.IfKeyword)
-
-      If endIfExists Then
+      If multiLine Then
         Dim endKeyword = MatchToken(SyntaxKind.EndKeyword)
         Dim endingIfkeyword = MatchToken(SyntaxKind.IfKeyword)
       End If
 
-      If Not endIfExists AndAlso
-         (statement Is Nothing OrElse (elseExists AndAlso elseClause Is Nothing)) Then
+      'If Not endIfExists AndAlso
+      '   (statement Is Nothing OrElse (elseExists AndAlso elseClause Is Nothing)) Then
 
-        ' Appears to be a one-liner IF statement but is missing either (or both) of the bodies.
+      '  ' Appears to be a one-liner IF statement but is missing either (or both) of the bodies.
 
-        If statement Is Nothing OrElse
-           (elseExists AndAlso elseClause Is Nothing) Then
-          m_diagnostics.ReportMissingEndIf(Current.Span)
-        End If
+      '  If statement Is Nothing OrElse
+      '     (elseExists AndAlso elseClause Is Nothing) Then
+      '    m_diagnostics.ReportMissingEndIf(Current.Span)
+      '  End If
 
-      End If
+      'End If
 
-      Return New IfStatementSyntax(beginningIfKeyword, condition, statement, elseClause)
+      Return New IfStatementSyntax(beginningIfKeyword, condition, statements, elseClause)
 
     End Function
 
@@ -164,8 +171,8 @@ Namespace Basic.CodeAnalysis.Syntax
         Return Nothing
       End If
       Dim elseKeyword = MatchToken(SyntaxKind.ElseKeyword)
-      Dim statement = ParseStatement()
-      Return New ElseClauseSyntax(elseKeyword, statement)
+      Dim statements = ParseStatements()
+      Return New ElseClauseSyntax(elseKeyword, statements)
     End Function
 
     Private Function ParseWhileStatement() As StatementSyntax
@@ -229,6 +236,42 @@ Namespace Basic.CodeAnalysis.Syntax
       End While
       Dim closeBraceToken = MatchToken(SyntaxKind.CloseBraceToken)
       Return New BlockStatementSyntax(openBraceToken, statements.ToImmutable, closeBraceToken)
+    End Function
+
+    Private Function ParseStatements() As ImmutableArray(Of StatementSyntax)
+      Dim statements = ImmutableArray.CreateBuilder(Of StatementSyntax)
+      Dim startToken = Current()
+      While True 'Current.Kind <> SyntaxKind.EndOfFileToken AndAlso
+        'Current.Kind <> SyntaxKind.CloseBraceToken
+
+        Select Case Current.Kind
+          Case SyntaxKind.CloseBraceToken,
+               SyntaxKind.ElseKeyword,
+               SyntaxKind.ElseIfKeyword,
+               SyntaxKind.EndKeyword,
+               SyntaxKind.NextKeyword,
+               SyntaxKind.EndOfFileToken
+            Exit While
+          Case Else
+        End Select
+
+        startToken = Current()
+        Dim statement = ParseStatement()
+        statements.Add(statement)
+
+        ' If ParseStatement did not consume any tokens,
+        ' let's skip the current token and continue in 
+        ' order to avoid an infinite loop.
+        '
+        ' We do not need to report an error, because we've
+        ' already tried to parse an experession statement
+        ' and reported one.
+        If Current() Is startToken Then
+          NextToken()
+        End If
+
+      End While
+      Return statements.ToImmutable
     End Function
 
     Private Function ParseExpression() As ExpressionSyntax
