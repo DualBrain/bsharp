@@ -70,10 +70,16 @@ Namespace Basic.CodeAnalysis
       Report(span, message)
     End Sub
 
-    Friend Sub ReportMissingEndIf(span As TextSpan)
+    Public Sub ReportMissingEndIf(span As TextSpan)
       Dim message = $"Missing End If."
       Report(span, message)
     End Sub
+
+    Public Sub ReportMissingIf(span As TextSpan)
+      Dim message = $"Missing If."
+      Report(span, message)
+    End Sub
+
   End Class
 
 End Namespace

@@ -146,8 +146,20 @@ Namespace Basic.CodeAnalysis.Syntax
       Dim elseClause = ParseElseClause()
 
       If multiLine Then
-        Dim endKeyword = MatchToken(SyntaxKind.EndKeyword)
-        Dim endingIfkeyword = MatchToken(SyntaxKind.IfKeyword)
+        If Peek(0).Kind = SyntaxKind.EndKeyword AndAlso
+           Peek(1).Kind = SyntaxKind.IfKeyword Then
+          Dim endKeyword = MatchToken(SyntaxKind.EndKeyword)
+          Dim endingIfkeyword = MatchToken(SyntaxKind.IfKeyword)
+        ElseIf Peek(0).Kind = SyntaxKind.EndKeyword Then
+          Dim endKeyword = MatchToken(SyntaxKind.EndKeyword)
+          m_diagnostics.ReportMissingIf(Current.Span)
+        Else
+          m_diagnostics.ReportMissingEndIf(Current.Span)
+        End If
+      Else
+        If Not statements.Any Then
+          m_diagnostics.ReportMissingEndIf(Current.Span)
+        End If
       End If
 
       'If Not endIfExists AndAlso

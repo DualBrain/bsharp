@@ -105,8 +105,135 @@ a * a }", 100)>
   next
   result
 }", 55)>
+    <InlineData("
+{ 
+  dim result = 0
+  if true then let result = 10
+  result
+}", 10)>
+    <InlineData("
+{ 
+  dim result = 0
+  if true then let result = 10 else
+  result
+}", 10)>
+    <InlineData("
+{ 
+  dim result = 0
+  if false then let result = 10 else let result = 20
+  result
+}", 20)>
+    <InlineData("
+{ 
+  dim result = 0
+  if true then 
+    let result = 10 
+  end if
+  result
+}", 10)>
+    <InlineData("
+{ 
+  dim result = 0
+  if true then 
+    let result = 10 
+  else 
+    let result = 20
+  end if
+  result
+}", 10)>
+    <InlineData("
+{ 
+  dim result = 0
+  if true then 
+    dim a = 0
+    let a = a + 10
+    let result = a
+  else
+    dim b = 0
+    let b = b + 10
+    let result = b
+  end if
+  let result = result + 10
+}", 20)>
     Public Sub Evaluator_Computes_CorrectValues(text As String, expectedValue As Object)
       AssertValue(text, expectedValue)
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_If_MissingEndIf()
+
+      Dim text = "
+          if true then 
+            dim x = 20 
+          else
+            dim y = 30
+          []"
+
+      Dim diagnostics = "
+        Missing End If."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_If_MissingEndingIf()
+
+      Dim text = "
+          if true then 
+            dim x = 20 
+          else
+            dim y = 30
+          end []"
+
+      Dim diagnostics = "
+        Missing If."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_If_MissingTrueStatement()
+
+      Dim text = "
+          if true then []
+"
+
+      Dim diagnostics = "
+        Missing End If."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_If_EmptyTrueStatement()
+
+      Dim text = "
+          if true then
+          end if
+"
+
+      Dim diagnostics = ""
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_If_EmptyTrueAndFalseStatement()
+
+      Dim text = "
+          if true then
+          else
+          end if
+"
+
+      Dim diagnostics = ""
+
+      AssertDiagnostics(text, diagnostics)
+
     End Sub
 
     <Fact>
