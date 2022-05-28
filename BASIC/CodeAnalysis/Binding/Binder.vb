@@ -94,8 +94,8 @@ Namespace Basic.CodeAnalysis.Binding
 
       Dim trueStatements = ImmutableArray.CreateBuilder(Of BoundStatement)
       'm_scope = New BoundScope(m_scope)
-      If syntax.ThenStatements.Any Then
-        For Each statementSyntax In syntax.ThenStatements
+      If syntax.TrueBlock.Any Then
+        For Each statementSyntax In syntax.TrueBlock
           Dim statement = BindStatement(statementSyntax)
           trueStatements.Add(statement)
         Next
@@ -108,7 +108,7 @@ Namespace Basic.CodeAnalysis.Binding
       Dim falseStatements = ImmutableArray.CreateBuilder(Of BoundStatement)
       'm_scope = New BoundScope(m_scope)
       If syntax.ElseClause IsNot Nothing Then
-        For Each statementSyntax In syntax.ElseClause.ElseStatements
+        For Each statementSyntax In syntax.ElseClause.ElseBlock
           Dim statement = BindStatement(statementSyntax)
           falseStatements.Add(statement)
         Next

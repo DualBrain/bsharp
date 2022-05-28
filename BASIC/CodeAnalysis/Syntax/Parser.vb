@@ -174,7 +174,7 @@ Namespace Basic.CodeAnalysis.Syntax
 
       'End If
 
-      Return New IfStatementSyntax(beginningIfKeyword, condition, statements, elseClause)
+      Return New IfStatementSyntax(condition, statements, Nothing, elseClause)
 
     End Function
 
@@ -184,7 +184,7 @@ Namespace Basic.CodeAnalysis.Syntax
       End If
       Dim elseKeyword = MatchToken(SyntaxKind.ElseKeyword)
       Dim statements = ParseStatements()
-      Return New ElseClauseSyntax(elseKeyword, statements)
+      Return New ElseClauseSyntax(statements)
     End Function
 
     Private Function ParseWhileStatement() As StatementSyntax
@@ -226,7 +226,7 @@ Namespace Basic.CodeAnalysis.Syntax
     Private Function ParseBlockStatement() As BlockStatementSyntax
       Dim statements = ImmutableArray.CreateBuilder(Of StatementSyntax)
       Dim openBraceToken = MatchToken(SyntaxKind.OpenBraceToken)
-      Dim startToken = Current()
+      Dim startToken As SyntaxToken '= Current()
       While Current.Kind <> SyntaxKind.EndOfFileToken AndAlso
             Current.Kind <> SyntaxKind.CloseBraceToken
 
@@ -252,7 +252,7 @@ Namespace Basic.CodeAnalysis.Syntax
 
     Private Function ParseStatements() As ImmutableArray(Of StatementSyntax)
       Dim statements = ImmutableArray.CreateBuilder(Of StatementSyntax)
-      Dim startToken = Current()
+      Dim startToken As SyntaxToken '= Current()
       While True 'Current.Kind <> SyntaxKind.EndOfFileToken AndAlso
         'Current.Kind <> SyntaxKind.CloseBraceToken
 
