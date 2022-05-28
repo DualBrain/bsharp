@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32407.343
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "b2x", "b2x\b2x.vbproj", "{7E0503A8-C1F9-408A-98A1-AAB7B8BD7B08}"
+Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "bi", "bi\bi.vbproj", "{7E0503A8-C1F9-408A-98A1-AAB7B8BD7B08}"
 EndProject
 Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "BASIC", "BASIC\BASIC.vbproj", "{C8154C07-B532-47EC-9323-E4330DC28DA2}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "BASIC.Tests", "BASIC.Tests\BASIC.Tests.vbproj", "{5B7583A8-8376-416C-9E25-A03184427C1E}"
+Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "BASIC.Tests", "BASIC.Tests\BASIC.Tests.vbproj", "{5B7583A8-8376-416C-9E25-A03184427C1E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
