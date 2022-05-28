@@ -90,33 +90,45 @@ Namespace Basic.CodeAnalysis.Binding
     End Function
 
     Private Function BindIfStatement(syntax As IfStatementSyntax) As BoundStatement
-      Dim condition = BindExpression(syntax.Condition, GetType(Boolean))
 
-      Dim trueStatements = ImmutableArray.CreateBuilder(Of BoundStatement)
-      'm_scope = New BoundScope(m_scope)
+      Dim ifCondition = BindExpression(syntax.Condition, GetType(Boolean))
+      Dim ifStatements = ImmutableArray.CreateBuilder(Of BoundStatement)
       If syntax.TrueBlock.Any Then
+        m_scope = New BoundScope(m_scope)
         For Each statementSyntax In syntax.TrueBlock
           Dim statement = BindStatement(statementSyntax)
-          trueStatements.Add(statement)
+          ifStatements.Add(statement)
+        Next
+        m_scope = m_scope.Parent
+      End If
+
+      Dim elseIfStatements = ImmutableArray.CreateBuilder(Of BoundElseIfStatement)
+      If syntax.ElseIfClauses.Any Then
+        For Each entry In syntax.ElseIfClauses
+          Dim elseIfCondition = BindExpression(entry.Condition, GetType(Boolean))
+          Dim statements = ImmutableArray.CreateBuilder(Of BoundStatement)
+          m_scope = New BoundScope(m_scope)
+          For Each statementSyntax In entry.Statements
+            Dim statement = BindStatement(statementSyntax)
+            statements.Add(statement)
+          Next
+          m_scope = m_scope.Parent
+          elseIfStatements.Add(New BoundElseIfStatement(elseIfCondition, statements.ToImmutable))
         Next
       End If
-      'm_scope = m_scope.Parent
-      Dim thenBlock = trueStatements.ToImmutable
 
-      'Dim thenBlock = If(syntax.ThenStatements Is Nothing OrElse syntax.ThenStatements?.First.Span.Length = 0, Nothing, BindStatement(syntax.ThenStatements))
-
-      Dim falseStatements = ImmutableArray.CreateBuilder(Of BoundStatement)
-      'm_scope = New BoundScope(m_scope)
+      Dim elseStatements = ImmutableArray.CreateBuilder(Of BoundStatement)
       If syntax.ElseClause IsNot Nothing Then
+        m_scope = New BoundScope(m_scope)
         For Each statementSyntax In syntax.ElseClause.ElseBlock
           Dim statement = BindStatement(statementSyntax)
-          falseStatements.Add(statement)
+          elseStatements.Add(statement)
         Next
+        m_scope = m_scope.Parent
       End If
-      'm_scope = m_scope.Parent
-      Dim elseBlock = falseStatements.ToImmutable
-      'Dim elseBlock = If(syntax.ElseClauses Is Nothing, Nothing, BindStatement(syntax.ElseClause.ElseStatements))
-      Return New BoundIfStatement(condition, thenBlock, elseBlock)
+
+      Return New BoundIfStatement(ifCondition, ifStatements.ToImmutable, elseIfStatements.ToImmutable, elseStatements.ToImmutable)
+
     End Function
 
     Private Function BindWhileStatement(syntax As WhileStatementSyntax) As BoundStatement

@@ -80,7 +80,7 @@
     BinaryExpression
     ParenthesizedExpression
     AssignmentExpression
-
+    ElseIfClause
   End Enum
 
 End Namespace

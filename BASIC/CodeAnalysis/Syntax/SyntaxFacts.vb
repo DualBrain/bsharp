@@ -82,7 +82,7 @@ Namespace Basic.CodeAnalysis.Syntax
 
         Case "if" : Return SyntaxKind.IfKeyword
         Case "then" : Return SyntaxKind.ThenKeyword
-        Case "elseIf" : Return SyntaxKind.ElseIfKeyword
+        Case "elseif" : Return SyntaxKind.ElseIfKeyword
         Case "else" : Return SyntaxKind.ElseKeyword
 
         Case "while" : Return SyntaxKind.WhileKeyword
@@ -128,7 +128,7 @@ Namespace Basic.CodeAnalysis.Syntax
 
         Case SyntaxKind.IfKeyword : Return "if"
         Case SyntaxKind.ThenKeyword : Return "then"
-        Case SyntaxKind.ElseIfKeyword : Return "elseIf"
+        Case SyntaxKind.ElseIfKeyword : Return "elseif"
         Case SyntaxKind.ElseKeyword : Return "else"
         'Case SyntaxKind.EndIfCommand : Return "end If"
 

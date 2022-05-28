@@ -6,33 +6,33 @@ Namespace Basic.CodeAnalysis.Syntax
 
     Public Sub New(condition As ExpressionSyntax,
                    trueBlock As ImmutableArray(Of StatementSyntax),
-                   additionalIfClauses As ImmutableArray(Of IfClauseSyntax),
+                   elseIfClauses As ImmutableArray(Of ElseIfClauseSyntax),
                    elseClause As ElseClauseSyntax)
       Me.Condition = condition
       Me.TrueBlock = trueBlock
-      Me.AdditionalIfClauses = additionalIfClauses
+      Me.ElseIfClauses = elseIfClauses
       Me.ElseClause = elseClause
     End Sub
 
     Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.IfStatement
     Public ReadOnly Property Condition As ExpressionSyntax
     Public ReadOnly Property TrueBlock As ImmutableArray(Of StatementSyntax)
-    Public ReadOnly Property AdditionalIfClauses As ImmutableArray(Of IfClauseSyntax)
+    Public ReadOnly Property ElseIfClauses As ImmutableArray(Of ElseIfClauseSyntax)
     Public ReadOnly Property ElseClause As ElseClauseSyntax
 
   End Class
 
-  Public NotInheritable Class IfClauseSyntax
+  Public NotInheritable Class ElseIfClauseSyntax
     Inherits SyntaxNode
 
-    Public Sub New(condition As ExpressionSyntax, trueBlock As ImmutableArray(Of StatementSyntax))
+    Public Sub New(condition As ExpressionSyntax, statements As ImmutableArray(Of StatementSyntax))
       Me.Condition = condition
-      Me.TrueBlock = trueBlock
+      Me.Statements = statements
     End Sub
 
-    Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.ElseClause
+    Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.ElseIfClause
     Public ReadOnly Property Condition As ExpressionSyntax
-    Public ReadOnly Property TrueBlock As ImmutableArray(Of StatementSyntax)
+    Public ReadOnly Property Statements As ImmutableArray(Of StatementSyntax)
 
   End Class
 

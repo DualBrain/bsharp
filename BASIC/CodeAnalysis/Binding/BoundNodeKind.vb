@@ -16,7 +16,7 @@
     AssignmentExpression
     UnaryExpression
     BinaryExpression
-
+    ElseIfStatement
   End Enum
 
 End Namespace
