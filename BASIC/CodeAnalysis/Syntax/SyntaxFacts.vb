@@ -93,6 +93,10 @@ Namespace Basic.CodeAnalysis.Syntax
         Case "step" : Return SyntaxKind.StepKeyword
         Case "next" : Return SyntaxKind.NextKeyword
 
+        Case "select" : Return SyntaxKind.SelectKeyword
+        Case "case" : Return SyntaxKind.CaseKeyword
+        Case "is" : Return SyntaxKind.IsKeyword
+
         Case "const" : Return SyntaxKind.ConstKeyword
         Case "dim" : Return SyntaxKind.DimKeyword
         Case "let" : Return SyntaxKind.LetKeyword
@@ -111,9 +115,11 @@ Namespace Basic.CodeAnalysis.Syntax
         Case Else
           Return SyntaxKind.IdentifierToken
       End Select
+
     End Function
 
     Public Shared Function GetText(kind As SyntaxKind) As String
+
       Select Case kind
 
         Case SyntaxKind.EndKeyword : Return "end"
@@ -125,6 +131,10 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.ToKeyword : Return "to"
         Case SyntaxKind.StepKeyword : Return "step"
         Case SyntaxKind.NextKeyword : Return "next"
+
+        Case SyntaxKind.SelectKeyword : Return "select"
+        Case SyntaxKind.CaseKeyword : Return "case"
+        Case SyntaxKind.IsKeyword : Return "is"
 
         Case SyntaxKind.IfKeyword : Return "if"
         Case SyntaxKind.ThenKeyword : Return "then"
@@ -162,6 +172,7 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.LessThanToken : Return "<"
         Case SyntaxKind.PeriodToken : Return "."
         Case SyntaxKind.ColonToken : Return ":"
+        Case SyntaxKind.CommaToken : Return ","
         Case SyntaxKind.SemicolonToken : Return ";"
         Case SyntaxKind.QuestionToken : Return "?"
         Case SyntaxKind.GreaterThanEqualToken : Return ">="
@@ -172,6 +183,7 @@ Namespace Basic.CodeAnalysis.Syntax
         Case Else
           Return Nothing
       End Select
+
     End Function
 
   End Class

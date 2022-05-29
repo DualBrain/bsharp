@@ -17,6 +17,9 @@
     UnaryExpression
     BinaryExpression
     ElseIfStatement
+    BoundMatchStatement
+    BoundCaseStatement
+    SelectCaseStatement
   End Enum
 
 End Namespace

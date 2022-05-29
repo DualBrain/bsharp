@@ -80,6 +80,7 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.IfKeyword : Return ParseIfStatement()
         Case SyntaxKind.WhileKeyword : Return ParseWhileStatement()
         Case SyntaxKind.ForKeyword : Return ParseForStatement()
+        Case SyntaxKind.SelectKeyword : Return ParseSelectCaseStatement()
         Case Else : Return ParseExpressionStatement()
       End Select
     End Function
@@ -144,6 +145,15 @@ Namespace Basic.CodeAnalysis.Syntax
 
     End Function
 
+    Private Function ParseCaseElseClause() As CaseElseClauseSyntax
+      If Current.Kind <> SyntaxKind.CaseKeyword Then Return Nothing
+      If Peek(1).Kind <> SyntaxKind.ElseKeyword Then Return Nothing
+      MatchToken(SyntaxKind.CaseKeyword)
+      MatchToken(SyntaxKind.ElseKeyword)
+      Dim statements = ParseStatements()
+      Return New CaseElseClauseSyntax(statements)
+    End Function
+
     Private Function ParseElseClause() As ElseClauseSyntax
       If Current.Kind <> SyntaxKind.ElseKeyword Then
         Return Nothing
@@ -182,6 +192,72 @@ Namespace Basic.CodeAnalysis.Syntax
       Dim body = ParseStatement()
       Dim nextToken = MatchToken(SyntaxKind.NextKeyword)
       Return New ForStatementSyntax(identifier, lowerBound, upperBound, stepper, body)
+    End Function
+
+    Private Function ParseSelectCaseStatement() As StatementSyntax
+
+      MatchToken(SyntaxKind.SelectKeyword)
+      MatchToken(SyntaxKind.CaseKeyword)
+      Dim test = ParseExpression()
+
+      Dim cases = New List(Of CaseClauseSyntax)
+      Do
+        If Current.Kind = SyntaxKind.CaseKeyword Then
+          If Peek(1).Kind = SyntaxKind.ElseKeyword Then Exit Do
+          MatchToken(SyntaxKind.CaseKeyword)
+          Dim matches = New List(Of CaseMatchExpressionSyntax)
+          Do
+            If Current.Kind = SyntaxKind.IsKeyword Then
+              ' Case Is > 5
+              MatchToken(SyntaxKind.IsKeyword)
+              Dim comparisonKind = SyntaxKind.EqualToken
+              Select Case Current.Kind
+                Case SyntaxKind.LessThanToken,
+                     SyntaxKind.LessThanGreaterThanToken,
+                     SyntaxKind.LessThanEqualToken,
+                     SyntaxKind.EqualToken,
+                     SyntaxKind.GreaterThanEqualToken,
+                     SyntaxKind.GreaterThanToken,
+                     SyntaxKind.LessThanGreaterThanToken
+                  comparisonKind = Current.Kind
+                Case Else
+              End Select
+              MatchToken(comparisonKind)
+              Dim expression = ParseExpression()
+              matches.Add(New CaseMatchExpressionSyntax(comparisonKind, expression))
+            Else
+              ' Case 1
+              ' Case variable
+              ' Case 1 To 10
+              Dim expression = ParseExpression()
+              If Current.Kind = SyntaxKind.ToKeyword Then
+                MatchToken(SyntaxKind.ToKeyword)
+                Dim expressionTo = ParseExpression()
+                matches.Add(New CaseMatchExpressionSyntax(SyntaxKind.EqualToken, expression, expressionTo))
+              Else
+                matches.Add(New CaseMatchExpressionSyntax(SyntaxKind.EqualToken, expression))
+              End If
+            End If
+            If Current.Kind <> SyntaxKind.CommaToken Then
+              Exit Do
+            Else
+              MatchToken(SyntaxKind.CommaToken)
+            End If
+          Loop
+          Dim statements = ParseStatements()
+          cases.Add(New CaseClauseSyntax(matches.ToImmutableArray, statements))
+        Else
+          Exit Do
+        End If
+      Loop
+
+      Dim caseElseBlock = ParseCaseElseClause()
+
+      MatchToken(SyntaxKind.EndKeyword)
+      MatchToken(SyntaxKind.SelectKeyword)
+
+      Return New SelectCaseStatementSyntax(test, cases.ToImmutableArray, caseElseBlock)
+
     End Function
 
     Private Function ParseExpressionStatement() As ExpressionStatementSyntax
@@ -224,14 +300,15 @@ Namespace Basic.CodeAnalysis.Syntax
         Select Case Current.Kind
           Case SyntaxKind.EndKeyword
             Select Case Peek(1).Kind
-              Case SyntaxKind.IfKeyword
-                Exit Do
+              Case SyntaxKind.IfKeyword : Exit Do
+              Case SyntaxKind.SelectKeyword : Exit Do
               Case Else
             End Select
           Case SyntaxKind.CloseBraceToken,
                SyntaxKind.ElseKeyword,
                SyntaxKind.ElseIfKeyword,
                SyntaxKind.NextKeyword,
+               SyntaxKind.CaseKeyword,
                SyntaxKind.EndOfFileToken
             Exit Do
           Case Else

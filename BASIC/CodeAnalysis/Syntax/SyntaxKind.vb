@@ -19,6 +19,7 @@
     LessThanToken
     PeriodToken
     ColonToken
+    CommaToken
     SemicolonToken
     QuestionToken
     GreaterThanEqualToken
@@ -81,6 +82,13 @@
     ParenthesizedExpression
     AssignmentExpression
     ElseIfClause
+    SelectKeyword
+    CaseKeyword
+    IsKeyword
+    CaseMatchExpressionSyntax
+    CaseElseClauseSyntax
+    CaseClauseSyntax
+    SelectCaseStatement
   End Enum
 
 End Namespace

@@ -75,6 +75,7 @@ Namespace Basic.CodeAnalysis.Syntax
             Case Else : m_kind = SyntaxKind.LessThanToken : m_position += 1
           End Select
         Case "."c : m_kind = SyntaxKind.PeriodToken : m_position += 1
+        Case ","c : m_kind = SyntaxKind.CommaToken : m_position += 1
         Case ":"c : m_kind = SyntaxKind.ColonToken : m_position += 1
         Case ";"c : m_kind = SyntaxKind.SemicolonToken : m_position += 1
         Case "?"c : m_kind = SyntaxKind.QuestionToken : m_position += 1

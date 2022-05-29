@@ -57,6 +57,7 @@ Namespace Basic.CodeAnalysis.Binding
         Case SyntaxKind.IfStatement : Return BindIfStatement(CType(syntax, IfStatementSyntax))
         Case SyntaxKind.WhileStatement : Return BindWhileStatement(CType(syntax, WhileStatementSyntax))
         Case SyntaxKind.ForStatement : Return BindForStatement(CType(syntax, ForStatementSyntax))
+        Case SyntaxKind.SelectCaseStatement : Return BindSelectCaseStatement(CType(syntax, SelectCaseStatementSyntax))
         Case SyntaxKind.ExpressionStatement : Return BindExpressionStatement(CType(syntax, ExpressionStatementSyntax))
         Case Else
           Throw New Exception($"Unexpected syntax {syntax.Kind}")
@@ -156,6 +157,43 @@ Namespace Basic.CodeAnalysis.Binding
       m_scope = m_scope.Parent
 
       Return New BoundForStatement(variable, lowerBound, upperBound, stepper, body)
+
+    End Function
+
+    Private Function BindSelectCaseStatement(syntax As SelectCaseStatementSyntax) As BoundStatement
+
+      Dim test = BindExpression(syntax.Test, GetType(Integer))
+
+      Dim cases = ImmutableArray.CreateBuilder(Of BoundCaseStatement)
+      For Each c In syntax.Cases
+        Dim matches = ImmutableArray.CreateBuilder(Of BoundMatchStatement)
+        For Each match In c.Matches
+          Dim comparisonKind = match.ComparisonKind
+          Dim expressionA = BindExpression(match.Expression)
+          Dim expressionB = If(match.ExpressionTo IsNot Nothing, BindExpression(match.ExpressionTo), Nothing)
+          matches.Add(New BoundMatchStatement(SyntaxFacts.GetText(comparisonKind), expressionA, expressionB))
+        Next
+        Dim statements = ImmutableArray.CreateBuilder(Of BoundStatement)
+        m_scope = New BoundScope(m_scope)
+        For Each statementSyntax In c.Statements
+          Dim statement = BindStatement(statementSyntax)
+          statements.Add(statement)
+        Next
+        m_scope = m_scope.Parent
+        cases.Add(New BoundCaseStatement(matches.ToImmutableArray, statements.ToImmutableArray))
+      Next
+
+      Dim elseStatements = ImmutableArray.CreateBuilder(Of BoundStatement)
+      If syntax.CaseElseClause IsNot Nothing Then
+        m_scope = New BoundScope(m_scope)
+        For Each statementSyntax In syntax.CaseElseClause.Statements
+          Dim statement = BindStatement(statementSyntax)
+          elseStatements.Add(statement)
+        Next
+        m_scope = m_scope.Parent
+      End If
+
+      Return New BoundSelectCaseStatement(test, cases.ToImmutableArray, elseStatements.ToImmutableArray)
 
     End Function
 

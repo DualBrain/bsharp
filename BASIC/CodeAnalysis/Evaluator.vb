@@ -28,6 +28,7 @@ Namespace Basic.CodeAnalysis
         Case BoundNodeKind.IfStatement : EvaluateIfStatement(CType(node, BoundIfStatement))
         Case BoundNodeKind.WhileStatement : EvaluateWhileStatement(CType(node, BoundWhileStatement))
         Case BoundNodeKind.ForStatement : EvaluateForStatement(CType(node, BoundForStatement))
+        Case BoundNodeKind.SelectCaseStatement : EvaluateSelectCaseStatement(CType(node, BoundSelectCaseStatement))
         Case BoundNodeKind.ExpressionStatement : EvaluateExpressionStatement(CType(node, BoundExpressionStatement))
         Case Else
           Throw New Exception($"Unexpected kind {node.Kind}")
@@ -66,6 +67,41 @@ Namespace Basic.CodeAnalysis
           EvaluateStatement(statement)
         Next
       End If
+    End Sub
+
+    Private Sub EvaluateSelectCaseStatement(node As BoundSelectCaseStatement)
+      Dim test = CInt(EvaluateExpression(node.Test))
+      For Each c In node.Cases
+        For Each match In c.Matches
+          Dim matched = False
+          Dim compare = CInt(EvaluateExpression(match.Expression))
+          Select Case match.Comparison
+            Case "="
+              If match.ExpressionTo Is Nothing Then
+                If test = compare Then matched = True
+              Else
+                Dim max = CInt(EvaluateExpression(match.ExpressionTo))
+                If test >= compare AndAlso test <= max Then matched = True
+              End If
+            Case "<" : If test < compare Then matched = True
+            Case ">" : If test > compare Then matched = True
+            Case ">=" : If test >= compare Then matched = True
+            Case "<=" : If test <= compare Then matched = True
+            Case "<>" : If test <> compare Then matched = True
+            Case Else
+              Stop
+          End Select
+          If matched Then
+            For Each statement In c.Statements
+              EvaluateStatement(statement)
+            Next
+            Return
+          End If
+        Next
+      Next
+      For Each statement In node.ElseStatements
+        EvaluateStatement(statement)
+      Next
     End Sub
 
     Private Sub EvaluateWhileStatement(node As BoundWhileStatement)
