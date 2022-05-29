@@ -1,6 +1,6 @@
 # BASIC (.NET)
 
-I've had an idea for several years now to create what most people would consider an absolutely absurd project - but it's something that just hasn't exited my brain.  Additionally, over the years,* ideas have been either *in my head* or as simple separate experiments to test a few ideas. All of that changes with this project.
+I've had an idea for several years now to create what most people would consider an absolutely absurd project - but it's something that just hasn't exited my brain.  Additionally, over the years, ideas have been either *in my head* or as simple separate experiments to test a few ideas. All of that changes with this project.
 
 ## Purpose?
 
@@ -9,6 +9,8 @@ The initial goal of the project is to recreate the *classic* BASIC experience bu
 Additionally, this project will strive to remain true to the original spirit of BASIC; as defined by the original creators of the language:
 
 - (TODO - enter list here from a particular book after returning home.)
+
+Finally, it has struck me as *odd* that given the power/capability of modern VB that such a project is written in a more evolved version of BASIC such as VB; the VB compiler, after all, is also written in VB... 
 
 ## Plans?
 
