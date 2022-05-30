@@ -8,7 +8,8 @@ Friend Module Program
 
   Friend Sub Main()
 
-    Dim treeVisible = False
+    Dim parseTreeVisible = False
+    Dim boundTreeVisible = False
     Dim variables = New Dictionary(Of VariableSymbol, Object)
     Dim textBuilder = New StringBuilder
     Dim previous As Compilation = Nothing
@@ -32,11 +33,13 @@ Friend Module Program
           Exit Do
         ElseIf input.StartsWith("$") Then
           Select Case input.ToLower
-            Case "$showtree" : treeVisible = True
-            Case "$hidetree" : treeVisible = False
+            Case "$showparsetree" : parseTreeVisible = True
+            Case "$hideparsetree" : parseTreeVisible = False
+            Case "$showboundtree" : boundTreeVisible = True
+            Case "$hideboundtree" : boundTreeVisible = False
             Case "$cls" : Console.Clear()
             Case "$exit", "$system", "$quit" : Exit Do
-            Case "$new" : treeVisible = False : previous = Nothing 'variables.Clear()
+            Case "$new" : parseTreeVisible = False : previous = Nothing 'variables.Clear()
             Case Else
               Console.WriteLine("Unknown meta command.")
           End Select
@@ -62,19 +65,14 @@ Friend Module Program
       'Dim boundExpression = binder.BindExpression(tree.Root)
       'Dim diagnostics = tree.Diagnostics.Concat(binder.Diagnostics).ToArray
 
-      If treeVisible Then
-        Console.ForegroundColor = ConsoleColor.DarkGray
-        tree.Root.WriteTo(Console.Out)
-        Console.ResetColor()
-      End If
+      If parseTreeVisible Then tree.Root.WriteTo(Console.Out)
+      If boundTreeVisible Then compilation.EmitTree(Console.Out)
 
       If Not result.Diagnostics.Any Then
         Console.ForegroundColor = ConsoleColor.Magenta
         Console.WriteLine(result.Value)
         Console.ResetColor()
-
         previous = compilation
-
       Else
 
         For Each diag In result.Diagnostics
@@ -88,7 +86,6 @@ Friend Module Program
           Console.WriteLine($"({lineNumber}, {character}): {diag}")
           Console.ResetColor()
 
-          'If diag.Span.Start + diag.Span.Length <= text.Length Then
           Dim prefixSpan = TextSpan.FromBounds(line.Start, diag.Span.Start)
           Dim suffixSpan = TextSpan.FromBounds(diag.Span.End, line.End)
 
@@ -103,8 +100,6 @@ Friend Module Program
           Console.ResetColor()
 
           Console.WriteLine(suffix)
-
-          'End If
 
         Next
 

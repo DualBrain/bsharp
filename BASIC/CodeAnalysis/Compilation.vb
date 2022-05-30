@@ -44,6 +44,10 @@ Namespace Basic.CodeAnalysis
       Return New EvaluationResult(ImmutableArray(Of Diagnostic).Empty, value)
     End Function
 
+    Public Sub EmitTree(writer As IO.TextWriter)
+      GlobalScope.Statement.WriteTo(writer)
+    End Sub
+
     Public ReadOnly Property Previous As Compilation
     Public ReadOnly Property SyntaxTree As SyntaxTree
 
