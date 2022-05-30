@@ -59,14 +59,14 @@ Friend Module Program
                            New Compilation(tree),
                            previous.ContinueWith(tree))
 
-      Dim result = compilation.Evaluate(variables)
-
       'Dim binder = New Binder()
       'Dim boundExpression = binder.BindExpression(tree.Root)
       'Dim diagnostics = tree.Diagnostics.Concat(binder.Diagnostics).ToArray
 
       If parseTreeVisible Then tree.Root.WriteTo(Console.Out)
       If boundTreeVisible Then compilation.EmitTree(Console.Out)
+
+      Dim result = compilation.Evaluate(variables)
 
       If Not result.Diagnostics.Any Then
         Console.ForegroundColor = ConsoleColor.Magenta
