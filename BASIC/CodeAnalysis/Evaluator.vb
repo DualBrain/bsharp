@@ -200,16 +200,16 @@ Namespace Basic.CodeAnalysis
         Case BoundBinaryOperatorKind.NotEqual : Return Not Equals(left, right)
 
         Case BoundBinaryOperatorKind.LogicalAnd : Return CBool(left) And CBool(right)
-        Case BoundBinaryOperatorKind.AndOperation : Return CInt(left) And CInt(right)
+        Case BoundBinaryOperatorKind.BitwiseAnd : Return CInt(left) And CInt(right)
         Case BoundBinaryOperatorKind.LogicalAndAlso : Return CBool(left) AndAlso CBool(right)
         Case BoundBinaryOperatorKind.LogicalOr : Return CBool(left) Or CBool(right)
-        Case BoundBinaryOperatorKind.OrOperation : Return CInt(left) Or CInt(right)
+        Case BoundBinaryOperatorKind.BitwiseOr : Return CInt(left) Or CInt(right)
         Case BoundBinaryOperatorKind.LogicalOrElse : Return CBool(left) OrElse CBool(right)
 
-        Case BoundBinaryOperatorKind.XorOperation : Return CInt(left) Xor CInt(right)
+        Case BoundBinaryOperatorKind.BitwiseXor : Return CInt(left) Xor CInt(right)
         Case BoundBinaryOperatorKind.LogicalXor : Return CBool(left) Xor CBool(right)
-        Case BoundBinaryOperatorKind.EqvOperation : Return CBool(left) = CBool(right)
-        Case BoundBinaryOperatorKind.ImpOperation : Return CBool(left) AndAlso Not CBool(right)
+        Case BoundBinaryOperatorKind.BitwiseEqv : Return CBool(left) = CBool(right)
+        Case BoundBinaryOperatorKind.BitwiseImp : Return CBool(left) AndAlso Not CBool(right)
 
         Case Else
           Throw New Exception($"Unexpected binary operator {node.Op.Kind}")

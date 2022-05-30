@@ -1,33 +1,36 @@
 ﻿Namespace Basic.CodeAnalysis.Binding
 
   Friend Enum BoundBinaryOperatorKind
+
     Addition
     Subtraction
     Multiplication
     Division
     IntegerDivision
 
-    LogicalAndAlso
-    LogicalAnd
-    AndOperation
-    LogicalOr
-    OrOperation
-    LogicalOrElse
+    BitwiseAnd
+    BitwiseOr
+    BitwiseXor
+    BitwiseEqv
+    BitwiseImp
 
-    XorOperation
+    LogicalAndAlso
+    LogicalOrElse
+    LogicalAnd
+    LogicalOr
     LogicalXor
-    InpOperation
-    ModOperation
-    ImpOperation
     LogicalImp
-    EqvOperation
     LogicalEqv
+
+    ModOperation
+
     GreaterThan
     GreaterThanEqual
     Equal
     NotEqual
     LessThan
     LessThanEqual
+
     Raise
 
   End Enum
