@@ -21,7 +21,8 @@ Namespace Basic.CodeAnalysis.Binding
     Public ReadOnly Property Type As Type
 
     Private Shared ReadOnly m_operators As BoundUnaryOperator() =
-      {New BoundUnaryOperator(SyntaxKind.NotKeyword, BoundUnaryOperatorKind.LogicalNegation, GetType(Boolean)),
+      {New BoundUnaryOperator(SyntaxKind.NotKeyword, BoundUnaryOperatorKind.BitwiseComplement, GetType(Integer)),
+       New BoundUnaryOperator(SyntaxKind.NotKeyword, BoundUnaryOperatorKind.LogicalNegation, GetType(Boolean)),
        New BoundUnaryOperator(SyntaxKind.PlusToken, BoundUnaryOperatorKind.Identity, GetType(Integer)),
        New BoundUnaryOperator(SyntaxKind.MinusToken, BoundUnaryOperatorKind.Negation, GetType(Integer))}
 

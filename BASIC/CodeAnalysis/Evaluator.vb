@@ -157,6 +157,7 @@ Namespace Basic.CodeAnalysis
         Case BoundUnaryOperatorKind.Identity : Return CInt(operand)
         Case BoundUnaryOperatorKind.Negation : Return -CInt(operand)
         Case BoundUnaryOperatorKind.LogicalNegation : Return Not CBool(operand)
+        Case BoundUnaryOperatorKind.BitwiseComplement : Return Not CInt(operand)
         Case Else
           Throw New Exception($"Unexpected unary operator {node.Op}")
       End Select

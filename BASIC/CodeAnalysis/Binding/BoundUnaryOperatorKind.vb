@@ -4,6 +4,7 @@
     Identity
     Negation
     LogicalNegation
+    BitwiseComplement
   End Enum
 
 End Namespace

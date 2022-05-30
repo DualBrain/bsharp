@@ -12,6 +12,7 @@ Namespace Global.BASIC.Tests.CodeAnalysis
 
     <Theory>
     <InlineData("1", 1)>
+    <InlineData("not 1", -2)>
     <InlineData("+1", 1)>
     <InlineData("-1", -1)>
     <InlineData("14 + 12", 26)>
