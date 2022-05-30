@@ -199,7 +199,22 @@ Namespace Basic.CodeAnalysis
         Case BoundBinaryOperatorKind.LessThanEqual : Return CInt(left) <= CInt(right)
         Case BoundBinaryOperatorKind.NotEqual : Return Not Equals(left, right)
 
-        Case BoundBinaryOperatorKind.LogicalAnd : Return CBool(left) And CBool(right)
+        Case BoundBinaryOperatorKind.LogicalAnd
+          'NOTE: Right now the following type check is not necessary since
+          '      we are only handling boolean and integer; however,
+          '      going forward we most likely will need to handle
+          '      different types including strings and it might further
+          '      make sense to merge the Logical and Bitwise versions
+          '      of these since "and" is simply "and".
+          '      So leaving this code here as a reminder as we progress
+          '      forward with more types, we will be returning here.
+          If node.Type = GetType(Boolean) Then
+            Return CBool(left) And CBool(right)
+          ElseIf node.Type = GetType(Integer) Then
+            Return CInt(left) And CInt(right)
+          Else
+            Throw New Exception($"Unexpected binary operator {node.Op.Kind} type {node.Type}.")
+          End If
         Case BoundBinaryOperatorKind.BitwiseAnd : Return CInt(left) And CInt(right)
         Case BoundBinaryOperatorKind.LogicalAndAlso : Return CBool(left) AndAlso CBool(right)
         Case BoundBinaryOperatorKind.LogicalOr : Return CBool(left) Or CBool(right)
