@@ -156,6 +156,14 @@ a * a }", 100)>
   end if
   let result = result + 10
 }", 20)>
+    <InlineData("
+{ 
+  dim a = 10
+  for i = 1 to a - 1
+    let a = a + i
+  next 
+  a
+}", 55)>
     Public Sub Evaluator_Computes_CorrectValues(text As String, expectedValue As Object)
       AssertValue(text, expectedValue)
     End Sub

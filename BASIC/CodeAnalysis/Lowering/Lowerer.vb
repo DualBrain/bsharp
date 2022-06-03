@@ -251,10 +251,13 @@ Namespace Basic.CodeAnalysis.Lowering
 
       Dim variableExpression = New BoundVariableExpression(node.Variable)
 
+      Dim upperBoundSymbol = New VariableSymbol("upperBound", True, GetType(Integer))
+      Dim upperBoundDeclaration = New BoundVariableDeclaration(upperBoundSymbol, node.UpperBound)
+
       Dim condition = New BoundBinaryExpression(
               variableExpression,
               BoundBinaryOperator.Bind(SyntaxKind.LessThanEqualToken, GetType(Integer), GetType(Integer)),
-              node.UpperBound)
+              New BoundVariableExpression(upperBoundSymbol))
 
       Dim increment = New BoundExpressionStatement(
               New BoundAssignmentExpression(
@@ -268,6 +271,7 @@ Namespace Basic.CodeAnalysis.Lowering
       Dim whileStatement = New BoundWhileStatement(condition, whileBody)
       Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(
               variableDeclaration,
+              upperBoundDeclaration,
               whileStatement))
 
       Return RewriteStatement(result)
