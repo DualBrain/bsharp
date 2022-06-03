@@ -7,8 +7,17 @@
     VariableDeclaration
     ExpressionStatement
     IfStatement
+    ElseIfStatement
     WhileStatement
     ForStatement
+
+    SelectCaseStatement
+    BoundMatchStatement
+    BoundCaseStatement
+
+    GotoStatement
+    LabelStatement
+    ConditionalGotoStatement
 
     ' Expressions
     LiteralExpression
@@ -16,10 +25,7 @@
     AssignmentExpression
     UnaryExpression
     BinaryExpression
-    ElseIfStatement
-    BoundMatchStatement
-    BoundCaseStatement
-    SelectCaseStatement
+
   End Enum
 
 End Namespace

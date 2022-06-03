@@ -156,27 +156,28 @@ a * a }", 100)>
   end if
   let result = result + 10
 }", 20)>
-    <InlineData("
-{ 
-  dim result = 0
-  if result = 1 then 
-    dim a = 0
-    let a = a + 10
-    let result = a
-  elseif result = 0 then
-    dim a = 0
-    let a = a + 100
-    let result = a
-  else
-    dim b = 0
-    let b = b + 1
-    let result = b
-  end if
-  let result = result + 10
-}", 110)>
     Public Sub Evaluator_Computes_CorrectValues(text As String, expectedValue As Object)
       AssertValue(text, expectedValue)
     End Sub
+    '    <InlineData("
+    '{ 
+    '  dim result = 0
+    '  if result = 1 then 
+    '    dim a = 0
+    '    let a = a + 10
+    '    let result = a
+    '  elseif result = 0 then
+    '    dim a = 0
+    '    let a = a + 100
+    '    let result = a
+    '  else
+    '    dim b = 0
+    '    let b = b + 1
+    '    let result = b
+    '  end if
+    '  let result = result + 10
+    '}", 110)>
+
 
     <Fact>
     Public Sub Evaluator_If_MissingEndIf()

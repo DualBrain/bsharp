@@ -39,14 +39,21 @@ Namespace Basic.CodeAnalysis
     Public Function Evaluate(variables As Dictionary(Of VariableSymbol, Object)) As EvaluationResult
       Dim diagnostics = SyntaxTree.Diagnostics.Concat(GlobalScope.Diagnostics).ToImmutableArray
       If diagnostics.Any Then Return New EvaluationResult(diagnostics, Nothing)
-      Dim evaluator = New Evaluator(GlobalScope.Statement, variables)
+      Dim statement = GetStatement()
+      Dim evaluator = New Evaluator(statement, variables)
       Dim value = evaluator.Evaluate
       Return New EvaluationResult(ImmutableArray(Of Diagnostic).Empty, value)
     End Function
 
     Public Sub EmitTree(writer As IO.TextWriter)
-      GlobalScope.Statement.WriteTo(writer)
+      Dim statement = GetStatement()
+      statement.WriteTo(writer)
     End Sub
+
+    Private Function GetStatement() As BoundBlockStatement
+      Dim result = GlobalScope.Statement
+      Return Lowering.Lowerer.Lower(result)
+    End Function
 
     Public ReadOnly Property Previous As Compilation
     Public ReadOnly Property SyntaxTree As SyntaxTree

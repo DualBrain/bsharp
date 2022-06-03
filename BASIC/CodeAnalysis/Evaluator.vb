@@ -6,34 +6,70 @@ Namespace Basic.CodeAnalysis
   ' This Evaluator utilizes the "Bound Tree" (very similar to the AST).
   Friend NotInheritable Class Evaluator
 
-    Private ReadOnly m_root As BoundStatement
+    Private ReadOnly m_root As BoundBlockStatement
     Private ReadOnly m_variables As Dictionary(Of VariableSymbol, Object)
 
     Private m_lastValue As Object
 
-    Sub New(root As BoundStatement, variables As Dictionary(Of VariableSymbol, Object))
+    Sub New(root As BoundBlockStatement, variables As Dictionary(Of VariableSymbol, Object))
       m_root = root
       m_variables = variables
     End Sub
 
     Public Function Evaluate() As Object
-      EvaluateStatement(m_root)
+
+      Dim labelToIndex = New Dictionary(Of BoundLabel, Integer)
+
+      For i = 0 To m_root.Statements.Length - 1
+        If TypeOf m_root.Statements(i) Is BoundLabelStatement Then
+          Dim l = CType(m_root.Statements(i), BoundLabelStatement)
+          labelToIndex.Add(l.Label, i + 1)
+        End If
+      Next
+
+      Dim index = 0
+      While index < m_root.Statements.Length
+        Dim s = m_root.Statements(index)
+        Select Case s.Kind
+          Case BoundNodeKind.VariableDeclaration
+            EvaluateVariableDeclaration(CType(s, BoundVariableDeclaration)) : index += 1
+          'Case BoundNodeKind.SelectCaseStatement
+          '  EvaluateSelectCaseStatement(CType(s, BoundSelectCaseStatement)) : index += 1
+          Case BoundNodeKind.ExpressionStatement
+            EvaluateExpressionStatement(CType(s, BoundExpressionStatement)) : index += 1
+          Case BoundNodeKind.GotoStatement
+            Dim gs = CType(s, BoundGotoStatement)
+            index = labelToIndex(gs.Label)
+          Case BoundNodeKind.ConditionalGotoStatement
+            Dim cgs = CType(s, BoundConditionalGotoStatement)
+            Dim condition = CBool(EvaluateExpression(cgs.Condition))
+            If condition = cgs.JumpIfTrue Then
+              index = labelToIndex(cgs.Label)
+            Else
+              index += 1
+            End If
+          Case BoundNodeKind.LabelStatement : index += 1
+          Case Else
+            Throw New Exception($"Unexpected kind {s.Kind}")
+        End Select
+      End While
+
       Return m_lastValue
     End Function
 
-    Private Sub EvaluateStatement(node As BoundStatement)
-      Select Case node.Kind
-        Case BoundNodeKind.BlockStatement : EvaluateBlockStatement(CType(node, BoundBlockStatement))
-        Case BoundNodeKind.VariableDeclaration : EvaluateVariableDeclaration(CType(node, BoundVariableDeclaration))
-        Case BoundNodeKind.IfStatement : EvaluateIfStatement(CType(node, BoundIfStatement))
-        Case BoundNodeKind.WhileStatement : EvaluateWhileStatement(CType(node, BoundWhileStatement))
-        Case BoundNodeKind.ForStatement : EvaluateForStatement(CType(node, BoundForStatement))
-        Case BoundNodeKind.SelectCaseStatement : EvaluateSelectCaseStatement(CType(node, BoundSelectCaseStatement))
-        Case BoundNodeKind.ExpressionStatement : EvaluateExpressionStatement(CType(node, BoundExpressionStatement))
-        Case Else
-          Throw New Exception($"Unexpected kind {node.Kind}")
-      End Select
-    End Sub
+    'Private Sub EvaluateStatement(node As BoundStatement)
+    '  Select Case node.Kind
+    '    'Case BoundNodeKind.BlockStatement : EvaluateBlockStatement(CType(node, BoundBlockStatement))
+    '    Case BoundNodeKind.VariableDeclaration : EvaluateVariableDeclaration(CType(node, BoundVariableDeclaration))
+    '    'Case BoundNodeKind.IfStatement : EvaluateIfStatement(CType(node, BoundIfStatement))
+    '    'Case BoundNodeKind.WhileStatement : EvaluateWhileStatement(CType(node, BoundWhileStatement))
+    '    'Case BoundNodeKind.ForStatement : EvaluateForStatement(CType(node, BoundForStatement))
+    '    'Case BoundNodeKind.SelectCaseStatement : EvaluateSelectCaseStatement(CType(node, BoundSelectCaseStatement))
+    '    Case BoundNodeKind.ExpressionStatement : EvaluateExpressionStatement(CType(node, BoundExpressionStatement))
+    '    Case Else
+    '      Throw New Exception($"Unexpected kind {node.Kind}")
+    '  End Select
+    'End Sub
 
     Private Sub EvaluateVariableDeclaration(node As BoundVariableDeclaration)
       Dim value = EvaluateExpression(node.Initializer)
@@ -41,85 +77,85 @@ Namespace Basic.CodeAnalysis
       m_lastValue = value
     End Sub
 
-    Private Sub EvaluateBlockStatement(node As BoundBlockStatement)
-      For Each statement In node.Statements
-        EvaluateStatement(statement)
-      Next
-    End Sub
+    'Private Sub EvaluateBlockStatement(node As BoundBlockStatement)
+    '  For Each statement In node.Statements
+    '    EvaluateStatement(statement)
+    '  Next
+    'End Sub
 
-    Private Sub EvaluateIfStatement(node As BoundIfStatement)
-      Dim condition = CBool(EvaluateExpression(node.Condition))
-      If condition Then
-        For Each statement In node.IfStatements
-          EvaluateStatement(statement)
-        Next
-      Else
-        For Each entry In node.ElseIfStatements
-          condition = CBool(EvaluateExpression(entry.Condition))
-          If condition Then
-            For Each statement In entry.Statements
-              EvaluateStatement(statement)
-            Next
-            Exit Sub
-          End If
-        Next
-        For Each statement In node.ElseStatements
-          EvaluateStatement(statement)
-        Next
-      End If
-    End Sub
+    'Private Sub EvaluateIfStatement(node As BoundIfStatement)
+    '  Dim condition = CBool(EvaluateExpression(node.Condition))
+    '  If condition Then
+    '    For Each statement In node.IfStatements
+    '      EvaluateStatement(statement)
+    '    Next
+    '  Else
+    '    For Each entry In node.ElseIfStatements
+    '      condition = CBool(EvaluateExpression(entry.Condition))
+    '      If condition Then
+    '        For Each statement In entry.Statements
+    '          EvaluateStatement(statement)
+    '        Next
+    '        Exit Sub
+    '      End If
+    '    Next
+    '    For Each statement In node.ElseStatements
+    '      EvaluateStatement(statement)
+    '    Next
+    '  End If
+    'End Sub
 
-    Private Sub EvaluateSelectCaseStatement(node As BoundSelectCaseStatement)
-      Dim test = CInt(EvaluateExpression(node.Test))
-      For Each c In node.Cases
-        For Each match In c.Matches
-          Dim matched = False
-          Dim compare = CInt(EvaluateExpression(match.Expression))
-          Select Case match.Comparison
-            Case "="
-              If match.ExpressionTo Is Nothing Then
-                If test = compare Then matched = True
-              Else
-                Dim max = CInt(EvaluateExpression(match.ExpressionTo))
-                If test >= compare AndAlso test <= max Then matched = True
-              End If
-            Case "<" : If test < compare Then matched = True
-            Case ">" : If test > compare Then matched = True
-            Case ">=" : If test >= compare Then matched = True
-            Case "<=" : If test <= compare Then matched = True
-            Case "<>" : If test <> compare Then matched = True
-            Case Else
-              Stop
-          End Select
-          If matched Then
-            For Each statement In c.Statements
-              EvaluateStatement(statement)
-            Next
-            Return
-          End If
-        Next
-      Next
-      For Each statement In node.ElseStatements
-        EvaluateStatement(statement)
-      Next
-    End Sub
+    'Private Sub EvaluateSelectCaseStatement(node As BoundSelectCaseStatement)
+    '  Dim test = CInt(EvaluateExpression(node.Test))
+    '  For Each c In node.Cases
+    '    For Each match In c.Matches
+    '      Dim matched = False
+    '      Dim compare = CInt(EvaluateExpression(match.Expression))
+    '      Select Case match.Comparison
+    '        Case "="
+    '          If match.ExpressionTo Is Nothing Then
+    '            If test = compare Then matched = True
+    '          Else
+    '            Dim max = CInt(EvaluateExpression(match.ExpressionTo))
+    '            If test >= compare AndAlso test <= max Then matched = True
+    '          End If
+    '        Case "<" : If test < compare Then matched = True
+    '        Case ">" : If test > compare Then matched = True
+    '        Case ">=" : If test >= compare Then matched = True
+    '        Case "<=" : If test <= compare Then matched = True
+    '        Case "<>" : If test <> compare Then matched = True
+    '        Case Else
+    '          Stop
+    '      End Select
+    '      If matched Then
+    '        For Each statement In c.Statements
+    '          EvaluateStatement(statement)
+    '        Next
+    '        Return
+    '      End If
+    '    Next
+    '  Next
+    '  For Each statement In node.ElseStatements
+    '    EvaluateStatement(statement)
+    '  Next
+    'End Sub
 
-    Private Sub EvaluateWhileStatement(node As BoundWhileStatement)
-      While CBool(EvaluateExpression(node.Condition))
-        EvaluateStatement(node.Body)
-      End While
-    End Sub
+    'Private Sub EvaluateWhileStatement(node As BoundWhileStatement)
+    '  While CBool(EvaluateExpression(node.Condition))
+    '    EvaluateStatement(node.Body)
+    '  End While
+    'End Sub
 
-    Private Sub EvaluateForStatement(node As BoundForStatement)
-      Dim lowerBound = CInt(EvaluateExpression(node.LowerBound))
-      Dim upperBound = CInt(EvaluateExpression(node.UpperBound))
-      Dim stepper = 1
-      If node.Stepper IsNot Nothing Then stepper = CInt(EvaluateExpression(node.Stepper))
-      For index = lowerBound To upperBound Step stepper
-        m_variables(node.Variable) = index
-        EvaluateStatement(node.Body)
-      Next
-    End Sub
+    'Private Sub EvaluateForStatement(node As BoundForStatement)
+    '  Dim lowerBound = CInt(EvaluateExpression(node.LowerBound))
+    '  Dim upperBound = CInt(EvaluateExpression(node.UpperBound))
+    '  Dim stepper = 1
+    '  If node.Stepper IsNot Nothing Then stepper = CInt(EvaluateExpression(node.Stepper))
+    '  For index = lowerBound To upperBound Step stepper
+    '    m_variables(node.Variable) = index
+    '    EvaluateStatement(node.Body)
+    '  Next
+    'End Sub
 
     Private Sub EvaluateExpressionStatement(node As BoundExpressionStatement)
       m_lastValue = EvaluateExpression(node.Expression)
