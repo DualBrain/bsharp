@@ -1,4 +1,5 @@
 ﻿Imports Basic.CodeAnalysis.Binding
+Imports Basic.CodeAnalysis.Symbols
 Imports Basic.CodeAnalysis.Syntax
 
 Namespace Basic.CodeAnalysis
@@ -244,9 +245,9 @@ Namespace Basic.CodeAnalysis
           '      of these since "and" is simply "and".
           '      So leaving this code here as a reminder as we progress
           '      forward with more types, we will be returning here.
-          If node.Type = GetType(Boolean) Then
+          If node.Type Is TypeSymbol.Boolean Then
             Return CBool(left) And CBool(right)
-          ElseIf node.Type = GetType(Integer) Then
+          ElseIf node.Type Is TypeSymbol.Integer Then
             Return CInt(left) And CInt(right)
           Else
             Throw New Exception($"Unexpected binary operator {node.Op.Kind} type {node.Type}.")

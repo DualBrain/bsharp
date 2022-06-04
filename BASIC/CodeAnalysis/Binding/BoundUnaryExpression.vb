@@ -1,4 +1,6 @@
-﻿Namespace Basic.CodeAnalysis.Binding
+﻿Imports Basic.CodeAnalysis.Symbols
+
+Namespace Basic.CodeAnalysis.Binding
 
   Friend NotInheritable Class BoundUnaryExpression
     Inherits BoundExpression
@@ -10,7 +12,7 @@
     End Sub
 
     Public Overrides ReadOnly Property Kind As BoundNodeKind = BoundNodeKind.UnaryExpression
-    Public Overrides ReadOnly Property Type As Type '= Operand.Type
+    Public Overrides ReadOnly Property Type As TypeSymbol '= Operand.Type
     Public ReadOnly Property Op As BoundUnaryOperator
     Public ReadOnly Property Operand As BoundExpression
 

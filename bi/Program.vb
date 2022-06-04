@@ -1,6 +1,7 @@
 ﻿Imports System.Text
 Imports Basic.CodeAnalysis
 Imports Basic.CodeAnalysis.Binding
+Imports Basic.CodeAnalysis.Symbols
 Imports Basic.CodeAnalysis.Syntax
 Imports Basic.CodeAnalysis.Text
 

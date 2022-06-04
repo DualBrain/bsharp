@@ -20,12 +20,13 @@
     ConditionalGotoStatement
 
     ' Expressions
+    ErrorExpression
     LiteralExpression
     VariableExpression
     AssignmentExpression
     UnaryExpression
     BinaryExpression
-
+    NopStatement
   End Enum
 
 End Namespace

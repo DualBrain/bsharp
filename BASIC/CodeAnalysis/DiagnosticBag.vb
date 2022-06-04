@@ -1,4 +1,5 @@
-﻿Imports Basic.CodeAnalysis.Syntax
+﻿Imports Basic.CodeAnalysis.Symbols
+Imports Basic.CodeAnalysis.Syntax
 Imports Basic.CodeAnalysis.Text
 
 Namespace Basic.CodeAnalysis
@@ -40,13 +41,13 @@ Namespace Basic.CodeAnalysis
       Report(span, message)
     End Sub
 
-    Public Sub ReportUndefinedUnaryOperator(span As TextSpan, operatorText As String, operandType As Type)
-      Dim message = $"Unary operator '{operatorText}' is not defined for type {operandType}."
+    Public Sub ReportUndefinedUnaryOperator(span As TextSpan, operatorText As String, operandType As TypeSymbol)
+      Dim message = $"Unary operator '{operatorText}' is not defined for type '{operandType}'."
       Report(span, message)
     End Sub
 
-    Public Sub ReportUndefinedBinaryOperator(span As TextSpan, operatorText As String, leftType As Type, rightType As Type)
-      Dim message = $"Binary operator '{operatorText}' is not defined for type {leftType} and {rightType}."
+    Public Sub ReportUndefinedBinaryOperator(span As TextSpan, operatorText As String, leftType As TypeSymbol, rightType As TypeSymbol)
+      Dim message = $"Binary operator '{operatorText}' is not defined for type '{leftType}' and '{rightType}'."
       Report(span, message)
     End Sub
 
@@ -60,7 +61,7 @@ Namespace Basic.CodeAnalysis
       Report(span, message)
     End Sub
 
-    Public Sub ReportCannotConvert(span As TextSpan, fromType As Type, toType As Type)
+    Public Sub ReportCannotConvert(span As TextSpan, fromType As TypeSymbol, toType As TypeSymbol)
       Dim message = $"Cannot convert type '{fromType}' to '{toType}'."
       Report(span, message)
     End Sub

@@ -3,6 +3,7 @@ Option Strict On
 Option Infer On
 
 Imports System.Collections.Immutable
+Imports Basic.CodeAnalysis.Symbols
 
 Namespace Basic.CodeAnalysis.Binding
 

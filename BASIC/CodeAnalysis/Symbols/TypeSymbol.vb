@@ -5,10 +5,10 @@
 
     Public Shared ReadOnly [Error] As New TypeSymbol("?")
     Public Shared ReadOnly Any As New TypeSymbol("any")
-    Public Shared ReadOnly Bool As New TypeSymbol("bool")
-    Public Shared ReadOnly Int As New TypeSymbol("int")
+    Public Shared ReadOnly [Boolean] As New TypeSymbol("boolean")
+    Public Shared ReadOnly [Integer] As New TypeSymbol("integer")
     Public Shared ReadOnly [String] As New TypeSymbol("string")
-    Public Shared ReadOnly Void As New TypeSymbol("void")
+    Public Shared ReadOnly [Nothing] As New TypeSymbol("nothing")
 
     Private Sub New(name As String)
       MyBase.New(name)

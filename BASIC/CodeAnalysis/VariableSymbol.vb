@@ -1,17 +1,17 @@
-﻿Namespace Basic.CodeAnalysis
+﻿'Namespace Basic.CodeAnalysis
 
-  Public NotInheritable Class VariableSymbol
+'  Public NotInheritable Class VariableSymbol
 
-    Public Sub New(name As String, isReadOnly As Boolean, type As Type)
-      Me.Name = name
-      Me.IsReadOnly = isReadOnly
-      Me.Type = type
-    End Sub
+'    Public Sub New(name As String, isReadOnly As Boolean, type As Type)
+'      Me.Name = name
+'      Me.IsReadOnly = isReadOnly
+'      Me.Type = type
+'    End Sub
 
-    Public ReadOnly Property Name As String
-    Public ReadOnly Property IsReadOnly As Boolean
-    Public ReadOnly Property Type As Type
+'    Public ReadOnly Property Name As String
+'    Public ReadOnly Property IsReadOnly As Boolean
+'    Public ReadOnly Property Type As Type
 
-  End Class
+'  End Class
 
-End Namespace
+'End Namespace

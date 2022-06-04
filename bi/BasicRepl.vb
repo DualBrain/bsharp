@@ -1,4 +1,5 @@
 ﻿Imports Basic.CodeAnalysis
+Imports Basic.CodeAnalysis.Symbols
 Imports Basic.CodeAnalysis.Syntax
 Imports Basic.CodeAnalysis.Text
 

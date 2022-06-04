@@ -26,7 +26,7 @@ Namespace Basic.CodeAnalysis.Binding
     Public Overridable Function RewriteExpression(node As BoundExpression) As BoundExpression
       If node Is Nothing Then Return node
       Select Case node.Kind
-        'Case BoundNodeKind.ErrorExpression : Return RewriteErrorExpression(DirectCast(node, BoundErrorExpression))
+        Case BoundNodeKind.ErrorExpression : Return RewriteErrorExpression(DirectCast(node, BoundErrorExpression))
         Case BoundNodeKind.LiteralExpression : Return RewriteLiteralExpression(DirectCast(node, BoundLiteralExpression))
         Case BoundNodeKind.VariableExpression : Return RewriteVariableExpression(DirectCast(node, BoundVariableExpression))
         Case BoundNodeKind.AssignmentExpression : Return RewriteAssignmentExpression(DirectCast(node, BoundAssignmentExpression))
@@ -174,9 +174,9 @@ Namespace Basic.CodeAnalysis.Binding
       End If
     End Function
 
-    'Private Function RewriteErrorExpression(node As BoundErrorExpression) As BoundExpression
-    '  Return node
-    'End Function
+    Private Shared Function RewriteErrorExpression(node As BoundErrorExpression) As BoundExpression
+      Return node
+    End Function
 
     Protected Overridable Function RewriteLiteralExpression(node As BoundLiteralExpression) As BoundExpression
       Return node

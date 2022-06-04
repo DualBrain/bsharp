@@ -5,6 +5,7 @@ Option Infer On
 Imports Xunit
 Imports BASIC.CodeAnalysis
 Imports BASIC.CodeAnalysis.Syntax
+Imports BASIC.CodeAnalysis.Symbols
 
 Namespace Global.BASIC.Tests.CodeAnalysis
 
@@ -324,23 +325,23 @@ a * a }", 100)>
 
     End Sub
 
-    '<Fact>
+    <Fact>
     Public Sub Evaluator_UnaryExpression_Reports_Undefined()
 
       Dim text = "[+]true"
 
-      Dim diagnostics = "Unary operator '+' is not defined for type 'bool'."
+      Dim diagnostics = "Unary operator '+' is not defined for type 'boolean'."
 
       AssertDiagnostics(text, diagnostics)
 
     End Sub
 
-    '<Fact>
+    <Fact>
     Public Sub Evaluator_BinaryExpression_Reports_Undefined()
 
       Dim text = "10 [+] false"
 
-      Dim diagnostics = "Binary operator '+' is not defined for type 'int' and 'bool'."
+      Dim diagnostics = "Binary operator '+' is not defined for type 'integer' and 'boolean'."
 
       AssertDiagnostics(text, diagnostics)
 
@@ -373,17 +374,17 @@ a * a }", 100)>
     End Sub
 
     '<Fact>
-    Public Sub Evaluator_AssignmentExpression_Reports_CannotConvert()
+    Public Shared Sub Evaluator_AssignmentExpression_Reports_CannotConvert()
 
       Dim text = "
         {
-          dim x = 10
+          const x = 10
           let x [=] [true]
         }"
 
       Dim diagnostics = "
         Variable 'x' is read-only and cannot be assigned to.
-        Cannot convert type 'bool' to 'int'."
+        Cannot convert type 'boolean' to 'integer'."
 
       AssertDiagnostics(text, diagnostics)
 

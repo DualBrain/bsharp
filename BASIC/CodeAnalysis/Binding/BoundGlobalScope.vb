@@ -1,4 +1,5 @@
 ﻿Imports System.Collections.Immutable
+Imports Basic.CodeAnalysis.Symbols
 
 Namespace Basic.CodeAnalysis.Binding
   Friend NotInheritable Class BoundGlobalScope

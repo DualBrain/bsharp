@@ -8,7 +8,7 @@
                    upperBound As ExpressionSyntax,
                    stepper As ExpressionSyntax,
                    body As StatementSyntax)
-      Me.Variable = variable
+      Me.Identifier = variable
       Me.LowerBound = lowerBound
       Me.UpperBound = upperBound
       Me.Stepper = stepper
@@ -16,7 +16,7 @@
     End Sub
 
     Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.ForStatement
-    Public ReadOnly Property Variable As SyntaxToken
+    Public ReadOnly Property Identifier As SyntaxToken
     Public ReadOnly Property LowerBound As ExpressionSyntax
     Public ReadOnly Property UpperBound As ExpressionSyntax
     Public ReadOnly Property Stepper As ExpressionSyntax

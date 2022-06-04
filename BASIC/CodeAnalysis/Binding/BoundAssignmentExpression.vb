@@ -1,4 +1,6 @@
-﻿Namespace Basic.CodeAnalysis.Binding
+﻿Imports Basic.CodeAnalysis.Symbols
+
+Namespace Basic.CodeAnalysis.Binding
 
   Friend NotInheritable Class BoundAssignmentExpression
     Inherits BoundExpression
@@ -9,7 +11,7 @@
       Me.Type = expression.Type
     End Sub
 
-    Public Overrides ReadOnly Property Type As Type
+    Public Overrides ReadOnly Property Type As TypeSymbol
     Public Overrides ReadOnly Property Kind As BoundNodeKind = BoundNodeKind.AssignmentExpression
     Public ReadOnly Property Variable As VariableSymbol
     Public ReadOnly Property Expression As BoundExpression

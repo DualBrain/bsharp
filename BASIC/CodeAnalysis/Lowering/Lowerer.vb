@@ -1,6 +1,7 @@
 ﻿'Imports System.Collections.Immutable
 Imports System.Collections.Immutable
 Imports Basic.CodeAnalysis.Binding
+Imports Basic.CodeAnalysis.Symbols
 'Imports Basic.CodeAnalysis.Symbols
 Imports Basic.CodeAnalysis.Syntax
 
@@ -251,12 +252,12 @@ Namespace Basic.CodeAnalysis.Lowering
 
       Dim variableExpression = New BoundVariableExpression(node.Variable)
 
-      Dim upperBoundSymbol = New VariableSymbol("upperBound", True, GetType(Integer))
+      Dim upperBoundSymbol = New VariableSymbol("upperBound", True, TypeSymbol.Integer)
       Dim upperBoundDeclaration = New BoundVariableDeclaration(upperBoundSymbol, node.UpperBound)
 
       Dim condition = New BoundBinaryExpression(
               variableExpression,
-              BoundBinaryOperator.Bind(SyntaxKind.LessThanEqualToken, GetType(Integer), GetType(Integer)),
+              BoundBinaryOperator.Bind(SyntaxKind.LessThanEqualToken, TypeSymbol.Integer, TypeSymbol.Integer),
               New BoundVariableExpression(upperBoundSymbol))
 
       Dim increment = New BoundExpressionStatement(
@@ -264,7 +265,7 @@ Namespace Basic.CodeAnalysis.Lowering
                 node.Variable,
                 New BoundBinaryExpression(
                   variableExpression,
-                  BoundBinaryOperator.Bind(SyntaxKind.PlusToken, GetType(Integer), GetType(Integer)),
+                  BoundBinaryOperator.Bind(SyntaxKind.PlusToken, TypeSymbol.Integer, TypeSymbol.Integer),
                   New BoundLiteralExpression(1))))
 
       Dim whileBody = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(node.Body, increment))

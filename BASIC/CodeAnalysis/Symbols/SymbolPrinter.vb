@@ -9,9 +9,9 @@ Namespace Basic.CodeAnalysis.Symbols
     Public Sub WriteTo(symbol As Symbol, writer As TextWriter)
       Select Case symbol.Kind
         'Case SymbolKind.Function : WriteFunctionTo(CType(symbol, FunctionSymbol), writer)
-        Case SymbolKind.GlobalVariable : WriteGlobalVariableTo(CType(symbol, GlobalVariableSymbol), writer)
-        Case SymbolKind.LocalVariable : WriteLocalVariableTo(CType(symbol, LocalVariableSymbol), writer)
-        Case SymbolKind.Parameter : WriteParameterTo(CType(symbol, ParameterSymbol), writer)
+        'Case SymbolKind.GlobalVariable : WriteGlobalVariableTo(CType(symbol, GlobalVariableSymbol), writer)
+        'Case SymbolKind.LocalVariable : WriteLocalVariableTo(CType(symbol, LocalVariableSymbol), writer)
+        'Case SymbolKind.Parameter : WriteParameterTo(CType(symbol, ParameterSymbol), writer)
         Case SymbolKind.Type : WriteTypeTo(CType(symbol, TypeSymbol), writer)
         Case Else
           Throw New Exception($"Unexpected symbol: {symbol.Kind}")
@@ -45,30 +45,30 @@ Namespace Basic.CodeAnalysis.Symbols
 
     'End Sub
 
-    Private Sub WriteGlobalVariableTo(symbol As GlobalVariableSymbol, writer As TextWriter)
-      writer.WriteKeyword(If(symbol.IsReadOnly, SyntaxKind.ConstKeyword, SyntaxKind.DimKeyword))
-      writer.WriteSpace()
-      writer.WriteIdentifier(symbol.Name)
-      writer.WritePunctuation(SyntaxKind.ColonToken)
-      writer.WriteSpace
-      symbol.Type.WriteTo(writer)
-    End Sub
+    'Private Sub WriteGlobalVariableTo(symbol As GlobalVariableSymbol, writer As TextWriter)
+    '  writer.WriteKeyword(If(symbol.IsReadOnly, SyntaxKind.ConstKeyword, SyntaxKind.DimKeyword))
+    '  writer.WriteSpace()
+    '  writer.WriteIdentifier(symbol.Name)
+    '  writer.WritePunctuation(SyntaxKind.ColonToken)
+    '  writer.WriteSpace
+    '  symbol.Type.WriteTo(writer)
+    'End Sub
 
-    Private Sub WriteLocalVariableTo(symbol As LocalVariableSymbol, writer As TextWriter)
-      writer.WriteKeyword(If(symbol.IsReadOnly, SyntaxKind.ConstKeyword, SyntaxKind.DimKeyword))
-      writer.WriteSpace
-      writer.WriteIdentifier(symbol.Name)
-      writer.WritePunctuation(SyntaxKind.ColonToken)
-      writer.WriteSpace
-      symbol.Type.WriteTo(writer)
-    End Sub
+    'Private Sub WriteLocalVariableTo(symbol As LocalVariableSymbol, writer As TextWriter)
+    '  writer.WriteKeyword(If(symbol.IsReadOnly, SyntaxKind.ConstKeyword, SyntaxKind.DimKeyword))
+    '  writer.WriteSpace
+    '  writer.WriteIdentifier(symbol.Name)
+    '  writer.WritePunctuation(SyntaxKind.ColonToken)
+    '  writer.WriteSpace
+    '  symbol.Type.WriteTo(writer)
+    'End Sub
 
-    Private Sub WriteParameterTo(symbol As ParameterSymbol, writer As TextWriter)
-      writer.WriteIdentifier(symbol.Name)
-      writer.WritePunctuation(SyntaxKind.ColonToken)
-      writer.WriteSpace
-      symbol.Type.WriteTo(writer)
-    End Sub
+    'Private Sub WriteParameterTo(symbol As ParameterSymbol, writer As TextWriter)
+    '  writer.WriteIdentifier(symbol.Name)
+    '  writer.WritePunctuation(SyntaxKind.ColonToken)
+    '  writer.WriteSpace
+    '  symbol.Type.WriteTo(writer)
+    'End Sub
 
     Private Sub WriteTypeTo(symbol As TypeSymbol, writer As TextWriter)
       writer.WriteIdentifier(symbol.Name)

@@ -5,6 +5,7 @@ Option Infer On
 Imports System.Collections.Immutable
 Imports System.Threading
 Imports Basic.CodeAnalysis.Binding
+Imports Basic.CodeAnalysis.Symbols
 Imports Basic.CodeAnalysis.Syntax
 
 Namespace Basic.CodeAnalysis
