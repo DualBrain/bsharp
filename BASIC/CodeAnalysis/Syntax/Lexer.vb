@@ -1,4 +1,5 @@
-﻿Imports Basic.CodeAnalysis.Text
+﻿Imports System.Text
+Imports Basic.CodeAnalysis.Text
 
 Namespace Basic.CodeAnalysis.Syntax
 
@@ -79,6 +80,8 @@ Namespace Basic.CodeAnalysis.Syntax
         Case ":"c : m_kind = SyntaxKind.ColonToken : m_position += 1
         Case ";"c : m_kind = SyntaxKind.SemicolonToken : m_position += 1
         Case "?"c : m_kind = SyntaxKind.QuestionToken : m_position += 1
+        Case ChrW(34)
+          ReadString()
         Case "0"c, "1"c, "2"c, "3"c, "4"c, "5"c, "6"c, "7"c, "8"c, "9"c
           ReadNumberToken()
         Case " "c, CChar(vbTab), CChar(vbCr), CChar(vbLf)
@@ -100,6 +103,42 @@ Namespace Basic.CodeAnalysis.Syntax
       Return New SyntaxToken(m_kind, m_start, text, m_value)
 
     End Function
+
+    Private Sub ReadString()
+
+      ' "Test "" dddd"
+
+      ' skip the current quote
+      m_position += 1
+
+      Dim sb = New StringBuilder
+      Dim done = False
+
+      While Not done
+        Select Case Current
+          Case ChrW(0), ChrW(13), ChrW(10)
+            Dim span = New TextSpan(m_start, 1)
+            Dim location = New TextLocation(m_text, span)
+            Diagnostics.ReportUnterminatedString(location)
+            done = True
+          Case """"c
+            If LookAhead = """"c Then
+              sb.Append(Current)
+              m_position += 2
+            Else
+              m_position += 1
+              done = True
+            End If
+          Case Else
+            sb.Append(Current)
+            m_position += 1
+        End Select
+      End While
+
+      m_kind = SyntaxKind.StringToken
+      m_value = sb.ToString
+
+    End Sub
 
     Private Sub ReadWhiteSpace()
       While Char.IsWhiteSpace(Current)

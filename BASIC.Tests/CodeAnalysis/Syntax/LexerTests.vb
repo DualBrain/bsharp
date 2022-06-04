@@ -1,3 +1,5 @@
+Imports System.Collections.Immutable
+Imports BASIC.CodeAnalysis.Text
 Imports Xunit
 
 Namespace BASIC.CodeAnalysis.Syntax
@@ -5,7 +7,24 @@ Namespace BASIC.CodeAnalysis.Syntax
   Public Class LexerTests
 
     <Fact>
-    Sub Lexer_Lexes_AllToken()
+    Public Sub Lexer_Lexes_UnterminatedString()
+
+      Dim text = """text"
+      Dim diagnostics As ImmutableArray(Of Diagnostic) = Nothing
+      Dim tokens = SyntaxTree.ParseTokens(text, diagnostics)
+
+      Dim token = Assert.[Single](tokens)
+      Assert.Equal(SyntaxKind.StringToken, token.Kind)
+      Assert.Equal(text, token.Text)
+
+      Dim diagnostic = Assert.[Single](diagnostics)
+      Assert.Equal(New TextSpan(0, 1), diagnostic.Span)
+      Assert.Equal("Unterminated string literal.", diagnostic.Message)
+
+    End Sub
+
+    <Fact>
+    Sub Lexer_Covers_AllToken()
 
       Dim tokenKinds = [Enum].GetValues(GetType(SyntaxKind)).
                               Cast(Of SyntaxKind).
@@ -90,7 +109,9 @@ Namespace BASIC.CodeAnalysis.Syntax
           {(SyntaxKind.IdentifierToken, "a"),
            (SyntaxKind.IdentifierToken, "abc"),
            (SyntaxKind.NumberToken, "1"),
-           (SyntaxKind.NumberToken, "123")}
+           (SyntaxKind.NumberToken, "123"),
+           (SyntaxKind.StringToken, """test"""),
+           (SyntaxKind.StringToken, """te\st""")}
 
       Return fixedTokens.Concat(dynamicTokens)
 
@@ -112,6 +133,7 @@ Namespace BASIC.CodeAnalysis.Syntax
       If t1IsKeyword AndAlso t2Kind = SyntaxKind.IdentifierToken Then Return True
       If t1Kind = SyntaxKind.IdentifierToken AndAlso t2IsKeyword Then Return True
       If t1Kind = SyntaxKind.NumberToken AndAlso t2Kind = SyntaxKind.NumberToken Then Return True
+      If t1Kind = SyntaxKind.StringToken AndAlso t2Kind = SyntaxKind.StringToken Then Return True
       If t1Kind = SyntaxKind.GreaterThanToken AndAlso t2Kind = SyntaxKind.EqualToken Then Return True
       If t1Kind = SyntaxKind.LessThanToken AndAlso t2Kind = SyntaxKind.EqualToken Then Return True
       If t1Kind = SyntaxKind.LessThanToken AndAlso t2Kind = SyntaxKind.GreaterThanToken Then Return True

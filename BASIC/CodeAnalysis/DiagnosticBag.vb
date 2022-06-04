@@ -80,6 +80,11 @@ Namespace Basic.CodeAnalysis
       Report(span, message)
     End Sub
 
+    Public Sub ReportUnterminatedString(location As TextLocation)
+      Dim message = $"Unterminated string literal."
+      Report(location.Span, message)
+    End Sub
+
   End Class
 
 End Namespace

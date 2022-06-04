@@ -380,6 +380,7 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.OpenParenToken : Return ParseParenExpression()
         Case SyntaxKind.FalseKeyword, SyntaxKind.TrueKeyword : Return ParseBooleanLiteral()
         Case SyntaxKind.NumberToken : Return ParseNumberLiteral()
+        Case SyntaxKind.StringToken : Return ParseStringLiteral()
         Case Else : Return ParseNameExpression() 'Case SyntaxKind.IdentifierToken
       End Select
     End Function
@@ -400,6 +401,11 @@ Namespace Basic.CodeAnalysis.Syntax
     Private Function ParseNumberLiteral() As ExpressionSyntax
       Dim numberToken = MatchToken(SyntaxKind.NumberToken)
       Return New LiteralExpressionSyntax(numberToken)
+    End Function
+
+    Private Function ParseStringLiteral() As ExpressionSyntax
+      Dim stringToken = MatchToken(SyntaxKind.StringToken)
+      Return New LiteralExpressionSyntax(stringToken)
     End Function
 
     Private Function ParseNameExpression() As ExpressionSyntax

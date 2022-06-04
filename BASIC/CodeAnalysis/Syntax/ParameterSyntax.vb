@@ -1,17 +1,17 @@
-﻿Namespace Basic.CodeAnalysis.Syntax
+﻿'Namespace Basic.CodeAnalysis.Syntax
 
-  Partial Public NotInheritable Class ParameterSyntax
-    Inherits SyntaxNode
+'  Partial Public NotInheritable Class ParameterSyntax
+'    Inherits SyntaxNode
 
-    Sub New(identifier As SyntaxToken, type As TypeClauseSyntax)
-      Me.Identifier = identifier
-      Me.Type = type
-    End Sub
+'    Sub New(identifier As SyntaxToken, type As TypeClauseSyntax)
+'      Me.Identifier = identifier
+'      Me.Type = type
+'    End Sub
 
-    Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.Parameter
-    Public ReadOnly Property Identifier As SyntaxToken
-    Public ReadOnly Property Type As TypeClauseSyntax
+'    Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.Parameter
+'    Public ReadOnly Property Identifier As SyntaxToken
+'    Public ReadOnly Property Type As TypeClauseSyntax
 
-  End Class
+'  End Class
 
-End Namespace
+'End Namespace

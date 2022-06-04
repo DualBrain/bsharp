@@ -29,6 +29,7 @@
     OpenBraceToken
     CloseBraceToken
     IdentifierToken
+    StringToken
 
     ' Keywords
     FalseKeyword
@@ -89,11 +90,12 @@
     CaseElseClauseSyntax
     CaseClauseSyntax
     SelectCaseStatement
-    FunctionKeyword
-    VarKeyword
-    Parameter
-    FunctionDeclaration
-    TypeClause
+    'FunctionKeyword
+    'VarKeyword
+    'Parameter
+    'FunctionDeclaration
+    'TypeClause
+
   End Enum
 
 End Namespace
