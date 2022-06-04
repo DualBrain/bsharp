@@ -79,6 +79,7 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.DimKeyword, SyntaxKind.ConstKeyword : Return ParseVariableDeclaration()
         Case SyntaxKind.IfKeyword : Return ParseIfStatement()
         Case SyntaxKind.WhileKeyword : Return ParseWhileStatement()
+        Case SyntaxKind.DoKeyword : Return ParseDoWhileStatement()
         Case SyntaxKind.ForKeyword : Return ParseForStatement()
         Case SyntaxKind.SelectKeyword : Return ParseSelectCaseStatement()
         Case Else : Return ParseExpressionStatement()
@@ -174,6 +175,14 @@ Namespace Basic.CodeAnalysis.Syntax
         Dim endingWhilekeyword = MatchToken(SyntaxKind.WhileKeyword)
       End If
       Return New WhileStatementSyntax(keyword, condition, statement)
+    End Function
+
+    Private Function ParseDoWhileStatement() As StatementSyntax
+      Dim doKeyword = MatchToken(SyntaxKind.DoKeyword)
+      Dim body = ParseStatement()
+      Dim whileKeyword = MatchToken(SyntaxKind.WhileKeyword)
+      Dim condition = ParseExpression()
+      Return New DoWhileStatementSyntax(doKeyword, body, whileKeyword, condition)
     End Function
 
     Private Function ParseForStatement() As StatementSyntax
@@ -381,8 +390,38 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.FalseKeyword, SyntaxKind.TrueKeyword : Return ParseBooleanLiteral()
         Case SyntaxKind.NumberToken : Return ParseNumberLiteral()
         Case SyntaxKind.StringToken : Return ParseStringLiteral()
-        Case Else : Return ParseNameExpression() 'Case SyntaxKind.IdentifierToken
+        Case Else : Return ParseNameOrCallExpression() 'Case SyntaxKind.IdentifierToken
       End Select
+    End Function
+
+    Private Function ParseNameOrCallExpression() As ExpressionSyntax
+      If Peek(0).Kind = SyntaxKind.IdentifierToken AndAlso
+         Peek(1).Kind = SyntaxKind.OpenParenToken Then
+        Return ParseCallExpression()
+      End If
+      Return ParseNameExpression()
+    End Function
+
+    Private Function ParseCallExpression() As ExpressionSyntax
+      Dim identifier = MatchToken(SyntaxKind.IdentifierToken)
+      Dim openParenToken = MatchToken(SyntaxKind.OpenParenToken)
+      Dim arguments = ParseArguments()
+      Dim closeParenToken = MatchToken(SyntaxKind.CloseParenToken)
+      Return New CallExpressionSyntax(identifier, openParenToken, arguments, closeParenToken)
+    End Function
+
+    Private Function ParseArguments() As SeparatedSyntaxList(Of ExpressionSyntax)
+      Dim nodesAndSeparators = ImmutableArray.CreateBuilder(Of SyntaxNode)
+      While Current.Kind <> SyntaxKind.CloseParenToken AndAlso
+            Current.Kind <> SyntaxKind.EndOfFileToken
+        Dim expression = ParseExpression()
+        nodesAndSeparators.Add(expression)
+        If Current.Kind <> SyntaxKind.CloseParenToken Then
+          Dim comma = MatchToken(SyntaxKind.CommaToken)
+          nodesAndSeparators.Add(comma)
+        End If
+      End While
+      Return New SeparatedSyntaxList(Of ExpressionSyntax)(nodesAndSeparators.ToImmutable)
     End Function
 
     Private Function ParseParenExpression() As ExpressionSyntax

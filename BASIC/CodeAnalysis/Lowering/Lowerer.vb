@@ -156,17 +156,17 @@ Namespace Basic.CodeAnalysis.Lowering
       ' <body>
       ' continue:
       ' gotoTrue <condition> body
-      ' break:
+      '' end:
 
       Dim continueLabel = GenerateLabel()
       Dim checkLabel = GenerateLabel()
-      Dim endLabel = GenerateLabel()
+      'Dim endLabel = GenerateLabel()
 
       Dim gotoCheck = New BoundGotoStatement(checkLabel)
       Dim continueLabelStatement = New BoundLabelStatement(continueLabel)
       Dim checkLabelStatement = New BoundLabelStatement(checkLabel)
       Dim gotoTrue = New BoundConditionalGotoStatement(continueLabel, node.Condition, True)
-      Dim endLabelStatement = New BoundLabelStatement(endLabel)
+      'Dim endLabelStatement = New BoundLabelStatement(endLabel)
 
       Dim builder = ImmutableArray.CreateBuilder(Of BoundStatement)
       builder.Add(gotoCheck)
@@ -176,7 +176,7 @@ Namespace Basic.CodeAnalysis.Lowering
       'Next
       builder.Add(checkLabelStatement)
       builder.Add(gotoTrue)
-      builder.Add(endLabelStatement)
+      'builder.Add(endLabelStatement)
       Dim result = New BoundBlockStatement(builder.ToImmutable)
 
       ' ------
@@ -201,37 +201,47 @@ Namespace Basic.CodeAnalysis.Lowering
 
     End Function
 
-    '    Protected Overrides Function RewriteDoWhileStatement(node As BoundDoWhileStatement) As BoundStatement
+    Protected Overrides Function RewriteDoWhileStatement(node As BoundDoWhileStatement) As BoundStatement
 
-    '      ' do 
-    '      '   <body>
-    '      ' while <condition>
-    '      '
-    '      ' ------->
-    '      '
-    '      ' body:
-    '      ' <body>
-    '      ' check:
-    '      ' continue:
-    '      ' gotoTrue <condition> body
-    '      ' break:
+      ' do 
+      '   <body>
+      ' while <condition>
+      '
+      ' ------->
+      '
+      ' body:
+      ' <body>
+      ' check:
+      ' continue:
+      ' gotoTrue <condition> body
+      ' break:
 
-    '      Dim bodyLabel = GenerateLabel()
+      Dim continueLabel = GenerateLabel()
 
-    '      Dim bodyLabelStatement = New BoundLabelStatement(bodyLabel)
-    '      Dim continueLabelStatement = New BoundLabelStatement(node.ContinueLabel)
-    '      Dim gotoTrue = New BoundConditionalGotoStatement(bodyLabel, node.Condition)
-    '      Dim breakLabelStatement = New BoundLabelStatement(node.BreakLabel)
+      Dim continueLabelStatement = New BoundLabelStatement(continueLabel)
+      Dim gotoTrue = New BoundConditionalGotoStatement(continueLabel, node.Condition)
 
-    '      Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(bodyLabelStatement,
-    '                                                                                    node.Body,
-    '                                                                                    continueLabelStatement,
-    '                                                                                    gotoTrue,
-    '                                                                                    breakLabelStatement))
+      Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(
+        continueLabelStatement,
+        node.Body,
+        gotoTrue))
 
-    '      Return RewriteStatement(result)
+      'Dim bodyLabel = GenerateLabel()
 
-    '    End Function
+      'Dim bodyLabelStatement = New BoundLabelStatement(bodyLabel)
+      'Dim continueLabelStatement = New BoundLabelStatement(node.ContinueLabel)
+      'Dim gotoTrue = New BoundConditionalGotoStatement(bodyLabel, node.Condition)
+      'Dim breakLabelStatement = New BoundLabelStatement(node.BreakLabel)
+
+      'Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(bodyLabelStatement,
+      '                                                                              node.Body,
+      '                                                                              continueLabelStatement,
+      '                                                                              gotoTrue,
+      '                                                                              breakLabelStatement))
+
+      Return RewriteStatement(result)
+
+    End Function
 
     Protected Overrides Function RewriteForStatement(node As BoundForStatement) As BoundStatement
 

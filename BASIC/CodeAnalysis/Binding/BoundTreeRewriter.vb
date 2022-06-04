@@ -11,7 +11,7 @@ Namespace Basic.CodeAnalysis.Binding
         Case BoundNodeKind.VariableDeclaration : Return RewriteVariableDeclaration(DirectCast(node, BoundVariableDeclaration))
         Case BoundNodeKind.IfStatement : Return RewriteIfStatement(DirectCast(node, BoundIfStatement))
         Case BoundNodeKind.WhileStatement : Return RewriteWhileStatement(DirectCast(node, BoundWhileStatement))
-        'Case BoundNodeKind.DoWhileStatement : Return RewriteDoWhileStatement(DirectCast(node, BoundDoWhileStatement))
+        Case BoundNodeKind.DoWhileStatement : Return RewriteDoWhileStatement(DirectCast(node, BoundDoWhileStatement))
         Case BoundNodeKind.ForStatement : Return RewriteForStatement(DirectCast(node, BoundForStatement))
         Case BoundNodeKind.LabelStatement : Return RewriteLabeltatement(DirectCast(node, BoundLabelStatement))
         Case BoundNodeKind.GotoStatement : Return RewriteGotoStatement(DirectCast(node, BoundGotoStatement))
@@ -32,8 +32,8 @@ Namespace Basic.CodeAnalysis.Binding
         Case BoundNodeKind.AssignmentExpression : Return RewriteAssignmentExpression(DirectCast(node, BoundAssignmentExpression))
         Case BoundNodeKind.UnaryExpression : Return RewriteUnaryExpression(DirectCast(node, BoundUnaryExpression))
         Case BoundNodeKind.BinaryExpression : Return RewriteBinaryExpression(DirectCast(node, BoundBinaryExpression))
-          'Case BoundNodeKind.CallExpression : Return RewriteCallExpression(DirectCast(node, BoundCallExpression))
-          'Case BoundNodeKind.ConversionExpression : Return RewriteConversionExpression(DirectCast(node, BoundConversionExpression))
+        Case BoundNodeKind.CallExpression : Return RewriteCallExpression(DirectCast(node, BoundCallExpression))
+        Case BoundNodeKind.ConversionExpression : Return RewriteConversionExpression(DirectCast(node, BoundConversionExpression))
         Case Else
           Throw New Exception($"Unexpected node: {node.Kind}")
       End Select
@@ -118,14 +118,14 @@ Namespace Basic.CodeAnalysis.Binding
       Return New BoundWhileStatement(condition, body) ', node.BreakLabel, node.ContinueLabel)
     End Function
 
-    'Protected Overridable Function RewriteDoWhileStatement(node As BoundDoWhileStatement) As BoundStatement
-    '  Dim body = RewriteStatement(node.Body)
-    '  Dim condition = RewriteExpression(node.Condition)
-    '  If body Is node.Body AndAlso condition Is node.Condition Then
-    '    Return node
-    '  End If
-    '  Return New BoundDoWhileStatement(body, condition, node.BreakLabel, node.ContinueLabel)
-    'End Function
+    Protected Overridable Function RewriteDoWhileStatement(node As BoundDoWhileStatement) As BoundStatement
+      Dim body = RewriteStatement(node.Body)
+      Dim condition = RewriteExpression(node.Condition)
+      If body Is node.Body AndAlso condition Is node.Condition Then
+        Return node
+      End If
+      Return New BoundDoWhileStatement(body, condition) ', node.BreakLabel, node.ContinueLabel)
+    End Function
 
     Protected Overridable Function RewriteForStatement(node As BoundForStatement) As BoundStatement
       Dim lowerBound = RewriteExpression(node.LowerBound)
@@ -214,37 +214,37 @@ Namespace Basic.CodeAnalysis.Binding
       End If
     End Function
 
-    'Protected Overridable Function RewriteCallExpression(node As BoundCallExpression) As BoundExpression
-    '  Dim builder As ImmutableArray(Of BoundExpression).Builder = Nothing
-    '  For i = 0 To node.Arguments.Length - 1
-    '    Dim oldArgument = node.Arguments(i)
-    '    Dim newArgument = RewriteExpression(oldArgument)
-    '    If newArgument IsNot oldArgument Then
-    '      If builder Is Nothing Then
-    '        builder = ImmutableArray.CreateBuilder(Of BoundExpression)(node.Arguments.Length)
-    '        For j = 0 To i - 1
-    '          builder.Add(node.Arguments(j))
-    '        Next
-    '      End If
-    '    End If
-    '    If builder IsNot Nothing Then
-    '      builder.Add(newArgument)
-    '    End If
-    '  Next
-    '  If builder Is Nothing Then
-    '    Return node
-    '  End If
-    '  Return New BoundCallExpression(node.Function, builder.MoveToImmutable)
-    'End Function
+    Protected Overridable Function RewriteCallExpression(node As BoundCallExpression) As BoundExpression
+      Dim builder As ImmutableArray(Of BoundExpression).Builder = Nothing
+      For i = 0 To node.Arguments.Length - 1
+        Dim oldArgument = node.Arguments(i)
+        Dim newArgument = RewriteExpression(oldArgument)
+        If newArgument IsNot oldArgument Then
+          If builder Is Nothing Then
+            builder = ImmutableArray.CreateBuilder(Of BoundExpression)(node.Arguments.Length)
+            For j = 0 To i - 1
+              builder.Add(node.Arguments(j))
+            Next
+          End If
+        End If
+        If builder IsNot Nothing Then
+          builder.Add(newArgument)
+        End If
+      Next
+      If builder Is Nothing Then
+        Return node
+      End If
+      Return New BoundCallExpression(node.Function, builder.MoveToImmutable)
+    End Function
 
-    'Protected Overridable Function RewriteConversionExpression(node As BoundConversionExpression) As BoundExpression
-    '  Dim expression = RewriteExpression(node.Expression)
-    '  If expression Is node.Expression Then
-    '    Return node
-    '  Else
-    '    Return New BoundConversionExpression(node.Type, expression)
-    '  End If
-    'End Function
+    Protected Overridable Function RewriteConversionExpression(node As BoundConversionExpression) As BoundExpression
+      Dim expression = RewriteExpression(node.Expression)
+      If expression Is node.Expression Then
+        Return node
+      Else
+        Return New BoundConversionExpression(node.Type, expression)
+      End If
+    End Function
 
   End Class
 

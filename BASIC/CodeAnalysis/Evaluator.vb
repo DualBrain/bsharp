@@ -9,6 +9,7 @@ Namespace Basic.CodeAnalysis
 
     Private ReadOnly m_root As BoundBlockStatement
     Private ReadOnly m_variables As Dictionary(Of VariableSymbol, Object)
+    Private m_random As Random
 
     Private m_lastValue As Object
 
@@ -169,6 +170,8 @@ Namespace Basic.CodeAnalysis
         Case BoundNodeKind.AssignmentExpression : Return EvaluateAssignmentExpression(CType(node, BoundAssignmentExpression))
         Case BoundNodeKind.UnaryExpression : Return EvaluateUnaryExpression(CType(node, BoundUnaryExpression))
         Case BoundNodeKind.BinaryExpression : Return EvaluateBinaryExpression(CType(node, BoundBinaryExpression))
+        Case BoundNodeKind.CallExpression : Return EvaluateCallExpression(CType(node, BoundCallExpression))
+        Case BoundNodeKind.ConversionExpression : Return EvaluateConversionExpression(CType(node, BoundConversionExpression))
         Case Else
           Throw New Exception($"Unexpected node {node.Kind}")
       End Select
@@ -226,7 +229,15 @@ Namespace Basic.CodeAnalysis
         Case BoundBinaryOperatorKind.Division : Return CInt(CInt(left) / CInt(right))
         Case BoundBinaryOperatorKind.IntegerDivision : Return CInt(left) \ CInt(right)
         Case BoundBinaryOperatorKind.ModOperation : Return CInt(left) Mod CInt(right)
-        Case BoundBinaryOperatorKind.Addition : Return CInt(left) + CInt(right)
+        Case BoundBinaryOperatorKind.Addition
+          If node.Type Is TypeSymbol.String Then
+            Return CStr(left) + CStr(right)
+          ElseIf node.Type Is TypeSymbol.Integer Then
+            Return CInt(left) + CInt(right)
+          Else
+            Throw New Exception($"Unexpected binary operator {node.Op.Kind} type {node.Type}.")
+          End If
+
         Case BoundBinaryOperatorKind.Subtraction : Return CInt(left) - CInt(right)
 
         Case BoundBinaryOperatorKind.Equal : Return Equals(left, right)
@@ -237,14 +248,6 @@ Namespace Basic.CodeAnalysis
         Case BoundBinaryOperatorKind.NotEqual : Return Not Equals(left, right)
 
         Case BoundBinaryOperatorKind.LogicalAnd
-          'NOTE: Right now the following type check is not necessary since
-          '      we are only handling boolean and integer; however,
-          '      going forward we most likely will need to handle
-          '      different types including strings and it might further
-          '      make sense to merge the Logical and Bitwise versions
-          '      of these since "and" is simply "and".
-          '      So leaving this code here as a reminder as we progress
-          '      forward with more types, we will be returning here.
           If node.Type Is TypeSymbol.Boolean Then
             Return CBool(left) And CBool(right)
           ElseIf node.Type Is TypeSymbol.Integer Then
@@ -252,6 +255,7 @@ Namespace Basic.CodeAnalysis
           Else
             Throw New Exception($"Unexpected binary operator {node.Op.Kind} type {node.Type}.")
           End If
+
         Case BoundBinaryOperatorKind.BitwiseAnd : Return CInt(left) And CInt(right)
         Case BoundBinaryOperatorKind.LogicalAndAlso : Return CBool(left) AndAlso CBool(right)
         Case BoundBinaryOperatorKind.LogicalOr : Return CBool(left) Or CBool(right)
@@ -266,6 +270,35 @@ Namespace Basic.CodeAnalysis
         Case Else
           Throw New Exception($"Unexpected binary operator {node.Op.Kind}")
       End Select
+    End Function
+
+    Private Function EvaluateCallExpression(node As BoundCallExpression) As Object
+      If node.[Function] Is BuiltinFunctions.Input Then
+        Return Console.ReadLine()
+      ElseIf node.[Function] Is BuiltinFunctions.Print Then
+        Dim message = CStr(EvaluateExpression(node.Arguments(0)))
+        Console.WriteLine(message)
+        Return Nothing
+      ElseIf node.[Function] Is BuiltinFunctions.Rnd Then
+        Dim max = CInt(CLng(Fix(EvaluateExpression(node.Arguments(0)))) Mod Integer.MaxValue)
+        If m_random Is Nothing Then m_random = New Random
+        Return m_random.[Next](max)
+      Else
+        Throw New Exception($"Unexpected function {node.[Function]}")
+      End If
+    End Function
+
+    Private Function EvaluateConversionExpression(node As BoundConversionExpression) As Object
+      Dim value = EvaluateExpression(node.Expression)
+      If node.Type Is TypeSymbol.Boolean Then
+        Return Convert.ToBoolean(value)
+      ElseIf node.Type Is TypeSymbol.Integer Then
+        Return Convert.ToInt32(value)
+      ElseIf node.Type Is TypeSymbol.String Then
+        Return Convert.ToString(value)
+      Else
+        Throw New Exception($"Unexpected type {node.Type}")
+      End If
     End Function
 
   End Class

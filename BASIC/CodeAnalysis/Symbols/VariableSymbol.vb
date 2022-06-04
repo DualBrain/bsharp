@@ -3,7 +3,7 @@
 Namespace Basic.CodeAnalysis.Symbols
 
   'Public MustInherit Class VariableSymbol
-  Public NotInheritable Class VariableSymbol
+  Public Class VariableSymbol
     Inherits Symbol
 
     Friend Sub New(name As String, isReadOnly As Boolean, type As TypeSymbol) ', constant As BoundConstant)

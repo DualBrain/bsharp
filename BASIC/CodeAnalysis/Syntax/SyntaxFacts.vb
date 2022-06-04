@@ -86,6 +86,7 @@ Namespace Basic.CodeAnalysis.Syntax
 
         Case "while" : Return SyntaxKind.WhileKeyword
         Case "wend" : Return SyntaxKind.WendKeyword
+        Case "do" : Return SyntaxKind.DoKeyword
 
         Case "for" : Return SyntaxKind.ForKeyword
         Case "to" : Return SyntaxKind.ToKeyword
@@ -125,6 +126,7 @@ Namespace Basic.CodeAnalysis.Syntax
 
         Case SyntaxKind.WhileKeyword : Return "while"
         Case SyntaxKind.WendKeyword : Return "wend"
+        Case SyntaxKind.DoKeyword : Return "do"
 
         Case SyntaxKind.ForKeyword : Return "for"
         Case SyntaxKind.ToKeyword : Return "to"
@@ -167,6 +169,7 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.CloseParenToken : Return ")"
         Case SyntaxKind.OpenBraceToken : Return "{"
         Case SyntaxKind.CloseBraceToken : Return "}"
+        Case SyntaxKind.PipeToken : Return "|"
         Case SyntaxKind.EqualToken : Return "="
         Case SyntaxKind.LessThanToken : Return "<"
         Case SyntaxKind.PeriodToken : Return "."

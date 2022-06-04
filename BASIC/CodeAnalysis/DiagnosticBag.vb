@@ -56,8 +56,8 @@ Namespace Basic.CodeAnalysis
       Report(span, message)
     End Sub
 
-    Public Sub ReportVariableAlreadyDeclared(span As TextSpan, name As String)
-      Dim message = $"Variable '{name}' is already declared."
+    Public Sub ReportSymbolAlreadyDeclared(span As TextSpan, name As String)
+      Dim message = $"'{name}' is already declared."
       Report(span, message)
     End Sub
 
@@ -84,6 +84,26 @@ Namespace Basic.CodeAnalysis
     Public Sub ReportUnterminatedString(location As TextLocation)
       Dim message = $"Unterminated string literal."
       Report(location.Span, message)
+    End Sub
+
+    Public Sub ReportUndefinedFunction(span As TextSpan, name As String)
+      Dim message = $"Function '{name}' doesn't exist."
+      Report(span, message)
+    End Sub
+
+    Public Sub ReportWrongArgumentCount(span As TextSpan, name As String, expectedCount As Integer, actualCount As Integer)
+      Dim message = $"Function '{name}' requires {expectedCount} arguments but was given {actualCount}."
+      Report(span, message)
+    End Sub
+
+    Public Sub ReportWrongArgumentType(span As TextSpan, name As String, expectedType As TypeSymbol, actualType As TypeSymbol)
+      Dim message = $"Parameter '{name}' requires a value of type '{expectedType}' but was given a value of type '{actualType}'."
+      Report(span, message)
+    End Sub
+
+    Public Sub ReportExpressionMustHaveValue(span As TextSpan)
+      Dim message = "Expression must have a value."
+      Report(span, message)
     End Sub
 
   End Class

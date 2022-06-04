@@ -1,12 +1,13 @@
 ﻿Namespace Basic.CodeAnalysis.Symbols
 
   Public Enum SymbolKind
+    [Function]
     Variable
+    Parameter
     Type
-    '[Function]
+    'LocalVariable
     'GlobalVariable
     'LocalVariable
-    'Parameter
   End Enum
 
 End Namespace

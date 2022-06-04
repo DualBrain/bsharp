@@ -62,7 +62,7 @@ Namespace Basic.CodeAnalysis.Syntax
         Case ")"c : m_kind = SyntaxKind.CloseParenToken : m_position += 1
         Case "{"c : m_kind = SyntaxKind.OpenBraceToken : m_position += 1
         Case "}"c : m_kind = SyntaxKind.CloseBraceToken : m_position += 1
-        Case "|"c : m_kind = SyntaxKind.CloseParenToken : m_position += 1
+        Case "|"c : m_kind = SyntaxKind.PipeToken : m_position += 1
         Case "="c : m_kind = SyntaxKind.EqualToken : m_position += 1
         Case ">"c ' > >=
           Select Case LookAhead

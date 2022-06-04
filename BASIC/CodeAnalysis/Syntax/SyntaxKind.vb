@@ -30,6 +30,7 @@
     CloseBraceToken
     IdentifierToken
     StringToken
+    PipeToken
 
     ' Keywords
     FalseKeyword
@@ -48,6 +49,8 @@
     DimKeyword
     LetKeyword
 
+    DoKeyword
+
     ' Potential start of a Command 
     EndKeyword
 
@@ -62,6 +65,9 @@
     ToKeyword
     StepKeyword
     NextKeyword
+    SelectKeyword
+    CaseKeyword
+    IsKeyword
 
     ' Nodes
     CompilationUnit
@@ -74,6 +80,11 @@
     ElseClause
     WhileStatement
     ForStatement
+    ElseIfClause
+    CaseMatchExpressionSyntax
+    CaseElseClauseSyntax
+    CaseClauseSyntax
+    SelectCaseStatement
 
     ' Expressions
     LiteralExpression
@@ -82,14 +93,9 @@
     BinaryExpression
     ParenthesizedExpression
     AssignmentExpression
-    ElseIfClause
-    SelectKeyword
-    CaseKeyword
-    IsKeyword
-    CaseMatchExpressionSyntax
-    CaseElseClauseSyntax
-    CaseClauseSyntax
-    SelectCaseStatement
+    CallExpression
+    DoWhileStatement
+
     'FunctionKeyword
     'VarKeyword
     'Parameter

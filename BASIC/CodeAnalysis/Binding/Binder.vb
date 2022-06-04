@@ -33,16 +33,24 @@ Namespace Basic.CodeAnalysis.Binding
         stack.Push(previous)
         previous = previous.Previous
       End While
-      Dim parent As BoundScope = Nothing
+      Dim parent = CreateRootScope() 'As BoundScope = Nothing
       While stack.Count > 0
         previous = stack.Pop
         Dim scope = New BoundScope(parent)
         For Each v In previous.Variables
-          scope.TryDeclare(v)
+          scope.TryDeclareVariable(v)
         Next
         parent = scope
       End While
       Return parent
+    End Function
+
+    Private Shared Function CreateRootScope() As BoundScope
+      Dim result = New BoundScope(Nothing)
+      For Each f In BuiltinFunctions.GetAll
+        result.TryDeclareFunction(f)
+      Next
+      Return result
     End Function
 
     Public ReadOnly Property Diagnostics As DiagnosticBag
@@ -57,6 +65,7 @@ Namespace Basic.CodeAnalysis.Binding
         Case SyntaxKind.VariableDeclaration : Return BindVariableDeclaration(CType(syntax, VariableDeclarationSyntax))
         Case SyntaxKind.IfStatement : Return BindIfStatement(CType(syntax, IfStatementSyntax))
         Case SyntaxKind.WhileStatement : Return BindWhileStatement(CType(syntax, WhileStatementSyntax))
+        Case SyntaxKind.DoWhileStatement : Return BindDoWhileStatement(CType(syntax, DoWhileStatementSyntax))
         Case SyntaxKind.ForStatement : Return BindForStatement(CType(syntax, ForStatementSyntax))
         Case SyntaxKind.SelectCaseStatement : Return BindSelectCaseStatement(CType(syntax, SelectCaseStatementSyntax))
         Case SyntaxKind.ExpressionStatement : Return BindExpressionStatement(CType(syntax, ExpressionStatementSyntax))
@@ -135,6 +144,12 @@ Namespace Basic.CodeAnalysis.Binding
       Return New BoundWhileStatement(condition, statement)
     End Function
 
+    Private Function BindDoWhileStatement(syntax As DoWhileStatementSyntax) As BoundStatement
+      Dim body = BindStatement(syntax.Body)
+      Dim condition = BindExpression(syntax.Condition, TypeSymbol.Boolean)
+      Return New BoundDoWhileStatement(body, condition)
+    End Function
+
     Private Function BindForStatement(syntax As ForStatementSyntax) As BoundStatement
 
       Dim lowerBound = BindExpression(syntax.LowerBound, TypeSymbol.Integer)
@@ -197,7 +212,7 @@ Namespace Basic.CodeAnalysis.Binding
     End Function
 
     Private Function BindExpressionStatement(syntax As ExpressionStatementSyntax) As BoundStatement
-      Dim expression = BindExpression(syntax.Expression)
+      Dim expression = BindExpression(syntax.Expression, canBeVoid:=True)
       Return New BoundExpressionStatement(expression)
     End Function
 
@@ -211,7 +226,16 @@ Namespace Basic.CodeAnalysis.Binding
       Return result
     End Function
 
-    Private Function BindExpression(syntax As ExpressionSyntax) As BoundExpression
+    Private Function BindExpression(syntax As ExpressionSyntax, Optional canBeVoid As Boolean = False) As BoundExpression
+      Dim result = BindExpressionInternal(syntax)
+      If Not canBeVoid AndAlso result.Type Is TypeSymbol.Nothing Then
+        m_diagnostics.ReportExpressionMustHaveValue(syntax.Span)
+        Return New BoundErrorExpression
+      End If
+      Return result
+    End Function
+
+    Private Function BindExpressionInternal(syntax As ExpressionSyntax) As BoundExpression
       Select Case syntax.Kind
         Case SyntaxKind.ParenthesizedExpression : Return BindParenthesizedExpression(CType(syntax, ParenthesizedExpressionSyntax))
         Case SyntaxKind.LiteralExpression : Return BindLiteralExpression(CType(syntax, LiteralExpressionSyntax))
@@ -219,6 +243,7 @@ Namespace Basic.CodeAnalysis.Binding
         Case SyntaxKind.AssignmentExpression : Return BindAssignmentExpression(CType(syntax, AssignmentExpressionSyntax))
         Case SyntaxKind.UnaryExpression : Return BindUnaryExpression(CType(syntax, UnaryExpressionSyntax))
         Case SyntaxKind.BinaryExpression : Return BindBinaryExpression(CType(syntax, BinaryExpressionSyntax))
+        Case SyntaxKind.CallExpression : Return BindCallExpression(CType(syntax, CallExpressionSyntax))
         Case Else
           Throw New Exception($"Unexpected syntax {syntax.Kind}")
       End Select
@@ -241,7 +266,7 @@ Namespace Basic.CodeAnalysis.Binding
         Return New BoundErrorExpression ' BoundLiteralExpression(0)
       End If
       Dim variable As VariableSymbol = Nothing
-      m_scope.TryLookup(name, variable)
+      m_scope.TryLookupVariable(name, variable)
       If variable Is Nothing Then
         m_diagnostics.ReportUndefinedName(syntax.IdentifierToken.Span, name)
         Return New BoundErrorExpression ' BoundLiteralExpression(0)
@@ -255,7 +280,7 @@ Namespace Basic.CodeAnalysis.Binding
       Dim boundExpression = BindExpression(syntax.Expression)
 
       Dim variable As VariableSymbol = Nothing
-      If Not m_scope.TryLookup(name, variable) Then
+      If Not m_scope.TryLookupVariable(name, variable) Then
         m_diagnostics.ReportUndefinedName(syntax.IdentifierToken.Span, name)
         Return boundExpression
       End If
@@ -297,14 +322,72 @@ Namespace Basic.CodeAnalysis.Binding
       Return New BoundBinaryExpression(boundLeft, boundOperator, boundRight)
     End Function
 
+    Private Function BindCallExpression(syntax As CallExpressionSyntax) As BoundExpression
+
+      If syntax.Arguments.Count = 1 AndAlso TypeOf LookupType(syntax.Identifier.Text) Is TypeSymbol Then
+        Dim type = CType(LookupType(syntax.Identifier.Text), TypeSymbol)
+        Return BindConversion(type, syntax.Arguments(0))
+      End If
+
+      Dim boundArguments = ImmutableArray.CreateBuilder(Of BoundExpression)()
+
+      For Each argument In syntax.Arguments
+        Dim boundArgument = BindExpression(argument)
+        boundArguments.Add(boundArgument)
+      Next
+
+      Dim f As FunctionSymbol = Nothing
+      If Not m_scope.TryLookupFunction(syntax.Identifier.Text, f) Then
+        m_diagnostics.ReportUndefinedFunction(syntax.Identifier.Span, syntax.Identifier.Text)
+        Return New BoundErrorExpression
+      End If
+
+      If syntax.Arguments.Count <> f.Parameters.Length Then
+        m_diagnostics.ReportWrongArgumentCount(syntax.Span, f.Name, f.Parameters.Length, syntax.Arguments.Count)
+        Return New BoundErrorExpression
+      End If
+
+      For i = 0 To syntax.Arguments.Count - 1
+        Dim argument = boundArguments(i)
+        Dim parameter = f.Parameters(i)
+        If argument.Type IsNot parameter.Type Then
+          m_diagnostics.ReportWrongArgumentType(syntax.Span, parameter.Name, parameter.Type, argument.Type)
+          Return New BoundErrorExpression
+        End If
+      Next
+
+      Return New BoundCallExpression(f, boundArguments.ToImmutable())
+
+    End Function
+
+    Private Function BindConversion(type As TypeSymbol, syntax As ExpressionSyntax) As BoundExpression
+      Dim expression = BindExpression(syntax)
+      Dim conversion = Binding.Conversion.Classify(expression.Type, type)
+      If Not conversion.Exists Then
+        m_diagnostics.ReportCannotConvert(syntax.Span, expression.Type, type)
+        Return New BoundErrorExpression
+      End If
+      Return New BoundConversionExpression(type, expression)
+    End Function
+
     Private Function BindVariable(identifier As SyntaxToken, isReadOnly As Boolean, type As TypeSymbol) As VariableSymbol
       Dim name = If(identifier.Text, "?")
       Dim decl = Not identifier.IsMissing
       Dim variable = New VariableSymbol(name, isReadOnly, type)
-      If decl AndAlso Not m_scope.TryDeclare(variable) Then
-        m_diagnostics.ReportVariableAlreadyDeclared(identifier.Span, name)
+      If decl AndAlso Not m_scope.TryDeclareVariable(variable) Then
+        m_diagnostics.ReportSymbolAlreadyDeclared(identifier.Span, name)
       End If
       Return variable
+    End Function
+
+    Private Shared Function LookupType(name As String) As TypeSymbol
+      Select Case name
+        Case "boolean" : Return TypeSymbol.Boolean
+        Case "integer" : Return TypeSymbol.Integer
+        Case "string" : Return TypeSymbol.String
+        Case Else
+          Return Nothing
+      End Select
     End Function
 
     'Private Shared Function BindUnaryOperatorKind(kind As SyntaxKind, operandType As Type) As BoundUnaryOperatorKind?

@@ -23,6 +23,11 @@ Namespace Basic.CodeAnalysis.Syntax
         If GetType(SyntaxNode).IsAssignableFrom(prop.PropertyType) Then
           Dim child = TryCast(prop.GetValue(Me), SyntaxNode)
           If child IsNot Nothing Then Yield child
+        ElseIf GetType(SeparatedSyntaxList).IsAssignableFrom(prop.PropertyType) Then
+          Dim separatedSyntaxList = TryCast(prop.GetValue(Me), SeparatedSyntaxList)
+          For Each child In separatedSyntaxList.GetWithSeparators
+            Yield child
+          Next
         ElseIf GetType(IEnumerable(Of SyntaxNode)).IsAssignableFrom(prop.PropertyType) Then
           Dim values = TryCast(prop.GetValue(Me), IEnumerable(Of SyntaxNode))
           For Each child In values

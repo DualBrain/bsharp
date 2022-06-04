@@ -3,6 +3,7 @@
   Friend Enum BoundNodeKind
 
     ' Statements
+    NopStatement
     BlockStatement
     VariableDeclaration
     ExpressionStatement
@@ -10,6 +11,7 @@
     ElseIfStatement
     WhileStatement
     ForStatement
+    DoWhileStatement
 
     SelectCaseStatement
     BoundMatchStatement
@@ -26,7 +28,9 @@
     AssignmentExpression
     UnaryExpression
     BinaryExpression
-    NopStatement
+    CallExpression
+    ConversionExpression
+
   End Enum
 
 End Namespace

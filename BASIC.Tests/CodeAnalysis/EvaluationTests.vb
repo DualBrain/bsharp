@@ -58,43 +58,43 @@ Namespace Global.BASIC.Tests.CodeAnalysis
     <InlineData("dim a = 10", 10)>
     <InlineData("{ dim a = 10
 (a * a) }", 100)>
-    <InlineData("{ dim a = 0
-let a = 10
-a * a }", 100)>
+    <InlineData("{ dim b = 0
+let b = 10
+b * b }", 100)>
     <InlineData("
 { 
-  dim a = 0
-  if a = 0 then
-    let a = 10
+  dim c = 0
+  if c = 0 then
+    let c = 10
   end if
-  a
+  c
 }", 10)>
     <InlineData("
 { 
-  dim a = 0
-  if a = 4 then
-    let a = 10
+  dim d = 0
+  if d = 4 then
+    let d = 10
   end if
-  a
+  d
 }", 0)>
     <InlineData("
 { 
-  dim a = 0
-  if a = 4 then
-    let a = 10
+  dim e = 0
+  if e = 4 then
+    let e = 10
   else
-    let a = 20
+    let e = 20
   end if
-  a
+  e
 }", 20)>
     <InlineData("
 { 
-  dim i = 10
+  dim f = 10
   dim result = 0
-  while i > 0
+  while f > 0
   {
-    let result = result + i
-    let i = i - 1
+    let result = result + f
+    let f = f - 1
   }
   wend
   result
@@ -102,8 +102,8 @@ a * a }", 100)>
     <InlineData("
 { 
   dim result = 0
-  for i = 1 to 10
-    let result = result + i
+  for g = 1 to 10
+    let result = result + g
   next
   result
 }", 55)>
@@ -147,25 +147,32 @@ a * a }", 100)>
 { 
   dim result = 0
   if true then 
-    dim a = 0
-    let a = a + 10
-    let result = a
+    dim h = 0
+    let h = h + 10
+    let result = h
   else
-    dim b = 0
-    let b = b + 10
-    let result = b
+    dim i = 0
+    let i = i + 10
+    let result = i
   end if
   let result = result + 10
 }", 20)>
     <InlineData("
 { 
-  dim a = 10
-  for i = 1 to a - 1
-    let a = a + i
+  dim j = 10
+  for i = 1 to j - 1
+    let j = j + i
   next 
-  a
+  j
 }", 55)>
-    Public Sub Evaluator_Computes_CorrectValues(text As String, expectedValue As Object)
+    <InlineData("
+{ 
+  dim a = 0
+  do
+    let a = a + 1
+  while a < 10
+  a
+}", 10)> Public Sub Evaluator_Computes_CorrectValues(text As String, expectedValue As Object)
       AssertValue(text, expectedValue)
     End Sub
     '    <InlineData("
@@ -187,6 +194,22 @@ a * a }", 100)>
     '  let result = result + 10
     '}", 110)>
 
+    <Fact>
+    Public Sub Evaluator_DoWhileStatement_Reports_CannotConvert()
+      Dim text As String = "
+        {
+            dim x = 0
+            do
+              let x = 10
+            while [10]
+        }"
+
+      Dim diagnostics As String = "
+          Cannot convert type 'integer' to 'boolean'."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
 
     <Fact>
     Public Sub Evaluator_If_MissingEndIf()
@@ -280,7 +303,23 @@ a * a }", 100)>
         }"
 
       Dim diagnostics = "
-        Variable 'x' is already declared."
+        'x' is already declared."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Varibles_Can_Shadow_Functions()
+
+      Dim text = "
+        {
+          dim print = 42
+          [print](""test"")
+        }"
+
+      Dim diagnostics = "
+        Function 'print' doesn't exist."
 
       AssertDiagnostics(text, diagnostics)
 
