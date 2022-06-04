@@ -8,6 +8,11 @@ Friend Module Program
 
   Friend Sub Main()
 
+    Dim repl = New Basic.BasicRepl
+    repl.Run()
+
+    End
+
     Dim parseTreeVisible = False
     Dim boundTreeVisible = False
     Dim variables = New Dictionary(Of VariableSymbol, Object)

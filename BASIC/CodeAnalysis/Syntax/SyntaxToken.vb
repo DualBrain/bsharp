@@ -21,6 +21,11 @@ Namespace Basic.CodeAnalysis.Syntax
         Return New TextSpan(Position, If(Text?.Length, 0))
       End Get
     End Property
+    Public ReadOnly Property IsMissing As Boolean
+      Get
+        Return Text Is Nothing
+      End Get
+    End Property
 
   End Class
 

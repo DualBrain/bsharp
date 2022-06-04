@@ -45,7 +45,7 @@ Namespace Basic.CodeAnalysis
       Return New EvaluationResult(ImmutableArray(Of Diagnostic).Empty, value)
     End Function
 
-    Public Sub EmitTree(writer As IO.TextWriter)
+    Public Sub EmitTree(writer As System.IO.TextWriter)
       Dim statement = GetStatement()
       statement.WriteTo(writer)
     End Sub

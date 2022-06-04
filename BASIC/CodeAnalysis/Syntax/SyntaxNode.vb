@@ -33,11 +33,11 @@ Namespace Basic.CodeAnalysis.Syntax
 
     End Function
 
-    Public Sub WriteTo(writer As IO.TextWriter)
+    Public Sub WriteTo(writer As System.IO.TextWriter)
       PrettyPrint(writer, Me)
     End Sub
 
-    Private Shared Sub PrettyPrint(writer As IO.TextWriter, node As SyntaxNode, Optional indent As String = "", Optional isLast As Boolean = True)
+    Private Shared Sub PrettyPrint(writer As System.IO.TextWriter, node As SyntaxNode, Optional indent As String = "", Optional isLast As Boolean = True)
 
       Dim isToConsole = (writer Is Console.Out)
       If node Is Nothing Then Return
@@ -66,7 +66,7 @@ Namespace Basic.CodeAnalysis.Syntax
     End Sub
 
     Public Overrides Function ToString() As String
-      Using writer = New IO.StringWriter
+      Using writer = New System.IO.StringWriter
         WriteTo(writer)
         Return writer.ToString
       End Using
