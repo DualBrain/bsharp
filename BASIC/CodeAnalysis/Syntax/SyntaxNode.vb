@@ -33,6 +33,12 @@ Namespace Basic.CodeAnalysis.Syntax
 
     End Function
 
+    Public Function GetLastToken() As SyntaxToken
+      If TypeOf Me Is SyntaxToken Then Return CType(Me, SyntaxToken)
+      ' A syntax node should always contain at least 1 token.
+      Return GetChildren.Last.GetLastToken 'GetLastToken(node.GetChildren.Last)
+    End Function
+
     Public Sub WriteTo(writer As System.IO.TextWriter)
       PrettyPrint(writer, Me)
     End Sub

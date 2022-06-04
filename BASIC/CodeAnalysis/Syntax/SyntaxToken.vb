@@ -16,11 +16,13 @@ Namespace Basic.CodeAnalysis.Syntax
     Public ReadOnly Property Position As Integer
     Public ReadOnly Property Text As String
     Public ReadOnly Property Value As Object
+
     Public Overrides ReadOnly Property Span As TextSpan
       Get
         Return New TextSpan(Position, If(Text?.Length, 0))
       End Get
     End Property
+
     Public ReadOnly Property IsMissing As Boolean
       Get
         Return Text Is nothing

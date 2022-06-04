@@ -47,15 +47,9 @@ Namespace Basic
     Protected Overrides Function IsCompleteSubmission(text As String) As Boolean
       If String.IsNullOrEmpty(text) Then Return True
       Dim tree = SyntaxTree.Parse(text)
-      'If tree.Diagnostics.Any() Then Return False
-      If GetLastToken(tree.Root.Statement).IsMissing Then Return False
+      ' Use Statement because we need to exclude the EndOfFileToken.
+      If tree.Root.Statement.GetLastToken.IsMissing Then Return False
       Return True
-    End Function
-
-    Private Function GetLastToken(node As SyntaxNode) As SyntaxToken
-      If TypeOf node Is SyntaxToken Then Return CType(node, SyntaxToken)
-      ' A syntax node should always contain at least 1 token.
-      Return GetLastToken(node.GetChildren.Last)
     End Function
 
     Protected Overrides Sub EvaluateSubmission(text As String)
