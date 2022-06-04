@@ -18,9 +18,14 @@ Namespace Basic
       For Each token In tokens
         Dim isKeyword = token.Kind.ToString().EndsWith("Keyword")
         Dim isNumber = token.Kind = SyntaxKind.NumberToken
+        Dim isIdentifier = token.Kind = SyntaxKind.IdentifierToken
         If isKeyword Then
           Console.ForegroundColor = ConsoleColor.Blue
-        ElseIf Not isNumber Then
+        ElseIf isidentifier Then
+          Console.ForegroundColor = ConsoleColor.DarkYellow
+        ElseIf isNumber Then
+          Console.ForegroundColor = ConsoleColor.Cyan
+        Else
           Console.ForegroundColor = ConsoleColor.DarkGray
         End If
         Console.Write(token.Text)
