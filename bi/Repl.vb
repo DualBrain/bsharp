@@ -198,6 +198,8 @@ Namespace Basic
     End Sub
 
     Private Shared Sub HandleLeftArrow(document As ObservableCollection(Of String), view As SubmissionView)
+      If document IsNot Nothing Then
+      End If
       If view.CurrentCharacter > 0 Then view.CurrentCharacter -= 1
     End Sub
 
@@ -207,6 +209,8 @@ Namespace Basic
     End Sub
 
     Private Shared Sub HandleUpArrow(document As ObservableCollection(Of String), view As SubmissionView)
+      If document IsNot Nothing Then
+      End If
       If view.CurrentLine > 0 Then view.CurrentLine -= 1
     End Sub
 
@@ -251,6 +255,8 @@ Namespace Basic
     End Sub
 
     Private Shared Sub HandleHome(document As ObservableCollection(Of String), view As SubmissionView)
+      If document IsNot Nothing Then
+      End If
       view.CurrentCharacter = 0
     End Sub
 

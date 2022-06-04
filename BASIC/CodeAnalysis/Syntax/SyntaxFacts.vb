@@ -22,14 +22,13 @@
 '  & and &=?
 '  for ++ and --?
 
+Imports System.Runtime.CompilerServices
+
 Namespace Basic.CodeAnalysis.Syntax
 
-  Public NotInheritable Class SyntaxFacts
+  Public Module SyntaxFacts
 
-    Private Sub New()
-    End Sub
-
-    Public Shared Function GetUnaryOperatorPrecedence(kind As SyntaxKind) As Integer
+    Public Function GetUnaryOperatorPrecedence(kind As SyntaxKind) As Integer
       Select Case kind
         Case SyntaxKind.PlusToken, SyntaxKind.MinusToken : Return 12
         Case SyntaxKind.NotKeyword : Return 6
@@ -38,7 +37,7 @@ Namespace Basic.CodeAnalysis.Syntax
       End Select
     End Function
 
-    Public Shared Function GetBinaryOperatorPrecedence(kind As SyntaxKind) As Integer
+    Public Function GetBinaryOperatorPrecedence(kind As SyntaxKind) As Integer
       Select Case kind
         Case SyntaxKind.HatToken : Return 13
         Case SyntaxKind.StarToken, SyntaxKind.SlashToken : Return 11
@@ -56,7 +55,7 @@ Namespace Basic.CodeAnalysis.Syntax
       End Select
     End Function
 
-    Public Shared Iterator Function GetUnaryOperatorKinds() As IEnumerable(Of SyntaxKind)
+    Public Iterator Function GetUnaryOperatorKinds() As IEnumerable(Of SyntaxKind)
       Dim kinds = DirectCast([Enum].GetValues(GetType(SyntaxKind)), SyntaxKind())
       For Each kind In kinds
         If GetUnaryOperatorPrecedence(kind) > 0 Then
@@ -65,7 +64,7 @@ Namespace Basic.CodeAnalysis.Syntax
       Next
     End Function
 
-    Public Shared Iterator Function GetBinaryOperatorKinds() As IEnumerable(Of SyntaxKind)
+    Public Iterator Function GetBinaryOperatorKinds() As IEnumerable(Of SyntaxKind)
       Dim kinds = DirectCast([Enum].GetValues(GetType(SyntaxKind)), SyntaxKind())
       For Each kind In kinds
         If GetBinaryOperatorPrecedence(kind) > 0 Then
@@ -74,7 +73,7 @@ Namespace Basic.CodeAnalysis.Syntax
       Next
     End Function
 
-    Public Shared Function GetKeywordKind(text As String) As SyntaxKind
+    Public Function GetKeywordKind(text As String) As SyntaxKind
 
       Select Case text
 
@@ -118,7 +117,7 @@ Namespace Basic.CodeAnalysis.Syntax
 
     End Function
 
-    Public Shared Function GetText(kind As SyntaxKind) As String
+    Public Function GetText(kind As SyntaxKind) As String
 
       Select Case kind
 
@@ -186,6 +185,11 @@ Namespace Basic.CodeAnalysis.Syntax
 
     End Function
 
-  End Class
+    <Extension>
+    Public Function Is_Keyword(kind As SyntaxKind) As Boolean
+      Return kind.ToString.EndsWith("Keyword")
+    End Function
+
+  End Module
 
 End Namespace

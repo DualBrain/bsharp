@@ -47,12 +47,12 @@ Namespace Basic.IO
       End If
     End Sub
 
-    '<Extension>
-    'Public Sub WriteKeyword(writer As TextWriter, kind As SyntaxKind)
-    '  Dim text = SyntaxFacts.GetText(kind)
-    '  Debug.Assert(kind.IsKeyword AndAlso text IsNot Nothing)
-    '  writer.WriteKeyword(text)
-    'End Sub
+    <Extension>
+    Public Sub WriteKeyword(writer As TextWriter, kind As SyntaxKind)
+      Dim text = SyntaxFacts.GetText(kind)
+      Debug.Assert(kind.Is_Keyword AndAlso text IsNot Nothing)
+      writer.WriteKeyword(text)
+    End Sub
 
     <Extension>
     Public Sub WriteKeyword(writer As TextWriter, text As String)

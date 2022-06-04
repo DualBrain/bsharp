@@ -89,6 +89,11 @@
     CaseElseClauseSyntax
     CaseClauseSyntax
     SelectCaseStatement
+    FunctionKeyword
+    VarKeyword
+    Parameter
+    FunctionDeclaration
+    TypeClause
   End Enum
 
 End Namespace

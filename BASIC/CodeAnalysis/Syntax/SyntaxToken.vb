@@ -23,7 +23,7 @@ Namespace Basic.CodeAnalysis.Syntax
     End Property
     Public ReadOnly Property IsMissing As Boolean
       Get
-        Return Text Is Nothing
+        Return Text Is nothing
       End Get
     End Property
 
