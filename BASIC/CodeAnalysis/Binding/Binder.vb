@@ -78,15 +78,8 @@ Namespace Basic.CodeAnalysis.Binding
 
     Private Function BindVariableDeclaration(syntax As VariableDeclarationSyntax) As BoundStatement
 
-      'Dim name = If(syntax.Identifier.Text, "?")
-      'Dim decl = Not syntax.Identifier.IsMissing
       Dim isReadOnly = (syntax.KeywordToken.Kind = SyntaxKind.ConstKeyword)
       Dim initializer = BindExpression(syntax.Initializer)
-      'Dim variable = New VariableSymbol(name, isReadOnly, initializer.Type)
-
-      'If Not m_scope.TryDeclare(variable) Then
-      '  m_diagnostics.ReportVariableAlreadyDeclared(syntax.Identifier.Span, name)
-      'End If
 
       Dim variable = BindVariable(syntax.Identifier, isReadOnly, initializer.Type)
 
@@ -210,7 +203,11 @@ Namespace Basic.CodeAnalysis.Binding
 
     Private Function BindExpression(syntax As ExpressionSyntax, targetType As TypeSymbol) As BoundExpression
       Dim result = BindExpression(syntax)
-      If result.Type IsNot targetType Then m_diagnostics.ReportCannotConvert(syntax.Span, result.Type, targetType)
+      If targetType IsNot TypeSymbol.Error AndAlso
+         result.Type IsNot TypeSymbol.Error AndAlso
+         result.Type IsNot targetType Then
+        m_diagnostics.ReportCannotConvert(syntax.Span, result.Type, targetType)
+      End If
       Return result
     End Function
 
