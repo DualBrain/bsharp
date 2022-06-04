@@ -18,13 +18,16 @@ Namespace Basic
       For Each token In tokens
         Dim isKeyword = token.Kind.ToString().EndsWith("Keyword")
         Dim isNumber = token.Kind = SyntaxKind.NumberToken
+        Dim isString = token.Kind = SyntaxKind.StringToken
         Dim isIdentifier = token.Kind = SyntaxKind.IdentifierToken
         If isKeyword Then
           Console.ForegroundColor = ConsoleColor.Blue
-        ElseIf isidentifier Then
-          Console.ForegroundColor = ConsoleColor.DarkYellow
-        ElseIf isNumber Then
+        ElseIf isIdentifier Then
           Console.ForegroundColor = ConsoleColor.Cyan
+        ElseIf isNumber Then
+          Console.ForegroundColor = ConsoleColor.White
+        ElseIf isString Then
+          Console.ForegroundColor = ConsoleColor.Yellow
         Else
           Console.ForegroundColor = ConsoleColor.DarkGray
         End If
@@ -76,7 +79,7 @@ Namespace Basic
       Dim result = compilation.Evaluate(m_variables)
 
       If Not result.Diagnostics.Any() Then
-        Console.ForegroundColor = ConsoleColor.Magenta
+        Console.ForegroundColor = ConsoleColor.White
         Console.WriteLine(result.Value)
         Console.ResetColor()
         m_previous = compilation
