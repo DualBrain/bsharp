@@ -7,31 +7,41 @@ Namespace Basic.CodeAnalysis
   ' This Evaluator utilizes the "Bound Tree" (very similar to the AST).
   Friend NotInheritable Class Evaluator
 
-    Private ReadOnly m_root As BoundBlockStatement
-    Private ReadOnly m_variables As Dictionary(Of VariableSymbol, Object)
+    'Private ReadOnly m_root As BoundBlockStatement
+    'Private ReadOnly m_variables As Dictionary(Of VariableSymbol, Object)
+    Private ReadOnly m_program As BoundProgram
+    Private ReadOnly m_globals As Dictionary(Of VariableSymbol, Object)
+    Private ReadOnly m_locals As New Stack(Of Dictionary(Of VariableSymbol, Object))
     Private m_random As Random
 
     Private m_lastValue As Object
 
-    Sub New(root As BoundBlockStatement, variables As Dictionary(Of VariableSymbol, Object))
-      m_root = root
-      m_variables = variables
+    Sub New(program As BoundProgram, variables As Dictionary(Of VariableSymbol, Object))
+      'm_root = root
+      'm_variables = variables
+      m_program = program
+      m_globals = variables
+      m_locals.Push(New Dictionary(Of VariableSymbol, Object))
     End Sub
 
     Public Function Evaluate() As Object
+      Return EvaluateStatement(m_program.Statement)
+    End Function
+
+    Private Function EvaluateStatement(body As BoundBlockStatement) As Object
 
       Dim labelToIndex = New Dictionary(Of BoundLabel, Integer)
 
-      For i = 0 To m_root.Statements.Length - 1
-        If TypeOf m_root.Statements(i) Is BoundLabelStatement Then
-          Dim l = CType(m_root.Statements(i), BoundLabelStatement)
+      For i = 0 To body.Statements.Length - 1
+        If TypeOf body.Statements(i) Is BoundLabelStatement Then
+          Dim l = CType(body.Statements(i), BoundLabelStatement)
           labelToIndex.Add(l.Label, i + 1)
         End If
       Next
 
       Dim index = 0
-      While index < m_root.Statements.Length
-        Dim s = m_root.Statements(index)
+      While index < body.Statements.Length
+        Dim s = body.Statements(index)
         Select Case s.Kind
           Case BoundNodeKind.VariableDeclaration
             EvaluateVariableDeclaration(CType(s, BoundVariableDeclaration)) : index += 1
@@ -75,8 +85,9 @@ Namespace Basic.CodeAnalysis
 
     Private Sub EvaluateVariableDeclaration(node As BoundVariableDeclaration)
       Dim value = EvaluateExpression(node.Initializer)
-      m_variables(node.Variable) = value
+      'm_variables(node.Variable) = value
       m_lastValue = value
+      Assign(node.Variable, value)
     End Sub
 
     'Private Sub EvaluateBlockStatement(node As BoundBlockStatement)
@@ -182,12 +193,19 @@ Namespace Basic.CodeAnalysis
     End Function
 
     Private Function EvaluateVariableExpression(node As BoundVariableExpression) As Object
-      Return m_variables(node.Variable)
+      'Return m_variables(node.Variable)
+      If node.Variable.Kind = SymbolKind.GlobalVariable Then
+        Return m_globals(node.Variable)
+      Else
+        Dim locals = m_locals.Peek
+        Return locals(node.Variable)
+      End If
     End Function
 
     Private Function EvaluateAssignmentExpression(node As BoundAssignmentExpression) As Object
       Dim value = EvaluateExpression(node.Expression)
-      m_variables(node.Variable) = value
+      'm_variables(node.Variable) = value
+      Assign(node.Variable, value)
       Return value
     End Function
 
@@ -284,7 +302,18 @@ Namespace Basic.CodeAnalysis
         If m_random Is Nothing Then m_random = New Random
         Return m_random.[Next](max)
       Else
-        Throw New Exception($"Unexpected function {node.[Function]}")
+        'Throw New Exception($"Unexpected function {node.[Function]}")
+        Dim locals = New Dictionary(Of VariableSymbol, Object)
+        For i = 0 To node.Arguments.Length - 1
+          Dim parameter = node.Function.Parameters(i)
+          Dim value = EvaluateExpression(node.Arguments(i))
+          locals.Add(parameter, value)
+        Next
+        m_locals.Push(locals)
+        Dim statement = m_program.Functions(node.Function)
+        Dim result = EvaluateStatement(statement)
+        m_locals.Pop()
+        Return result
       End If
     End Function
 
@@ -300,6 +329,15 @@ Namespace Basic.CodeAnalysis
         Throw New Exception($"Unexpected type {node.Type}")
       End If
     End Function
+
+    Private Sub Assign(variable As VariableSymbol, value As Object)
+      If variable.Kind = SymbolKind.GlobalVariable Then
+        m_globals(variable) = value
+      Else
+        Dim locals = m_locals.Peek
+        locals(variable) = value
+      End If
+    End Sub
 
   End Class
 

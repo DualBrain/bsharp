@@ -76,6 +76,10 @@ Namespace Basic.CodeAnalysis
       Report(span, message)
     End Sub
 
+    Friend Sub XXX_ReportFunctionsAreUnsupported(span As Object)
+      Throw New NotImplementedException()
+    End Sub
+
     Public Sub ReportMissingIf(span As TextSpan)
       Dim message = $"Missing If."
       Report(span, message)
@@ -103,6 +107,26 @@ Namespace Basic.CodeAnalysis
 
     Public Sub ReportExpressionMustHaveValue(span As TextSpan)
       Dim message = "Expression must have a value."
+      Report(span, message)
+    End Sub
+
+    Public Sub ReportParameterAlreadyDeclared(span As TextSpan, parameterName As String)
+      Dim message = $"A parameter with the name '{parameterName}' already exists."
+      Report(span, message)
+    End Sub
+
+    Public Sub ReportUndefinedType(span As TextSpan, name As String)
+      Dim message = $"Type '{name}' doesn't exist."
+      Report(span, message)
+    End Sub
+
+    Public Sub ReportCannotConvertImplicitly(span As TextSpan, fromType As TypeSymbol, toType As TypeSymbol)
+      Dim message = $"Cannot convert type '{fromType}' to '{toType}'. An explicit conversion exists (are you missing a cast?)"
+      Report(span, message)
+    End Sub
+
+    Public Sub XXX_ReportFunctionsAreUnsupported(span As TextSpan)
+      Dim message = "Functions with return values are unsupported."
       Report(span, message)
     End Sub
 

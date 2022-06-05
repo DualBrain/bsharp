@@ -39,29 +39,28 @@ Namespace Basic.CodeAnalysis.Binding
       End Select
     End Function
 
-    Protected Overridable Function RewriteStatements(statements As ImmutableArray(Of BoundStatement)) As ImmutableArray(Of BoundStatement)
-      Dim builder As ImmutableArray(Of BoundStatement).Builder = Nothing
-      For i = 0 To statements.Length - 1
-        Dim oldStatement = statements(i)
-        Dim newStatement = RewriteStatement(oldStatement)
-        If newStatement IsNot oldStatement Then
-          If builder Is Nothing Then
-            builder = ImmutableArray.CreateBuilder(Of BoundStatement)(statements.Length)
-            For j = 0 To i - 1
-              builder.Add(statements(j))
-            Next
-          End If
-        End If
-        If builder IsNot Nothing Then
-          builder.Add(newStatement)
-        End If
-      Next
-      If builder Is Nothing Then
-        Return statements
-      End If
-      Return builder.MoveToImmutable
-    End Function
-
+    'Protected Overridable Function RewriteStatements(statements As ImmutableArray(Of BoundStatement)) As ImmutableArray(Of BoundStatement)
+    '  Dim builder As ImmutableArray(Of BoundStatement).Builder = Nothing
+    '  For i = 0 To statements.Length - 1
+    '    Dim oldStatement = statements(i)
+    '    Dim newStatement = RewriteStatement(oldStatement)
+    '    If newStatement IsNot oldStatement Then
+    '      If builder Is Nothing Then
+    '        builder = ImmutableArray.CreateBuilder(Of BoundStatement)(statements.Length)
+    '        For j = 0 To i - 1
+    '          builder.Add(statements(j))
+    '        Next
+    '      End If
+    '    End If
+    '    If builder IsNot Nothing Then
+    '      builder.Add(newStatement)
+    '    End If
+    '  Next
+    '  If builder Is Nothing Then
+    '    Return statements
+    '  End If
+    '  Return builder.MoveToImmutable
+    'End Function
     Protected Overridable Function RewriteBlockStatement(node As BoundBlockStatement) As BoundStatement
       Dim builder As ImmutableArray(Of BoundStatement).Builder = Nothing
       For i = 0 To node.Statements.Length - 1
@@ -99,14 +98,14 @@ Namespace Basic.CodeAnalysis.Binding
 
     Protected Overridable Function RewriteIfStatement(node As BoundIfStatement) As BoundStatement
       Dim condition = RewriteExpression(node.Condition)
-      Dim thenStatements = RewriteStatements(node.IfStatements)
-      Dim elseStatements = RewriteStatements(node.ElseStatements)
+      Dim thenStatement = RewriteStatement(node.IfStatement)
+      Dim elseStatement = RewriteStatement(node.ElseStatement)
       If condition Is node.Condition AndAlso
-         thenStatements.Equals(node.IfStatements) AndAlso
-         elseStatements.Equals(node.ElseStatements) Then
+         thenStatement.Equals(node.IfStatement) AndAlso
+         elseStatement.Equals(node.ElseStatement) Then
         Return node
       End If
-      Return New BoundIfStatement(condition, thenStatements, Nothing, elseStatements)
+      Return New BoundIfStatement(condition, thenStatement, elseStatement)
     End Function
 
     Protected Overridable Function RewriteWhileStatement(node As BoundWhileStatement) As BoundStatement

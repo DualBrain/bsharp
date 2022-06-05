@@ -68,7 +68,7 @@ Namespace Basic.CodeAnalysis.Lowering
 
     Protected Overrides Function RewriteIfStatement(node As BoundIfStatement) As BoundStatement
 
-      If Not node.ElseStatements.Any Then
+      If node.ElseStatement IsNot Nothing Then
 
         ' if <condition> then
         '   <trueBody>
@@ -85,9 +85,10 @@ Namespace Basic.CodeAnalysis.Lowering
         Dim endLabelStatement = New BoundLabelStatement(endLabel)
         Dim builder = ImmutableArray.CreateBuilder(Of BoundStatement)
         builder.Add(gotoFalse)
-        For Each statement In node.IfStatements
-          builder.Add(statement)
-        Next
+        builder.Add(node.IfStatement)
+        'For Each statement In node.IfStatement
+        '  builder.Add(statement)
+        'Next
         builder.Add(endLabelStatement)
         Dim result = New BoundBlockStatement(builder.ToImmutable) 'ImmutableArray.Create(Of BoundStatement)(gotoFalse, node.ThenStatement, endLabelStatement))
         Return RewriteStatement(result)
@@ -120,14 +121,16 @@ Namespace Basic.CodeAnalysis.Lowering
 
         Dim builder = ImmutableArray.CreateBuilder(Of BoundStatement)
         builder.Add(gotoFalse)
-        For Each statement In node.IfStatements
-          builder.Add(statement)
-        Next
+        builder.Add(node.IfStatement)
+        'For Each statement In node.IfStatement
+        '  builder.Add(statement)
+        'Next
         builder.Add(gotoEndStatement)
         builder.Add(elseLabelStatement)
-        For Each statement In node.ElseStatements
-          builder.Add(statement)
-        Next
+        builder.Add(node.ElseStatement)
+        'For Each statement In node.ElseStatement
+        '  builder.Add(statement)
+        'Next
         builder.Add(endLabelStatement)
         Dim result = New BoundBlockStatement(builder.ToImmutable)
 
@@ -262,7 +265,7 @@ Namespace Basic.CodeAnalysis.Lowering
 
       Dim variableExpression = New BoundVariableExpression(node.Variable)
 
-      Dim upperBoundSymbol = New VariableSymbol("upperBound", True, TypeSymbol.Integer)
+      Dim upperBoundSymbol = New LocalVariableSymbol("upperBound", True, TypeSymbol.Integer)
       Dim upperBoundDeclaration = New BoundVariableDeclaration(upperBoundSymbol, node.UpperBound)
 
       Dim condition = New BoundBinaryExpression(

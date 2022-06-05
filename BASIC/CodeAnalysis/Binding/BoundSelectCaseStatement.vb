@@ -5,30 +5,30 @@ Namespace Basic.CodeAnalysis.Binding
   Friend NotInheritable Class BoundSelectCaseStatement
     Inherits BoundStatement
 
-    Public Sub New(test As BoundExpression, cases As ImmutableArray(Of BoundCaseStatement), elseStatements As ImmutableArray(Of BoundStatement))
+    Public Sub New(test As BoundExpression, cases As ImmutableArray(Of BoundCaseStatement), elseStatement As BoundStatement)
       Me.Test = test
       Me.Cases = cases
-      Me.ElseStatements = elseStatements
+      Me.ElseStatement = elseStatement
     End Sub
 
     Public Overrides ReadOnly Property Kind As BoundNodeKind = BoundNodeKind.SelectCaseStatement
     Public ReadOnly Property Test As BoundExpression
     Public ReadOnly Property Cases As ImmutableArray(Of BoundCaseStatement)
-    Public ReadOnly Property ElseStatements As ImmutableArray(Of BoundStatement)
+    Public ReadOnly Property ElseStatement As BoundStatement
 
   End Class
 
   Friend NotInheritable Class BoundCaseStatement
     Inherits BoundStatement
 
-    Public Sub New(matches As ImmutableArray(Of BoundMatchStatement), statements As ImmutableArray(Of BoundStatement))
+    Public Sub New(matches As ImmutableArray(Of BoundMatchStatement), statement As BoundStatement)
       Me.Matches = matches
-      Me.Statements = statements
+      Me.Statement = statement
     End Sub
 
     Public Overrides ReadOnly Property Kind As BoundNodeKind = BoundNodeKind.BoundCaseStatement
     Public ReadOnly Property Matches As ImmutableArray(Of BoundMatchStatement)
-    Public ReadOnly Property Statements As ImmutableArray(Of BoundStatement)
+    Public ReadOnly Property Statement As BoundStatement
 
   End Class
 

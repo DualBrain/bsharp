@@ -22,26 +22,26 @@ Namespace Basic.CodeAnalysis.Syntax
   Public NotInheritable Class CaseClauseSyntax
     Inherits SyntaxNode
 
-    Public Sub New(matches As ImmutableArray(Of CaseMatchExpressionSyntax), statements As ImmutableArray(Of StatementSyntax))
+    Public Sub New(matches As ImmutableArray(Of CaseMatchExpressionSyntax), statement As StatementSyntax)
       Me.Matches = matches
-      Me.Statements = statements
+      Me.Statement = statement
     End Sub
 
     Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.CaseClauseSyntax
     Public ReadOnly Property Matches As ImmutableArray(Of CaseMatchExpressionSyntax)
-    Public ReadOnly Property Statements As ImmutableArray(Of StatementSyntax)
+    Public ReadOnly Property Statement As StatementSyntax
 
   End Class
 
   Public NotInheritable Class CaseElseClauseSyntax
     Inherits SyntaxNode
 
-    Public Sub New(statements As ImmutableArray(Of StatementSyntax))
-      Me.Statements = statements
+    Public Sub New(statement As StatementSyntax)
+      Me.Statement = statement
     End Sub
 
     Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.CaseElseClauseSyntax
-    Public ReadOnly Property Statements As ImmutableArray(Of StatementSyntax)
+    Public ReadOnly Property Statement As StatementSyntax
 
   End Class
 

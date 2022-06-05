@@ -2,12 +2,11 @@
 
   Public Enum SymbolKind
     [Function]
-    Variable
+    'Variable
+    GlobalVariable
+    LocalVariable
     Parameter
     Type
-    'LocalVariable
-    'GlobalVariable
-    'LocalVariable
   End Enum
 
 End Namespace

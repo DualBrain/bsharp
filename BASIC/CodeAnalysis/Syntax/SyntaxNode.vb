@@ -26,7 +26,7 @@ Namespace Basic.CodeAnalysis.Syntax
         ElseIf GetType(SeparatedSyntaxList).IsAssignableFrom(prop.PropertyType) Then
           Dim separatedSyntaxList = TryCast(prop.GetValue(Me), SeparatedSyntaxList)
           For Each child In separatedSyntaxList.GetWithSeparators
-            Yield child
+            If child IsNot Nothing Then Yield child
           Next
         ElseIf GetType(IEnumerable(Of SyntaxNode)).IsAssignableFrom(prop.PropertyType) Then
           Dim values = TryCast(prop.GetValue(Me), IEnumerable(Of SyntaxNode))

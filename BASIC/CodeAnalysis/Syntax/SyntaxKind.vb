@@ -55,6 +55,7 @@
     EndKeyword
 
     ' Blocks (NOTE: Commands are a combination of 2 or more keywords that make up a command "phrase".)
+    FunctionKeyword
     IfKeyword
     ThenKeyword
     ElseIfKeyword
@@ -68,23 +69,29 @@
     SelectKeyword
     CaseKeyword
     IsKeyword
+    AsKeyword
 
     ' Nodes
     CompilationUnit
+    FunctionDeclaration
+    GlobalStatement
+    Parameter
+    TypeClause
 
     ' Statements
     BlockStatement
     VariableDeclaration
     ExpressionStatement
     IfStatement
-    ElseClause
+    ElseStatement
     WhileStatement
     ForStatement
-    ElseIfClause
+    ElseIfStatement
     CaseMatchExpressionSyntax
     CaseElseClauseSyntax
     CaseClauseSyntax
     SelectCaseStatement
+    DoWhileStatement
 
     ' Expressions
     LiteralExpression
@@ -94,14 +101,9 @@
     ParenthesizedExpression
     AssignmentExpression
     CallExpression
-    DoWhileStatement
-
-    'FunctionKeyword
-    'VarKeyword
-    'Parameter
-    'FunctionDeclaration
-    'TypeClause
-
+    SingleLineElseClause
+    SingleLineIfStatement
+    MultiLineIfBlock
   End Enum
 
 End Namespace

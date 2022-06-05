@@ -88,6 +88,9 @@ Namespace Basic.CodeAnalysis.Syntax
         Case "wend" : Return SyntaxKind.WendKeyword
         Case "do" : Return SyntaxKind.DoKeyword
 
+        Case "function" : Return SyntaxKind.FunctionKeyword
+        Case "as" : Return SyntaxKind.AsKeyword
+
         Case "for" : Return SyntaxKind.ForKeyword
         Case "to" : Return SyntaxKind.ToKeyword
         Case "step" : Return SyntaxKind.StepKeyword
@@ -127,6 +130,9 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.WhileKeyword : Return "while"
         Case SyntaxKind.WendKeyword : Return "wend"
         Case SyntaxKind.DoKeyword : Return "do"
+
+        Case SyntaxKind.FunctionKeyword : Return "function"
+        Case SyntaxKind.AsKeyword : Return "as"
 
         Case SyntaxKind.ForKeyword : Return "for"
         Case SyntaxKind.ToKeyword : Return "to"

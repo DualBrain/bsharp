@@ -1,22 +1,46 @@
 ﻿Imports System.Collections.Immutable
+Imports Basic.CodeAnalysis.Lowering
 Imports Basic.CodeAnalysis.Symbols
 Imports Basic.CodeAnalysis.Syntax
+Imports Basic.CodeAnalysis.Text
 
 Namespace Basic.CodeAnalysis.Binding
 
   Friend NotInheritable Class Binder
 
     Private ReadOnly m_diagnostics As New DiagnosticBag
+    Private ReadOnly m_function As FunctionSymbol
     Private m_scope As BoundScope
 
-    Public Sub New(parent As BoundScope)
+    Public Sub New(parent As BoundScope, [function] As FunctionSymbol)
       m_scope = New BoundScope(parent)
+      m_function = [function]
+      If [function] IsNot Nothing Then
+        For Each p In [function].Parameters
+          m_scope.TryDeclareVariable(p)
+        Next
+      End If
     End Sub
 
     Public Shared Function BindGlobalScope(previous As BoundGlobalScope, syntax As CompilationUnitSyntax) As BoundGlobalScope
-      Dim parentScope = CreateParentScopes(previous)
-      Dim binder = New Binder(parentScope)
-      Dim expression = binder.BindStatement(syntax.Statement)
+
+      Dim parentScope = CreateParentScope(previous)
+      'Dim binder = New Binder(parentScope)
+      'Dim expression = binder.BindStatement(syntax.Statement)
+      Dim binder = New Binder(parentScope, Nothing)
+
+      For Each f In syntax.Members.OfType(Of FunctionDeclarationSyntax)
+        binder.BindFunctionDeclaration(f)
+      Next
+
+      Dim statements = ImmutableArray.CreateBuilder(Of BoundStatement)
+
+      For Each globalStatement In syntax.Members.OfType(Of GlobalStatementSyntax)
+        Dim statement = binder.BindStatement(globalStatement.Statement)
+        statements.Add(statement)
+      Next
+
+      Dim functions = binder.m_scope.GetDeclaredFunctions
       Dim variables = binder.m_scope.GetDeclaredVariables
       Dim diagnostics = binder.Diagnostics.ToImmutableArray
 
@@ -24,10 +48,68 @@ Namespace Basic.CodeAnalysis.Binding
         diagnostics = diagnostics.InsertRange(0, previous.Diagnostics)
       End If
 
-      Return New BoundGlobalScope(previous, diagnostics, variables, expression)
+      'Return New BoundGlobalScope(previous, diagnostics, variables, expression)
+      Return New BoundGlobalScope(previous, diagnostics, functions, variables, statements.ToImmutable)
+
     End Function
 
-    Private Shared Function CreateParentScopes(previous As BoundGlobalScope) As BoundScope
+    Public Shared Function BindProgram(globalScope As BoundGlobalScope) As BoundProgram
+
+      Dim parentScope = CreateParentScope(globalScope)
+
+      Dim functionBodies = ImmutableDictionary.CreateBuilder(Of FunctionSymbol, BoundBlockStatement)()
+      Dim diagnostics = ImmutableArray.CreateBuilder(Of Diagnostic)()
+
+      Dim scope = globalScope
+
+      While scope IsNot Nothing
+        For Each f In scope.Functions
+          Dim binder As New Binder(parentScope, f)
+          Dim body = binder.BindStatement(f.Declaration.Body)
+          Dim loweredBody = Lowerer.Lower(body)
+          functionBodies.Add(f, loweredBody)
+          diagnostics.AddRange(binder.Diagnostics)
+        Next
+        scope = scope.Previous
+      End While
+
+      Dim statement = Lowerer.Lower(New BoundBlockStatement(globalScope.Statements))
+
+      Return New BoundProgram(diagnostics.ToImmutable(), functionBodies.ToImmutable(), statement)
+
+    End Function
+
+    Private Sub BindFunctionDeclaration(syntax As FunctionDeclarationSyntax)
+
+      Dim parameters = ImmutableArray.CreateBuilder(Of ParameterSymbol)()
+
+      Dim seenParameterNames As New HashSet(Of String)
+
+      For Each parameterSyntax In syntax.Parameters
+        Dim parameterName = parameterSyntax.Identifier.Text
+        Dim parameterType = BindTypeClause(parameterSyntax.Type)
+        If Not seenParameterNames.Add(parameterName) Then
+          m_diagnostics.ReportParameterAlreadyDeclared(parameterSyntax.Span, parameterName)
+        Else
+          Dim parameter As New ParameterSymbol(parameterName, parameterType)
+          parameters.Add(parameter)
+        End If
+      Next
+
+      Dim type = If(BindTypeClause(syntax.Type), TypeSymbol.Nothing)
+
+      If type IsNot TypeSymbol.Nothing Then
+        m_diagnostics.XXX_ReportFunctionsAreUnsupported(syntax.Type.Span)
+      End If
+
+      Dim f As New FunctionSymbol(syntax.Identifier.Text, parameters.ToImmutable(), type, syntax)
+      If Not m_scope.TryDeclareFunction(f) Then
+        m_diagnostics.ReportSymbolAlreadyDeclared(syntax.Identifier.Span, f.Name)
+      End If
+
+    End Sub
+
+    Private Shared Function CreateParentScope(previous As BoundGlobalScope) As BoundScope
       Dim stack = New Stack(Of BoundGlobalScope)
       While previous IsNot Nothing
         stack.Push(previous)
@@ -37,6 +119,9 @@ Namespace Basic.CodeAnalysis.Binding
       While stack.Count > 0
         previous = stack.Pop
         Dim scope = New BoundScope(parent)
+        For Each f In previous.Functions
+          scope.TryDeclareFunction(f)
+        Next
         For Each v In previous.Variables
           scope.TryDeclareVariable(v)
         Next
@@ -63,7 +148,8 @@ Namespace Basic.CodeAnalysis.Binding
       Select Case syntax.Kind
         Case SyntaxKind.BlockStatement : Return BindBlockStatement(CType(syntax, BlockStatementSyntax))
         Case SyntaxKind.VariableDeclaration : Return BindVariableDeclaration(CType(syntax, VariableDeclarationSyntax))
-        Case SyntaxKind.IfStatement : Return BindIfStatement(CType(syntax, IfStatementSyntax))
+        Case SyntaxKind.SingleLineIfStatement : Return BindSingleLineIfStatement(CType(syntax, SingleLineIfStatementSyntax))
+        Case SyntaxKind.MultiLineIfBlock : Return BindMultiLineIfBlock(CType(syntax, MultiLineIfBlock))
         Case SyntaxKind.WhileStatement : Return BindWhileStatement(CType(syntax, WhileStatementSyntax))
         Case SyntaxKind.DoWhileStatement : Return BindDoWhileStatement(CType(syntax, DoWhileStatementSyntax))
         Case SyntaxKind.ForStatement : Return BindForStatement(CType(syntax, ForStatementSyntax))
@@ -86,55 +172,92 @@ Namespace Basic.CodeAnalysis.Binding
     End Function
 
     Private Function BindVariableDeclaration(syntax As VariableDeclarationSyntax) As BoundStatement
-
       Dim isReadOnly = (syntax.KeywordToken.Kind = SyntaxKind.ConstKeyword)
+      Dim type = BindTypeClause(syntax.TypeClause)
       Dim initializer = BindExpression(syntax.Initializer)
+      'Dim variable = BindVariable(syntax.Identifier, isReadOnly, initializer.Type)
+      Dim variableType = If(type, initializer.Type)
+      Dim variable = BindVariable(syntax.Identifier, isReadOnly, variableType)
+      Dim convertedInitializer = BindConversion(syntax.Initializer.Span, initializer, variableType)
+      'Return New BoundVariableDeclaration(variable, initializer)
+      Return New BoundVariableDeclaration(variable, convertedInitializer)
+    End Function
 
-      Dim variable = BindVariable(syntax.Identifier, isReadOnly, initializer.Type)
+    Private Function BindTypeClause(syntax As TypeClauseSyntax) As TypeSymbol
+      If syntax Is Nothing Then Return Nothing
+      Dim type = LookupType(syntax.Identifier.Text)
+      If type Is Nothing Then
+        m_diagnostics.ReportUndefinedType(syntax.Identifier.Span, syntax.Identifier.Text)
+      End If
+      Return type
+    End Function
 
-      Return New BoundVariableDeclaration(variable, initializer)
+    Private Function BindSingleLineIfStatement(syntax As SingleLineIfStatementSyntax) As BoundStatement
+
+      Dim condition = BindExpression(syntax.Condition, TypeSymbol.Boolean)
+
+      'If condition.ConstantValue IsNot Nothing Then
+      '  If Not CBool(condition.ConstantValue.Value) Then
+      '    m_diagnostics.ReportUnreachableCode(syntax.ThenStatement)
+      '  ElseIf syntax.ElseClause IsNot Nothing Then
+      '    m_diagnostics.ReportUnreachableCode(syntax.ElseClause.ElseStatement)
+      '  End If
+      'End If
+
+      Dim thenStatement = BindStatement(syntax.ThenStatement)
+      Dim elseStatement = If(syntax.ElseClause IsNot Nothing, BindStatement(syntax.ElseClause.ElseStatement), Nothing)
+      Return New BoundIfStatement(condition, thenStatement, elseStatement)
+
+      'Dim ifCondition = BindExpression(syntax.Condition, TypeSymbol.Boolean)
+      'Dim ifStatements = ImmutableArray.CreateBuilder(Of BoundStatement)
+      'm_scope = New BoundScope(m_scope)
+      'For Each statementSyntax In syntax.ThenStatement
+      '  Dim statement = BindStatement(statementSyntax)
+      '  ifStatements.Add(statement)
+      'Next
+      'm_scope = m_scope.Parent
+
+      'Dim elseIfStatements = ImmutableArray.CreateBuilder(Of BoundElseIfStatement)
+      'If syntax.ElseIfClause.Any Then
+      '  For Each entry In syntax.ElseIfClauses
+      '    Dim elseIfCondition = BindExpression(entry.Condition, TypeSymbol.Boolean)
+      '    Dim statements = ImmutableArray.CreateBuilder(Of BoundStatement)
+      '    m_scope = New BoundScope(m_scope)
+      '    For Each statementSyntax In entry.Statements
+      '      Dim statement = BindStatement(statementSyntax)
+      '      statements.Add(statement)
+      '    Next
+      '    m_scope = m_scope.Parent
+      '    elseIfStatements.Add(New BoundElseIfStatement(elseIfCondition, statements.ToImmutable))
+      '  Next
+      'End If
+
+      'Dim elseStatements = ImmutableArray.CreateBuilder(Of BoundStatement)
+      'If syntax.ElseClause IsNot Nothing Then
+      '  m_scope = New BoundScope(m_scope)
+      '  For Each statementSyntax In syntax.ElseClause.ElseStatement
+      '    Dim statement = BindStatement(statementSyntax)
+      '    elseStatements.Add(statement)
+      '  Next
+      '  m_scope = m_scope.Parent
+      'End If
+
+      'Return New BoundIfStatement(ifCondition, ifStatements.ToImmutable, elseIfStatements.ToImmutable, elseStatements.ToImmutable)
 
     End Function
 
-    Private Function BindIfStatement(syntax As IfStatementSyntax) As BoundStatement
+    Private Function BindMultiLineIfBlock(syntax As MultiLineIfBlock) As BoundStatement
 
-      Dim ifCondition = BindExpression(syntax.Condition, TypeSymbol.Boolean)
-      Dim ifStatements = ImmutableArray.CreateBuilder(Of BoundStatement)
-      If syntax.TrueBlock.Any Then
-        m_scope = New BoundScope(m_scope)
-        For Each statementSyntax In syntax.TrueBlock
-          Dim statement = BindStatement(statementSyntax)
-          ifStatements.Add(statement)
-        Next
-        m_scope = m_scope.Parent
-      End If
+      Dim ifStatement = syntax.IfStatement
+      Dim elseIfStatements = syntax.ElseIfStatements
+      Dim elseStatement = syntax.ElseStatement
 
-      Dim elseIfStatements = ImmutableArray.CreateBuilder(Of BoundElseIfStatement)
-      If syntax.ElseIfClauses.Any Then
-        For Each entry In syntax.ElseIfClauses
-          Dim elseIfCondition = BindExpression(entry.Condition, TypeSymbol.Boolean)
-          Dim statements = ImmutableArray.CreateBuilder(Of BoundStatement)
-          m_scope = New BoundScope(m_scope)
-          For Each statementSyntax In entry.Statements
-            Dim statement = BindStatement(statementSyntax)
-            statements.Add(statement)
-          Next
-          m_scope = m_scope.Parent
-          elseIfStatements.Add(New BoundElseIfStatement(elseIfCondition, statements.ToImmutable))
-        Next
-      End If
+      'TODO: Need to handle ElseIf...
 
-      Dim elseStatements = ImmutableArray.CreateBuilder(Of BoundStatement)
-      If syntax.ElseClause IsNot Nothing Then
-        m_scope = New BoundScope(m_scope)
-        For Each statementSyntax In syntax.ElseClause.ElseBlock
-          Dim statement = BindStatement(statementSyntax)
-          elseStatements.Add(statement)
-        Next
-        m_scope = m_scope.Parent
-      End If
-
-      Return New BoundIfStatement(ifCondition, ifStatements.ToImmutable, elseIfStatements.ToImmutable, elseStatements.ToImmutable)
+      Dim condition = BindExpression(ifStatement.Condition, TypeSymbol.Boolean)
+      Dim thenStatement = BindStatement(ifStatement.ThenStatement)
+      Dim elseClause = If(elseStatement IsNot Nothing, BindStatement(elseStatement.ElseStatement), Nothing)
+      Return New BoundIfStatement(condition, thenStatement, elseClause)
 
     End Function
 
@@ -187,27 +310,27 @@ Namespace Basic.CodeAnalysis.Binding
           Dim expressionB = If(match.ExpressionTo IsNot Nothing, BindExpression(match.ExpressionTo), Nothing)
           matches.Add(New BoundMatchStatement(SyntaxFacts.GetText(comparisonKind), expressionA, expressionB))
         Next
-        Dim statements = ImmutableArray.CreateBuilder(Of BoundStatement)
-        m_scope = New BoundScope(m_scope)
-        For Each statementSyntax In c.Statements
-          Dim statement = BindStatement(statementSyntax)
-          statements.Add(statement)
-        Next
-        m_scope = m_scope.Parent
-        cases.Add(New BoundCaseStatement(matches.ToImmutableArray, statements.ToImmutableArray))
+        Dim statement = BindStatement(c.Statement) ' ImmutableArray.CreateBuilder(Of BoundStatement)
+        'm_scope = New BoundScope(m_scope)
+        'For Each statementSyntax In c.Statements
+        '  Dim statement = BindStatement(statementSyntax)
+        '  statements.Add(statement)
+        'Next
+        'm_scope = m_scope.Parent
+        cases.Add(New BoundCaseStatement(matches.ToImmutableArray, statement))
       Next
 
-      Dim elseStatements = ImmutableArray.CreateBuilder(Of BoundStatement)
-      If syntax.CaseElseClause IsNot Nothing Then
-        m_scope = New BoundScope(m_scope)
-        For Each statementSyntax In syntax.CaseElseClause.Statements
-          Dim statement = BindStatement(statementSyntax)
-          elseStatements.Add(statement)
-        Next
-        m_scope = m_scope.Parent
-      End If
+      Dim elseStatement = BindStatement(syntax.CaseElseClause.Statement) 'ImmutableArray.CreateBuilder(Of BoundStatement)
+      'If syntax.CaseElseClause IsNot Nothing Then
+      '  m_scope = New BoundScope(m_scope)
+      '  For Each statementSyntax In syntax.CaseElseClause.Statements
+      '    Dim statement = BindStatement(statementSyntax)
+      '    elseStatements.Add(statement)
+      '  Next
+      '  m_scope = m_scope.Parent
+      'End If
 
-      Return New BoundSelectCaseStatement(test, cases.ToImmutableArray, elseStatements.ToImmutableArray)
+      Return New BoundSelectCaseStatement(test, cases.ToImmutableArray, elseStatement)
 
     End Function
 
@@ -217,13 +340,14 @@ Namespace Basic.CodeAnalysis.Binding
     End Function
 
     Private Function BindExpression(syntax As ExpressionSyntax, targetType As TypeSymbol) As BoundExpression
-      Dim result = BindExpression(syntax)
-      If targetType IsNot TypeSymbol.Error AndAlso
-         result.Type IsNot TypeSymbol.Error AndAlso
-         result.Type IsNot targetType Then
-        m_diagnostics.ReportCannotConvert(syntax.Span, result.Type, targetType)
-      End If
-      Return result
+      Return BindConversion(syntax, targetType)
+      'Dim result = BindExpression(syntax)
+      'If targetType IsNot TypeSymbol.Error AndAlso
+      '   result.Type IsNot TypeSymbol.Error AndAlso
+      '   result.Type IsNot targetType Then
+      '  m_diagnostics.ReportCannotConvert(syntax.Span, result.Type, targetType)
+      'End If
+      'Return result
     End Function
 
     Private Function BindExpression(syntax As ExpressionSyntax, Optional canBeVoid As Boolean = False) As BoundExpression
@@ -290,12 +414,15 @@ Namespace Basic.CodeAnalysis.Binding
 
       End If
 
-      If boundExpression.Type IsNot variable.Type Then
-        m_diagnostics.ReportCannotConvert(syntax.IdentifierToken.Span, boundExpression.Type, variable.Type)
-        Return boundExpression
-      End If
+      'If boundExpression.Type IsNot variable.Type Then
+      '  m_diagnostics.ReportCannotConvert(syntax.IdentifierToken.Span, boundExpression.Type, variable.Type)
+      '  Return boundExpression
+      'End If
 
-      Return New BoundAssignmentExpression(variable, boundExpression)
+      Dim convertedExpression = BindConversion(syntax.Expression.Span, boundExpression, variable.Type)
+
+      'Return New BoundAssignmentExpression(variable, boundExpression)
+      Return New BoundAssignmentExpression(variable, convertedExpression)
 
     End Function
 
@@ -326,7 +453,7 @@ Namespace Basic.CodeAnalysis.Binding
 
       If syntax.Arguments.Count = 1 AndAlso TypeOf LookupType(syntax.Identifier.Text) Is TypeSymbol Then
         Dim type = CType(LookupType(syntax.Identifier.Text), TypeSymbol)
-        Return BindConversion(type, syntax.Arguments(0))
+        Return BindConversion(syntax.Arguments(0), type, True)
       End If
 
       Dim boundArguments = ImmutableArray.CreateBuilder(Of BoundExpression)()
@@ -351,7 +478,7 @@ Namespace Basic.CodeAnalysis.Binding
         Dim argument = boundArguments(i)
         Dim parameter = f.Parameters(i)
         If argument.Type IsNot parameter.Type Then
-          m_diagnostics.ReportWrongArgumentType(syntax.Span, parameter.Name, parameter.Type, argument.Type)
+          m_diagnostics.ReportWrongArgumentType(syntax.Arguments(i).Span, parameter.Name, parameter.Type, argument.Type)
           Return New BoundErrorExpression
         End If
       Next
@@ -360,20 +487,31 @@ Namespace Basic.CodeAnalysis.Binding
 
     End Function
 
-    Private Function BindConversion(type As TypeSymbol, syntax As ExpressionSyntax) As BoundExpression
+    Private Function BindConversion(syntax As ExpressionSyntax, type As TypeSymbol, Optional allowExplicit As Boolean = False) As BoundExpression
       Dim expression = BindExpression(syntax)
+      Return BindConversion(syntax.Span, expression, type, allowExplicit)
+    End Function
+
+    Private Function BindConversion(diagnosticSpan As TextSpan, expression As BoundExpression, type As TypeSymbol, Optional allowExplicit As Boolean = False) As BoundExpression
       Dim conversion = Binding.Conversion.Classify(expression.Type, type)
       If Not conversion.Exists Then
-        m_diagnostics.ReportCannotConvert(syntax.Span, expression.Type, type)
+        If expression.Type IsNot TypeSymbol.Error AndAlso type IsNot TypeSymbol.Error Then
+          m_diagnostics.ReportCannotConvert(diagnosticSpan, expression.Type, type)
+        End If
         Return New BoundErrorExpression
       End If
+      If Not allowExplicit AndAlso conversion.IsExplicit Then
+        m_diagnostics.ReportCannotConvertImplicitly(diagnosticSpan, expression.Type, type)
+      End If
+      If conversion.IsIdentity Then Return expression
       Return New BoundConversionExpression(type, expression)
     End Function
 
     Private Function BindVariable(identifier As SyntaxToken, isReadOnly As Boolean, type As TypeSymbol) As VariableSymbol
       Dim name = If(identifier.Text, "?")
       Dim decl = Not identifier.IsMissing
-      Dim variable = New VariableSymbol(name, isReadOnly, type)
+      'Dim variable = New VariableSymbol(name, isReadOnly, type)
+      Dim variable = If(m_function Is Nothing, CType(New GlobalVariableSymbol(name, isReadOnly, type), VariableSymbol), New LocalVariableSymbol(name, isReadOnly, type))
       If decl AndAlso Not m_scope.TryDeclareVariable(variable) Then
         m_diagnostics.ReportSymbolAlreadyDeclared(identifier.Span, name)
       End If
