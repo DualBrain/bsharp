@@ -1,6 +1,6 @@
 ﻿Namespace Basic.CodeAnalysis.Syntax
 
-  Partial Public NotInheritable Class TypeClauseSyntax
+  Partial Public NotInheritable Class AsClauseSyntax
     Inherits SyntaxNode
 
     Sub New(asKeyword As SyntaxToken, identifier As SyntaxToken)

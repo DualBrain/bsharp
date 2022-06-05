@@ -68,29 +68,26 @@ Namespace Basic.CodeAnalysis.Lowering
 
     Protected Overrides Function RewriteIfStatement(node As BoundIfStatement) As BoundStatement
 
-      If node.ElseStatement IsNot Nothing Then
+      If node.ElseStatement Is Nothing Then
 
-        ' if <condition> then
-        '   <trueBody>
-        ' end if
+        ' IF *expression* THEN
+        '   *statements*
+        ' END IF
         '
         ' ------>
         '
-        ' gotoFalse <condition> end
-        ' <trueBody>
+        ' gotoFalse *expression* end
+        '   *statements*
         ' end:
 
         Dim endLabel = GenerateLabel()
-        Dim gotoFalse = New BoundConditionalGotoStatement(endLabel, node.Condition, False)
+        Dim gotoFalse = New BoundConditionalGotoStatement(endLabel, node.Expression, False)
         Dim endLabelStatement = New BoundLabelStatement(endLabel)
         Dim builder = ImmutableArray.CreateBuilder(Of BoundStatement)
         builder.Add(gotoFalse)
-        builder.Add(node.IfStatement)
-        'For Each statement In node.IfStatement
-        '  builder.Add(statement)
-        'Next
+        builder.Add(node.Statements)
         builder.Add(endLabelStatement)
-        Dim result = New BoundBlockStatement(builder.ToImmutable) 'ImmutableArray.Create(Of BoundStatement)(gotoFalse, node.ThenStatement, endLabelStatement))
+        Dim result = New BoundBlockStatement(builder.ToImmutable)
         Return RewriteStatement(result)
 
       Else
@@ -113,7 +110,7 @@ Namespace Basic.CodeAnalysis.Lowering
         Dim elseLabel = GenerateLabel()
         Dim endLabel = GenerateLabel()
 
-        Dim gotoFalse = New BoundConditionalGotoStatement(elseLabel, node.Condition, False)
+        Dim gotoFalse = New BoundConditionalGotoStatement(elseLabel, node.Expression, False)
         Dim gotoEndStatement = New BoundGotoStatement(endLabel)
 
         Dim elseLabelStatement = New BoundLabelStatement(elseLabel)
@@ -121,7 +118,7 @@ Namespace Basic.CodeAnalysis.Lowering
 
         Dim builder = ImmutableArray.CreateBuilder(Of BoundStatement)
         builder.Add(gotoFalse)
-        builder.Add(node.IfStatement)
+        builder.Add(node.Statements)
         'For Each statement In node.IfStatement
         '  builder.Add(statement)
         'Next
@@ -204,19 +201,52 @@ Namespace Basic.CodeAnalysis.Lowering
 
     End Function
 
-    Protected Overrides Function RewriteDoWhileStatement(node As BoundDoWhileStatement) As BoundStatement
+    Protected Overrides Function RewriteDoUntilStatement(node As BoundDoUntilStatement) As BoundStatement
 
-      ' do 
-      '   <body>
-      ' while <condition>
+      ' do [until *expression*]
+      '   *statements*
+      ' loop [until *expression*]
       '
       ' ------->
       '
       ' body:
-      ' <body>
+      '   *statements*
       ' check:
       ' continue:
-      ' gotoTrue <condition> body
+      ' gotoTrue *expression* body
+      ' break:
+
+      Dim continueLabel = GenerateLabel()
+
+      Dim continueLabelStatement = New BoundLabelStatement(continueLabel)
+      Dim gotoTrue = New BoundConditionalGotoStatement(continueLabel, node.Condition)
+
+      Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(
+        continueLabelStatement,
+        node.Body,
+        gotoTrue))
+
+      Return RewriteStatement(result)
+
+    End Function
+
+    Protected Overrides Function RewriteDoWhileStatement(node As BoundDoWhileStatement) As BoundStatement
+
+      ' do [while *expression*]
+      '   *statements*
+      ' loop [while *expression*]
+
+      ' do [until *expression*]
+      '   *statements*
+      ' loop [until *expression*]
+      '
+      ' ------->
+      '
+      ' body:
+      '   *statements*
+      ' check:
+      ' continue:
+      ' gotoTrue *expression* body
       ' break:
 
       Dim continueLabel = GenerateLabel()

@@ -3,20 +3,20 @@
   Partial Public NotInheritable Class CallExpressionSyntax
     Inherits ExpressionSyntax
 
-    Sub New(identifier As SyntaxToken, openParen As SyntaxToken, arguments As SeparatedSyntaxList(Of ExpressionSyntax), closeParen As SyntaxToken)
+    Sub New(identifier As SyntaxToken, openParenToken As SyntaxToken, arguments As SeparatedSyntaxList(Of ExpressionSyntax), closeParenToken As SyntaxToken)
       'tree As SyntaxTree, 
       'MyBase.New(tree)
       Me.Identifier = identifier
-      Me.OpenParen = openParen
+      Me.OpenParenToken = openParenToken
       Me.Arguments = arguments
-      Me.CloseParen = closeParen
+      Me.CloseParenToken = closeParenToken
     End Sub
 
     Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.CallExpression
     Public ReadOnly Property Identifier As SyntaxToken
-    Public ReadOnly Property OpenParen As SyntaxToken
+    Public ReadOnly Property OpenParenToken As SyntaxToken
     Public ReadOnly Property Arguments As SeparatedSyntaxList(Of ExpressionSyntax)
-    Public ReadOnly Property CloseParen As SyntaxToken
+    Public ReadOnly Property CloseParenToken As SyntaxToken
 
   End Class
 

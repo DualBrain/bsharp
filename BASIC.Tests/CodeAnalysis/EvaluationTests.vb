@@ -170,7 +170,7 @@ b * b }", 100)>
   dim a = 0
   do
     let a = a + 1
-  while a < 10
+  loop while a < 10
   a
 }", 10)> Public Sub Evaluator_Computes_CorrectValues(text As String, expectedValue As Object)
       AssertValue(text, expectedValue)
@@ -201,7 +201,7 @@ b * b }", 100)>
             dim x = 0
             do
               let x = 10
-            while [10]
+            loop while [10]
         }"
 
       Dim diagnostics As String = "
@@ -219,10 +219,11 @@ b * b }", 100)>
             dim x = 20 
           else
             dim y = 30
-          []"
+          [][]"
 
       Dim diagnostics = "
-        Missing End If."
+        Unexpected token <EndOfFileToken>, expected <EndKeyword>.
+        Unexpected token <EndOfFileToken>, expected <IfKeyword>."
 
       AssertDiagnostics(text, diagnostics)
 
@@ -236,11 +237,12 @@ b * b }", 100)>
             dim x = 20 
           else
             dim y = 30
-          [end] []"
+          [end] [][]"
 
       Dim diagnostics = "
          Unexpected token <EndKeyword>, expected <IdentifierToken>.
-         Missing End If."
+         Unexpected token <EndOfFileToken>, expected <EndKeyword>.
+         Unexpected token <EndOfFileToken>, expected <IfKeyword>."
 
       AssertDiagnostics(text, diagnostics)
 
@@ -250,11 +252,12 @@ b * b }", 100)>
     Public Sub Evaluator_If_MissingTrueStatement()
 
       Dim text = "
-          if true then []
+          if true then [][]
 "
 
       Dim diagnostics = "
-        Missing End If."
+        Unexpected token <EndOfFileToken>, expected <EndKeyword>.
+        Unexpected token <EndOfFileToken>, expected <IfKeyword>."
 
       AssertDiagnostics(text, diagnostics)
 

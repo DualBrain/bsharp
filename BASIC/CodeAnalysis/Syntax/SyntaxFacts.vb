@@ -87,12 +87,16 @@ Namespace Basic.CodeAnalysis.Syntax
         Case "while" : Return SyntaxKind.WhileKeyword
         Case "wend" : Return SyntaxKind.WendKeyword
         Case "do" : Return SyntaxKind.DoKeyword
+        Case "loop" : Return SyntaxKind.LoopKeyword
+        Case "until" : Return SyntaxKind.UntilKeyword
 
         Case "function" : Return SyntaxKind.FunctionKeyword
         Case "as" : Return SyntaxKind.AsKeyword
 
         Case "for" : Return SyntaxKind.ForKeyword
         Case "to" : Return SyntaxKind.ToKeyword
+        Case "each" : Return SyntaxKind.EachKeyword
+        Case "in" : Return SyntaxKind.InKeyword
         Case "step" : Return SyntaxKind.StepKeyword
         Case "next" : Return SyntaxKind.NextKeyword
 
@@ -130,12 +134,16 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.WhileKeyword : Return "while"
         Case SyntaxKind.WendKeyword : Return "wend"
         Case SyntaxKind.DoKeyword : Return "do"
+        Case SyntaxKind.LoopKeyword : Return "loop"
+        Case SyntaxKind.UntilKeyword : Return "until"
 
         Case SyntaxKind.FunctionKeyword : Return "function"
         Case SyntaxKind.AsKeyword : Return "as"
 
         Case SyntaxKind.ForKeyword : Return "for"
         Case SyntaxKind.ToKeyword : Return "to"
+        Case SyntaxKind.EachKeyword : Return "each"
+        Case SyntaxKind.InKeyword : Return "in"
         Case SyntaxKind.StepKeyword : Return "step"
         Case SyntaxKind.NextKeyword : Return "next"
 

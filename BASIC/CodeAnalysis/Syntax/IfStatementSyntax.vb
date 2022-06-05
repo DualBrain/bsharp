@@ -6,22 +6,22 @@ Namespace Basic.CodeAnalysis.Syntax
     Inherits StatementSyntax
 
     Public Sub New(ifKeyword As SyntaxToken,
-                   condition As ExpressionSyntax,
+                   expression As ExpressionSyntax,
                    thenKeyword As SyntaxToken,
-                   thenStatement As StatementSyntax,
+                   statements As StatementSyntax,
                    elseClause As SingleLineElseClauseSyntax)
       Me.IfKeyword = ifKeyword
-      Me.Condition = condition
+      Me.Expression = expression
       Me.ThenKeyword = thenKeyword
-      Me.ThenStatement = thenStatement
+      Me.Statements = statements
       Me.ElseClause = elseClause
     End Sub
 
     Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.SingleLineIfStatement
     Public ReadOnly Property IfKeyword As SyntaxToken
-    Public ReadOnly Property Condition As ExpressionSyntax
+    Public ReadOnly Property Expression As ExpressionSyntax
     Public ReadOnly Property ThenKeyword As SyntaxToken
-    Public ReadOnly Property ThenStatement As StatementSyntax
+    Public ReadOnly Property Statements As StatementSyntax
     Public ReadOnly Property ElseClause As SingleLineElseClauseSyntax
 
   End Class
@@ -29,14 +29,14 @@ Namespace Basic.CodeAnalysis.Syntax
   Public NotInheritable Class SingleLineElseClauseSyntax
     Inherits SyntaxNode
 
-    Public Sub New(elseKeyword As SyntaxToken, elseStatement As StatementSyntax)
+    Public Sub New(elseKeyword As SyntaxToken, statements As StatementSyntax)
       Me.ElseKeyword = elseKeyword
-      Me.ElseStatement = elseStatement
+      Me.Statements = statements
     End Sub
 
     Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.SingleLineElseClause
     Public ReadOnly Property ElseKeyword As SyntaxToken
-    Public ReadOnly Property ElseStatement As StatementSyntax
+    Public ReadOnly Property Statements As StatementSyntax
 
   End Class
 
@@ -68,52 +68,52 @@ Namespace Basic.CodeAnalysis.Syntax
     Inherits StatementSyntax
 
     Public Sub New(ifKeyword As SyntaxToken,
-                   condition As ExpressionSyntax,
+                   expression As ExpressionSyntax,
                    thenKeyword As SyntaxToken,
-                   thenStatement As StatementSyntax)
+                   statements As StatementSyntax)
       Me.IfKeyword = ifKeyword
-      Me.Condition = condition
+      Me.Expression = expression
       Me.ThenKeyword = thenKeyword
-      Me.ThenStatement = thenStatement
+      Me.Statements = statements
     End Sub
 
     Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.IfStatement
     Public ReadOnly Property IfKeyword As SyntaxToken
-    Public ReadOnly Property Condition As ExpressionSyntax
+    Public ReadOnly Property Expression As ExpressionSyntax
     Public ReadOnly Property ThenKeyword As SyntaxToken
-    Public ReadOnly Property ThenStatement As StatementSyntax
+    Public ReadOnly Property Statements As StatementSyntax
 
   End Class
 
   Public NotInheritable Class ElseIfStatementSyntax
     Inherits SyntaxNode
 
-    Public Sub New(elseIfKeyword As SyntaxToken, condition As ExpressionSyntax, thenKeyword As SyntaxToken, statement As StatementSyntax)
+    Public Sub New(elseIfKeyword As SyntaxToken, expression As ExpressionSyntax, thenKeyword As SyntaxToken, statements As StatementSyntax)
       Me.ElseIfKeyword = elseIfKeyword
-      Me.Condition = condition
+      Me.Expression = expression
       Me.ThenKeyword = thenKeyword
-      Me.Statement = statement
+      Me.Statements = statements
     End Sub
 
     Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.ElseIfStatement
     Public ReadOnly Property ElseIfKeyword As SyntaxToken
-    Public ReadOnly Property Condition As ExpressionSyntax
+    Public ReadOnly Property Expression As ExpressionSyntax
     Public ReadOnly Property ThenKeyword As SyntaxToken
-    Public ReadOnly Property Statement As StatementSyntax
+    Public ReadOnly Property Statements As StatementSyntax
 
   End Class
 
   Public NotInheritable Class ElseStatementSyntax
     Inherits SyntaxNode
 
-    Public Sub New(elseKeyword As SyntaxToken, elseStatement As StatementSyntax)
+    Public Sub New(elseKeyword As SyntaxToken, statements As StatementSyntax)
       Me.ElseKeyword = elseKeyword
-      Me.ElseStatement = elseStatement
+      Me.Statements = statements
     End Sub
 
     Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.ElseStatement
     Public ReadOnly Property ElseKeyword As SyntaxToken
-    Public ReadOnly Property ElseStatement As StatementSyntax
+    Public ReadOnly Property Statements As StatementSyntax
 
   End Class
 

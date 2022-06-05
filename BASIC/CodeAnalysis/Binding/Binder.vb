@@ -65,7 +65,7 @@ Namespace Basic.CodeAnalysis.Binding
       While scope IsNot Nothing
         For Each f In scope.Functions
           Dim binder As New Binder(parentScope, f)
-          Dim body = binder.BindStatement(f.Declaration.Body)
+          Dim body = binder.BindStatement(f.Declaration.Statements)
           Dim loweredBody = Lowerer.Lower(body)
           functionBodies.Add(f, loweredBody)
           diagnostics.AddRange(binder.Diagnostics)
@@ -87,7 +87,7 @@ Namespace Basic.CodeAnalysis.Binding
 
       For Each parameterSyntax In syntax.Parameters
         Dim parameterName = parameterSyntax.Identifier.Text
-        Dim parameterType = BindTypeClause(parameterSyntax.Type)
+        Dim parameterType = BindTypeClause(parameterSyntax.AsClause)
         If Not seenParameterNames.Add(parameterName) Then
           m_diagnostics.ReportParameterAlreadyDeclared(parameterSyntax.Span, parameterName)
         Else
@@ -96,10 +96,10 @@ Namespace Basic.CodeAnalysis.Binding
         End If
       Next
 
-      Dim type = If(BindTypeClause(syntax.Type), TypeSymbol.Nothing)
+      Dim type = If(BindTypeClause(syntax.AsClause), TypeSymbol.Nothing)
 
       If type IsNot TypeSymbol.Nothing Then
-        m_diagnostics.XXX_ReportFunctionsAreUnsupported(syntax.Type.Span)
+        m_diagnostics.XXX_ReportFunctionsAreUnsupported(syntax.AsClause.Span)
       End If
 
       Dim f As New FunctionSymbol(syntax.Identifier.Text, parameters.ToImmutable(), type, syntax)
@@ -152,6 +152,7 @@ Namespace Basic.CodeAnalysis.Binding
         Case SyntaxKind.MultiLineIfBlock : Return BindMultiLineIfBlock(CType(syntax, MultiLineIfBlock))
         Case SyntaxKind.WhileStatement : Return BindWhileStatement(CType(syntax, WhileStatementSyntax))
         Case SyntaxKind.DoWhileStatement : Return BindDoWhileStatement(CType(syntax, DoWhileStatementSyntax))
+        Case SyntaxKind.DoUntilStatement : Return BindDoUntilStatement(CType(syntax, DoUntilStatementSyntax))
         Case SyntaxKind.ForStatement : Return BindForStatement(CType(syntax, ForStatementSyntax))
         Case SyntaxKind.SelectCaseStatement : Return BindSelectCaseStatement(CType(syntax, SelectCaseStatementSyntax))
         Case SyntaxKind.ExpressionStatement : Return BindExpressionStatement(CType(syntax, ExpressionStatementSyntax))
@@ -173,7 +174,7 @@ Namespace Basic.CodeAnalysis.Binding
 
     Private Function BindVariableDeclaration(syntax As VariableDeclarationSyntax) As BoundStatement
       Dim isReadOnly = (syntax.KeywordToken.Kind = SyntaxKind.ConstKeyword)
-      Dim type = BindTypeClause(syntax.TypeClause)
+      Dim type = BindTypeClause(syntax.AsClause)
       Dim initializer = BindExpression(syntax.Initializer)
       'Dim variable = BindVariable(syntax.Identifier, isReadOnly, initializer.Type)
       Dim variableType = If(type, initializer.Type)
@@ -183,7 +184,7 @@ Namespace Basic.CodeAnalysis.Binding
       Return New BoundVariableDeclaration(variable, convertedInitializer)
     End Function
 
-    Private Function BindTypeClause(syntax As TypeClauseSyntax) As TypeSymbol
+    Private Function BindTypeClause(syntax As AsClauseSyntax) As TypeSymbol
       If syntax Is Nothing Then Return Nothing
       Dim type = LookupType(syntax.Identifier.Text)
       If type Is Nothing Then
@@ -194,7 +195,7 @@ Namespace Basic.CodeAnalysis.Binding
 
     Private Function BindSingleLineIfStatement(syntax As SingleLineIfStatementSyntax) As BoundStatement
 
-      Dim condition = BindExpression(syntax.Condition, TypeSymbol.Boolean)
+      Dim condition = BindExpression(syntax.Expression, TypeSymbol.Boolean)
 
       'If condition.ConstantValue IsNot Nothing Then
       '  If Not CBool(condition.ConstantValue.Value) Then
@@ -204,9 +205,9 @@ Namespace Basic.CodeAnalysis.Binding
       '  End If
       'End If
 
-      Dim thenStatement = BindStatement(syntax.ThenStatement)
-      Dim elseStatement = If(syntax.ElseClause IsNot Nothing, BindStatement(syntax.ElseClause.ElseStatement), Nothing)
-      Return New BoundIfStatement(condition, thenStatement, elseStatement)
+      Dim statements = BindStatement(syntax.Statements)
+      Dim elseStatement = If(syntax.ElseClause IsNot Nothing, BindStatement(syntax.ElseClause.Statements), Nothing)
+      Return New BoundIfStatement(condition, statements, elseStatement)
 
       'Dim ifCondition = BindExpression(syntax.Condition, TypeSymbol.Boolean)
       'Dim ifStatements = ImmutableArray.CreateBuilder(Of BoundStatement)
@@ -254,30 +255,38 @@ Namespace Basic.CodeAnalysis.Binding
 
       'TODO: Need to handle ElseIf...
 
-      Dim condition = BindExpression(ifStatement.Condition, TypeSymbol.Boolean)
-      Dim thenStatement = BindStatement(ifStatement.ThenStatement)
-      Dim elseClause = If(elseStatement IsNot Nothing, BindStatement(elseStatement.ElseStatement), Nothing)
+      Dim condition = BindExpression(ifStatement.Expression, TypeSymbol.Boolean)
+      Dim thenStatement = BindStatement(ifStatement.Statements)
+      Dim elseClause = If(elseStatement IsNot Nothing, BindStatement(elseStatement.Statements), Nothing)
       Return New BoundIfStatement(condition, thenStatement, elseClause)
 
     End Function
 
     Private Function BindWhileStatement(syntax As WhileStatementSyntax) As BoundStatement
-      Dim condition = BindExpression(syntax.Condition, TypeSymbol.Boolean)
+      Dim condition = BindExpression(syntax.Expression, TypeSymbol.Boolean)
       Dim statement = BindStatement(syntax.Body)
       Return New BoundWhileStatement(condition, statement)
     End Function
 
     Private Function BindDoWhileStatement(syntax As DoWhileStatementSyntax) As BoundStatement
       Dim body = BindStatement(syntax.Body)
-      Dim condition = BindExpression(syntax.Condition, TypeSymbol.Boolean)
-      Return New BoundDoWhileStatement(body, condition)
+      Dim expression = BindExpression(syntax.WhileClause.Expression, TypeSymbol.Boolean)
+      Dim atBeginning = syntax.WhileClause.AtBeginning
+      Return New BoundDoWhileStatement(body, expression, atBeginning)
+    End Function
+
+    Private Function BindDoUntilStatement(syntax As DoUntilStatementSyntax) As BoundStatement
+      Dim body = BindStatement(syntax.Body)
+      Dim expression = BindExpression(syntax.UntilClause.Expression, TypeSymbol.Boolean)
+      Dim atBeginning = syntax.UntilClause.AtBeginning
+      Return New BoundDoUntilStatement(body, expression, atBeginning)
     End Function
 
     Private Function BindForStatement(syntax As ForStatementSyntax) As BoundStatement
 
-      Dim lowerBound = BindExpression(syntax.LowerBound, TypeSymbol.Integer)
-      Dim upperBound = BindExpression(syntax.UpperBound, TypeSymbol.Integer)
-      Dim stepper = If(syntax.Stepper Is Nothing, Nothing, BindExpression(syntax.Stepper, TypeSymbol.Integer))
+      Dim lowerBound = BindExpression(syntax.startValue, TypeSymbol.Integer)
+      Dim upperBound = BindExpression(syntax.endValue, TypeSymbol.Integer)
+      Dim stepper = If(syntax.Increment Is Nothing, Nothing, BindExpression(syntax.Increment, TypeSymbol.Integer))
 
       m_scope = New BoundScope(m_scope)
 
@@ -289,7 +298,7 @@ Namespace Basic.CodeAnalysis.Binding
 
       Dim variable = BindVariable(syntax.Identifier, True, TypeSymbol.Integer)
 
-      Dim body = BindStatement(syntax.Body)
+      Dim body = BindStatement(syntax.Statements)
 
       m_scope = m_scope.Parent
 

@@ -63,6 +63,8 @@
     WhileKeyword
     WendKeyword
     ForKeyword
+    EachKeyword
+    InKeyword
     ToKeyword
     StepKeyword
     NextKeyword
@@ -70,6 +72,8 @@
     CaseKeyword
     IsKeyword
     AsKeyword
+    LoopKeyword
+    UntilKeyword
 
     ' Nodes
     CompilationUnit
@@ -82,16 +86,22 @@
     BlockStatement
     VariableDeclaration
     ExpressionStatement
+    SingleLineIfStatement
+    SingleLineElseClause
+    MultiLineIfBlock
     IfStatement
-    ElseStatement
-    WhileStatement
-    ForStatement
     ElseIfStatement
+    ElseStatement
+    SelectCaseStatement
     CaseMatchExpressionSyntax
     CaseElseClauseSyntax
     CaseClauseSyntax
-    SelectCaseStatement
+    ForStatement
+    WhileStatement
     DoWhileStatement
+    DoUntilStatement
+    WhileClause
+    UntilClause
 
     ' Expressions
     LiteralExpression
@@ -101,9 +111,7 @@
     ParenthesizedExpression
     AssignmentExpression
     CallExpression
-    SingleLineElseClause
-    SingleLineIfStatement
-    MultiLineIfBlock
+    ForEachStatement
   End Enum
 
 End Namespace
