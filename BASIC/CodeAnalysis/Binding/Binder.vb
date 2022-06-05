@@ -10,6 +10,8 @@ Namespace Basic.CodeAnalysis.Binding
 
     Private ReadOnly m_diagnostics As New DiagnosticBag
     Private ReadOnly m_function As FunctionSymbol
+    Private ReadOnly m_loopStack As New Stack(Of (ExitLabel As BoundLabel, ContinueLabel As BoundLabel))
+    Private m_labelCounter As Integer
     Private m_scope As BoundScope
 
     Public Sub New(parent As BoundScope, [function] As FunctionSymbol)
@@ -144,6 +146,10 @@ Namespace Basic.CodeAnalysis.Binding
       End Get
     End Property
 
+    Private Shared Function BindErrorStatement() As BoundStatement
+      Return New BoundExpressionStatement(New BoundErrorExpression)
+    End Function
+
     Private Function BindStatement(syntax As StatementSyntax) As BoundStatement
       Select Case syntax.Kind
         Case SyntaxKind.BlockStatement : Return BindBlockStatement(CType(syntax, BlockStatementSyntax))
@@ -154,6 +160,8 @@ Namespace Basic.CodeAnalysis.Binding
         Case SyntaxKind.DoWhileStatement : Return BindDoWhileStatement(CType(syntax, DoWhileStatementSyntax))
         Case SyntaxKind.DoUntilStatement : Return BindDoUntilStatement(CType(syntax, DoUntilStatementSyntax))
         Case SyntaxKind.ForStatement : Return BindForStatement(CType(syntax, ForStatementSyntax))
+        Case SyntaxKind.ExitStatement : Return BindExitStatement(CType(syntax, ExitStatementSyntax))
+        Case SyntaxKind.ContinueStatement : Return BindContinueStatement(CType(syntax, ContinueStatementSyntax))
         Case SyntaxKind.SelectCaseStatement : Return BindSelectCaseStatement(CType(syntax, SelectCaseStatementSyntax))
         Case SyntaxKind.ExpressionStatement : Return BindExpressionStatement(CType(syntax, ExpressionStatementSyntax))
         Case Else
@@ -264,22 +272,31 @@ Namespace Basic.CodeAnalysis.Binding
 
     Private Function BindWhileStatement(syntax As WhileStatementSyntax) As BoundStatement
       Dim condition = BindExpression(syntax.Expression, TypeSymbol.Boolean)
-      Dim statement = BindStatement(syntax.Body)
-      Return New BoundWhileStatement(condition, statement)
+      'Dim statements = BindStatement(syntax.Statements)
+      Dim exitLabel As BoundLabel = Nothing
+      Dim continueLabel As BoundLabel = Nothing
+      Dim statements = BindLoopBody(syntax.Statements, exitLabel, continueLabel)
+      Return New BoundWhileStatement(condition, statements, exitLabel, continueLabel)
     End Function
 
     Private Function BindDoWhileStatement(syntax As DoWhileStatementSyntax) As BoundStatement
-      Dim body = BindStatement(syntax.Body)
+      'Dim statements = BindStatement(syntax.Statements)
+      Dim exitLabel As BoundLabel = Nothing
+      Dim continueLabel As BoundLabel = Nothing
+      Dim statements = BindLoopBody(syntax.Statements, exitLabel, continueLabel)
       Dim expression = BindExpression(syntax.WhileClause.Expression, TypeSymbol.Boolean)
       Dim atBeginning = syntax.WhileClause.AtBeginning
-      Return New BoundDoWhileStatement(body, expression, atBeginning)
+      Return New BoundDoWhileStatement(statements, expression, atBeginning, exitLabel, continueLabel)
     End Function
 
     Private Function BindDoUntilStatement(syntax As DoUntilStatementSyntax) As BoundStatement
-      Dim body = BindStatement(syntax.Body)
+      'Dim statements = BindStatement(syntax.Statements)
+      Dim exitLabel As BoundLabel = Nothing
+      Dim continueLabel As BoundLabel = Nothing
+      Dim statements = BindLoopBody(syntax.Statements, exitLabel, continueLabel)
       Dim expression = BindExpression(syntax.UntilClause.Expression, TypeSymbol.Boolean)
       Dim atBeginning = syntax.UntilClause.AtBeginning
-      Return New BoundDoUntilStatement(body, expression, atBeginning)
+      Return New BoundDoUntilStatement(statements, expression, atBeginning, exitLabel, continueLabel)
     End Function
 
     Private Function BindForStatement(syntax As ForStatementSyntax) As BoundStatement
@@ -298,11 +315,14 @@ Namespace Basic.CodeAnalysis.Binding
 
       Dim variable = BindVariable(syntax.Identifier, True, TypeSymbol.Integer)
 
-      Dim body = BindStatement(syntax.Statements)
+      'Dim body = BindStatement(syntax.Statements)
+      Dim exitLabel As BoundLabel = Nothing
+      Dim continueLabel As BoundLabel = Nothing
+      Dim body = BindLoopBody(syntax.Statements, exitLabel, continueLabel)
 
       m_scope = m_scope.Parent
 
-      Return New BoundForStatement(variable, lowerBound, upperBound, stepper, body)
+      Return New BoundForStatement(variable, lowerBound, upperBound, stepper, body, exitLabel, continueLabel)
 
     End Function
 
@@ -340,6 +360,44 @@ Namespace Basic.CodeAnalysis.Binding
       'End If
 
       Return New BoundSelectCaseStatement(test, cases.ToImmutableArray, elseStatement)
+
+    End Function
+
+    Private Function BindLoopBody(statements As StatementSyntax, ByRef exitLabel As BoundLabel, ByRef continueLabel As BoundLabel) As BoundStatement
+
+      m_labelCounter += 1
+      exitLabel = New BoundLabel($"exit{m_labelCounter}")
+      continueLabel = New BoundLabel($"continue{m_labelCounter}")
+
+      m_loopStack.Push((exitLabel, continueLabel))
+      Dim boundBody = BindStatement(statements)
+      m_loopStack.Pop()
+
+      Return boundBody
+
+    End Function
+
+    Private Function BindExitStatement(syntax As ExitStatementSyntax) As BoundStatement
+
+      If m_loopStack.Count = 0 Then
+        m_diagnostics.ReportInvalidBreakOrContinue(syntax.ExitKeyword.Span, syntax.ExitKeyword.Text)
+        Return BindErrorStatement()
+      End If
+
+      Dim breakLabel = m_loopStack.Peek().ExitLabel
+      Return New BoundGotoStatement(breakLabel)
+
+    End Function
+
+    Private Function BindContinueStatement(syntax As ContinueStatementSyntax) As BoundStatement
+
+      If m_loopStack.Count = 0 Then
+        m_diagnostics.ReportInvalidBreakOrContinue(syntax.ContinueKeyword.Span, syntax.ContinueKeyword.Text)
+        Return BindErrorStatement()
+      End If
+
+      Dim continueLabel = m_loopStack.Peek().ContinueLabel
+      Return New BoundGotoStatement(continueLabel)
 
     End Function
 
@@ -531,7 +589,7 @@ Namespace Basic.CodeAnalysis.Binding
       Select Case name
         Case "boolean" : Return TypeSymbol.Boolean
         Case "integer" : Return TypeSymbol.Integer
-        Case "string" : Return TypeSymbol.String
+        Case "string", "cstr", "cstr$" : Return TypeSymbol.String
         Case Else
           Return Nothing
       End Select

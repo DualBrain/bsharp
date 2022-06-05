@@ -116,7 +116,7 @@
     ParenthesizedExpression
     AssignmentExpression
     CallExpression
-
+    DollarToken
   End Enum
 
 End Namespace

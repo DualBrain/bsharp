@@ -197,6 +197,7 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.CommaToken : Return ","
         Case SyntaxKind.SemicolonToken : Return ";"
         Case SyntaxKind.QuestionToken : Return "?"
+        Case SyntaxKind.DollarToken : Return "$"
         Case SyntaxKind.GreaterThanEqualToken : Return ">="
         Case SyntaxKind.LessThanEqualToken : Return "<="
         Case SyntaxKind.LessThanGreaterThanToken : Return "<>"

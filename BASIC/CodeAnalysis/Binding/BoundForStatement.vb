@@ -3,9 +3,10 @@
 Namespace Basic.CodeAnalysis.Binding
 
   Friend NotInheritable Class BoundForStatement
-    Inherits BoundStatement
+    Inherits BoundLoopStatement
 
-    Public Sub New(variable As VariableSymbol, lowerBound As BoundExpression, upperBound As BoundExpression, stepper As BoundExpression, body As BoundStatement)
+    Public Sub New(variable As VariableSymbol, lowerBound As BoundExpression, upperBound As BoundExpression, stepper As BoundExpression, body As BoundStatement, exitLabel As BoundLabel, continueLabel As BoundLabel)
+      MyBase.New(exitLabel, continueLabel)
       Me.Variable = variable
       Me.LowerBound = lowerBound
       Me.UpperBound = upperBound

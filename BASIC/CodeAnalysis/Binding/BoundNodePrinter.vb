@@ -143,18 +143,18 @@ Namespace Basic.CodeAnalysis.Binding
     Private Sub WriteWhileStatement(node As BoundWhileStatement, writer As IndentedTextWriter)
       writer.WriteKeyword(SyntaxKind.WhileKeyword)
       writer.WriteSpace
-      node.Condition.WriteTo(writer)
+      node.Expression.WriteTo(writer)
       writer.WriteLine()
-      writer.WriteNestedStatement(node.Body)
+      writer.WriteNestedStatement(node.Statements)
     End Sub
 
     Private Sub WriteDoWhileStatement(node As BoundDoWhileStatement, writer As IndentedTextWriter)
       writer.WriteKeyword(SyntaxKind.DoKeyword)
       writer.WriteLine()
-      writer.WriteNestedStatement(node.Body)
+      writer.WriteNestedStatement(node.Statements)
       writer.WriteKeyword(SyntaxKind.WhileKeyword)
       writer.WriteSpace
-      node.Condition.WriteTo(writer)
+      node.Expression.WriteTo(writer)
       writer.WriteLine()
     End Sub
 

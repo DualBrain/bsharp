@@ -80,6 +80,7 @@ Namespace Basic.CodeAnalysis.Syntax
         Case ":"c : m_kind = SyntaxKind.ColonToken : m_position += 1
         Case ";"c : m_kind = SyntaxKind.SemicolonToken : m_position += 1
         Case "?"c : m_kind = SyntaxKind.QuestionToken : m_position += 1
+        Case "$"c : m_kind = SyntaxKind.DollarToken : m_position += 1
         Case ChrW(34)
           ReadString()
         Case "0"c, "1"c, "2"c, "3"c, "4"c, "5"c, "6"c, "7"c, "8"c, "9"c
@@ -172,6 +173,9 @@ Namespace Basic.CodeAnalysis.Syntax
       While Char.IsLetter(Current)
         m_position += 1
       End While
+      If Current = "$"c Then
+        m_position += 1
+      End If
       Dim length = m_position - m_start
       Dim text = m_text.ToString(m_start, length)
       m_kind = SyntaxFacts.GetKeywordKind(text)

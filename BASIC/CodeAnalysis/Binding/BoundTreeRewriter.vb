@@ -110,32 +110,32 @@ Namespace Basic.CodeAnalysis.Binding
     End Function
 
     Protected Overridable Function RewriteWhileStatement(node As BoundWhileStatement) As BoundStatement
-      Dim condition = RewriteExpression(node.Condition)
-      Dim body = RewriteStatement(node.Body)
-      If condition Is node.Condition AndAlso body Is node.Body Then
+      Dim condition = RewriteExpression(node.Expression)
+      Dim body = RewriteStatement(node.Statements)
+      If condition Is node.Expression AndAlso body Is node.Statements Then
         Return node
       End If
-      Return New BoundWhileStatement(condition, body) ', node.BreakLabel, node.ContinueLabel)
+      Return New BoundWhileStatement(condition, body, node.ExitLabel, node.ContinueLabel)
     End Function
 
     Protected Overridable Function RewriteDoWhileStatement(node As BoundDoWhileStatement) As BoundStatement
-      Dim body = RewriteStatement(node.Body)
-      Dim condition = RewriteExpression(node.Condition)
+      Dim body = RewriteStatement(node.Statements)
+      Dim condition = RewriteExpression(node.Expression)
       Dim atBeginning = node.AtBeginning
-      If body Is node.Body AndAlso condition Is node.Condition Then
+      If body Is node.Statements AndAlso condition Is node.Expression Then
         Return node
       End If
-      Return New BoundDoWhileStatement(body, condition, atBeginning) ', node.BreakLabel, node.ContinueLabel)
+      Return New BoundDoWhileStatement(body, condition, atBeginning, node.ExitLabel, node.ContinueLabel)
     End Function
 
     Protected Overridable Function RewriteDoUntilStatement(node As BoundDoUntilStatement) As BoundStatement
-      Dim body = RewriteStatement(node.Body)
-      Dim condition = RewriteExpression(node.Condition)
+      Dim body = RewriteStatement(node.Statements)
+      Dim condition = RewriteExpression(node.Expression)
       Dim atBeginning = node.AtBeginning
-      If body Is node.Body AndAlso condition Is node.Condition Then
+      If body Is node.Statements AndAlso condition Is node.Expression Then
         Return node
       End If
-      Return New BoundDoUntilStatement(body, condition, atBeginning) ', node.BreakLabel, node.ContinueLabel)
+      Return New BoundDoUntilStatement(body, condition, atBeginning, node.ExitLabel, node.ContinueLabel)
     End Function
 
     Protected Overridable Function RewriteForStatement(node As BoundForStatement) As BoundStatement
@@ -149,7 +149,7 @@ Namespace Basic.CodeAnalysis.Binding
          body Is node.Body Then
         Return node
       End If
-      Return New BoundForStatement(node.Variable, lowerBound, upperBound, stepper, body) ', node.BreakLabel, node.ContinueLabel)
+      Return New BoundForStatement(node.Variable, lowerBound, upperBound, stepper, body, node.ExitLabel, node.ContinueLabel)
     End Function
 
     Protected Overridable Function RewriteLabeltatement(node As BoundLabelStatement) As BoundStatement

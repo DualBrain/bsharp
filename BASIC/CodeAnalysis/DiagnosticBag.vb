@@ -125,6 +125,11 @@ Namespace Basic.CodeAnalysis
       Report(span, message)
     End Sub
 
+    Public Sub ReportInvalidBreakOrContinue(span As TextSpan, text As String)
+      Dim message = $"The keyword '{text}' can only be used inside of loops."
+      Report(span, message)
+    End Sub
+
     Public Sub XXX_ReportFunctionsAreUnsupported(span As TextSpan)
       Dim message = "Functions with return values are unsupported."
       Report(span, message)

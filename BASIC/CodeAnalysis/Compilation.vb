@@ -48,10 +48,25 @@ Namespace Basic.CodeAnalysis
     End Function
 
     Public Sub EmitTree(writer As System.IO.TextWriter)
+
       'Dim statement = GetStatement()
       'statement.WriteTo(writer)
+
       Dim program = Binder.BindProgram(GlobalScope)
-      program.Statement.WriteTo(writer)
+
+      'program.Statement.WriteTo(writer)
+      If program.Statement.Statements.Any Then
+        program.Statement.WriteTo(writer)
+      Else
+        For Each fb In program.Functions
+          If Not GlobalScope.Functions.Contains(fb.Key) Then
+            Continue For
+          End If
+          fb.Key.WriteTo(writer)
+          fb.Value.WriteTo(writer)
+        Next
+      End If
+
     End Sub
 
     'Private Function GetStatement() As BoundBlockStatement

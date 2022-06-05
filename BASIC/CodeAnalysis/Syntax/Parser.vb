@@ -90,6 +90,8 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.WhileKeyword : Return ParseWhileStatement()
         Case SyntaxKind.DoKeyword : Return ParseDoStatement()
         Case SyntaxKind.ForKeyword : Return ParseForStatement()
+        Case SyntaxKind.ContinueKeyword : Return ParseContinueStatement()
+        Case SyntaxKind.ExitKeyword : Return ParseExitStatement()
         Case SyntaxKind.SelectKeyword : Return ParseSelectCaseStatement()
         Case Else : Return ParseExpressionStatement()
       End Select
