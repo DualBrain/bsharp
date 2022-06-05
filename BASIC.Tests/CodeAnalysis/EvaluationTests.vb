@@ -416,6 +416,38 @@ b * b }", 100)>
     End Sub
 
     '<Fact>
+    Public Sub Evaluator_InvokeFunctionArguments_NoInfiniteLoop()
+
+      Dim text As String = "
+        print([""Hi""=][)]"
+
+      Dim diagnostics As String = "
+        Unexpected token <CloseParenToken>, expected <IdentifierToken>.
+        Parameter 'text' requires a value of type 'string' but was given a value of type '?'."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_FunctionParameters_NoInfiniteLoop()
+
+      Dim text As String = "
+        function hi(name as string[[=]][[)]]
+            print(""Hi "" + name + ""!"" )
+        end function"
+
+      Dim diagnostics As String = "
+        Unexpected token <EqualToken>, expected <CloseParenToken>.
+        Unexpected token <EqualToken>, expected <IdentifierToken>.
+        Unexpected token <CloseParenToken>, expected <IdentifierToken>.
+        Unexpected token <CloseParenToken>, expected <IdentifierToken>."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
     Public Shared Sub Evaluator_AssignmentExpression_Reports_CannotConvert()
 
       Dim text = "

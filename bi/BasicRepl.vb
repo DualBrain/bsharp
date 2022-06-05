@@ -88,7 +88,7 @@ Namespace Basic
         m_previous = compilation
       Else
 
-        For Each diagnostic In result.Diagnostics
+        For Each diagnostic In result.Diagnostics.OrderBy(Function(diag) diag.Span, New TextSpanComparer)
 
           Dim lineIndex = tree.Text.GetLineIndex(diagnostic.Span.Start)
           Dim line = tree.Text.Lines(lineIndex)

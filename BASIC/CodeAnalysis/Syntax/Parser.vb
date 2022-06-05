@@ -154,15 +154,19 @@ Namespace Basic.CodeAnalysis.Syntax
 
       Dim nodesAndSeparators = ImmutableArray.CreateBuilder(Of SyntaxNode)()
 
-      While Current.Kind <> SyntaxKind.CloseParenToken AndAlso
+      Dim parseNextParameter = True
+      While parseNextParameter AndAlso
+            Current.Kind <> SyntaxKind.CloseParenToken AndAlso
             Current.Kind <> SyntaxKind.EndOfFileToken
 
         Dim parameter = ParseParameter()
         nodesAndSeparators.Add(parameter)
 
-        If Current.Kind <> SyntaxKind.CloseParenToken Then
+        If Current.Kind = SyntaxKind.CommaToken Then
           Dim comma = MatchToken(SyntaxKind.CommaToken)
           nodesAndSeparators.Add(comma)
+        Else
+          parseNextParameter = False
         End If
 
       End While
@@ -652,6 +656,7 @@ Namespace Basic.CodeAnalysis.Syntax
       ' ... *expression*[, *expression*] ...
 
       Dim nodesAndSeparators = ImmutableArray.CreateBuilder(Of SyntaxNode)
+
       Dim parseNextArgument = True
       While parseNextArgument AndAlso
             Current.Kind <> SyntaxKind.CloseParenToken AndAlso
