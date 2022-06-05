@@ -29,6 +29,12 @@ Namespace Global.BASIC.Tests.CodeAnalysis
     <InlineData("true = false", False)>
     <InlineData("false <> false", False)>
     <InlineData("true <> false", True)>
+    <InlineData("""test""", "test")>
+    <InlineData("""te""""st""", "te""st")>
+    <InlineData("""test""=""test""", True)>
+    <InlineData("""test""<>""test""", False)>
+    <InlineData("""test""=""abc""", False)>
+    <InlineData("""test""<>""abc""", True)>
     <InlineData("true", True)>
     <InlineData("false", False)>
     <InlineData("not true", False)>
@@ -416,7 +422,7 @@ b * b }", 100)>
     End Sub
 
     '<Fact>
-    Public Sub Evaluator_InvokeFunctionArguments_NoInfiniteLoop()
+    Public Shared Sub Evaluator_InvokeFunctionArguments_NoInfiniteLoop()
 
       Dim text As String = "
         print([""Hi""=][)]"

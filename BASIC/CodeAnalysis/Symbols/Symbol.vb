@@ -12,16 +12,15 @@ Namespace Basic.CodeAnalysis.Symbols
     Public MustOverride ReadOnly Property Kind As SymbolKind
     Public ReadOnly Property Name As String
 
-    'Public Sub WriteTo(writer As TextWriter)
-    '  SymbolPrinter.WriteTo(Me, writer)
-    'End Sub
+    Public Sub WriteTo(writer As TextWriter)
+      SymbolPrinter.WriteTo(Me, writer)
+    End Sub
 
     Public Overrides Function ToString() As String
-      Return Name
-      'Using writer = New StringWriter()
-      '  WriteTo(writer)
-      '  Return writer.ToString()
-      'End Using
+      Using writer = New StringWriter()
+        WriteTo(writer)
+        Return writer.ToString()
+      End Using
     End Function
 
   End Class

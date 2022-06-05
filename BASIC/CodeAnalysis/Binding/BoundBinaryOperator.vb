@@ -71,7 +71,9 @@ Namespace Basic.CodeAnalysis.Binding
        New BoundBinaryOperator(SyntaxKind.EqvKeyword, BoundBinaryOperatorKind.LogicalEqv, TypeSymbol.Boolean),
        New BoundBinaryOperator(SyntaxKind.ImpKeyword, BoundBinaryOperatorKind.LogicalImp, TypeSymbol.Integer, TypeSymbol.Boolean),
        New BoundBinaryOperator(SyntaxKind.ImpKeyword, BoundBinaryOperatorKind.BitwiseImp, TypeSymbol.Boolean),
-       New BoundBinaryOperator(SyntaxKind.PlusToken, BoundBinaryOperatorKind.Addition, TypeSymbol.String)}
+       New BoundBinaryOperator(SyntaxKind.PlusToken, BoundBinaryOperatorKind.Addition, TypeSymbol.String),
+       New BoundBinaryOperator(SyntaxKind.EqualToken, BoundBinaryOperatorKind.Equal, TypeSymbol.String, TypeSymbol.Boolean),
+       New BoundBinaryOperator(SyntaxKind.LessThanGreaterThanToken, BoundBinaryOperatorKind.NotEqual, TypeSymbol.String, TypeSymbol.Boolean)}
 
     Public Shared Function Bind(SyntaxKind As SyntaxKind, leftType As TypeSymbol, rightType As TypeSymbol) As BoundBinaryOperator
 

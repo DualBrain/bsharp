@@ -74,6 +74,8 @@
     AsKeyword
     LoopKeyword
     UntilKeyword
+    ContinueKeyword
+    ExitKeyword
 
     ' Nodes
     CompilationUnit
@@ -96,12 +98,15 @@
     CaseMatchExpressionSyntax
     CaseElseClauseSyntax
     CaseClauseSyntax
+    ForEachStatement
     ForStatement
     WhileStatement
     DoWhileStatement
     DoUntilStatement
     WhileClause
     UntilClause
+    ExitStatement
+    ContinueStatement
 
     ' Expressions
     LiteralExpression
@@ -111,7 +116,7 @@
     ParenthesizedExpression
     AssignmentExpression
     CallExpression
-    ForEachStatement
+
   End Enum
 
 End Namespace

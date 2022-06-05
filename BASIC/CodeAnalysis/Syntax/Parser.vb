@@ -189,6 +189,49 @@ Namespace Basic.CodeAnalysis.Syntax
 
 #Region "Flow Control Blocks"
 
+    Private Function ParseExitStatement() As StatementSyntax
+
+      ' Exit Do
+      ' Exit For
+      ' Exit Function
+      ' Exit Sub
+      ' Exit While
+
+      Dim exitKeyword = MatchToken(SyntaxKind.ExitKeyword)
+      Dim kind As SyntaxKind = SyntaxKind.ForKeyword
+      Select Case Current.Kind
+        Case SyntaxKind.DoKeyword,
+             SyntaxKind.ForKeyword,
+             SyntaxKind.FunctionKeyword,
+             SyntaxKind.WhileKeyword
+          kind = Current.Kind
+        Case Else
+      End Select
+      Dim scopeKeyword = MatchToken(kind)
+      Return New ExitStatementSyntax(exitKeyword, scopeKeyword)
+
+    End Function
+
+    Private Function ParseContinueStatement() As StatementSyntax
+
+      ' Continue Do
+      ' Continue For
+      ' Continue While
+
+      Dim continueKeyword = MatchToken(SyntaxKind.ContinueKeyword)
+      Dim kind As SyntaxKind = SyntaxKind.ForKeyword
+      Select Case Current.Kind
+        Case SyntaxKind.DoKeyword,
+             SyntaxKind.ForKeyword,
+             SyntaxKind.WhileKeyword
+          kind = Current.Kind
+        Case Else
+      End Select
+      Dim scopeKeyword = MatchToken(kind)
+      Return New ContinueStatementSyntax(continueKeyword, scopeKeyword)
+
+    End Function
+
     Private Function ParseDoStatement() As StatementSyntax
 
       ' DO [WHILE *boolean_expression*]

@@ -171,8 +171,11 @@ Namespace Basic
     End Sub
 
     Private Shared Sub HandleEscape(document As ObservableCollection(Of String), view As SubmissionView)
-      document(view.CurrentLine) = String.Empty
-      view.CurrentCharacter = 0
+      'document(view.CurrentLine) = String.Empty
+      'view.CurrentCharacter = 0
+      document.Clear()
+      document.Add(String.Empty)
+      view.CurrentLine = 0
     End Sub
 
     Private Sub HandleEnter(document As ObservableCollection(Of String), view As SubmissionView)

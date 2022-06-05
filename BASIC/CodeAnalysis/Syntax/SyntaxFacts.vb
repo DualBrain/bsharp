@@ -90,6 +90,9 @@ Namespace Basic.CodeAnalysis.Syntax
         Case "loop" : Return SyntaxKind.LoopKeyword
         Case "until" : Return SyntaxKind.UntilKeyword
 
+        Case "continue" : Return SyntaxKind.ContinueKeyword
+        Case "exit" : Return SyntaxKind.ExitKeyword
+
         Case "function" : Return SyntaxKind.FunctionKeyword
         Case "as" : Return SyntaxKind.AsKeyword
 
@@ -136,6 +139,9 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.DoKeyword : Return "do"
         Case SyntaxKind.LoopKeyword : Return "loop"
         Case SyntaxKind.UntilKeyword : Return "until"
+
+        Case SyntaxKind.ContinueKeyword : Return "continue"
+        Case SyntaxKind.ExitKeyword : Return "exit"
 
         Case SyntaxKind.FunctionKeyword : Return "function"
         Case SyntaxKind.AsKeyword : Return "as"
