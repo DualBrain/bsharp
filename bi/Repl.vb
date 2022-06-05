@@ -176,6 +176,7 @@ Namespace Basic
       document.Clear()
       document.Add(String.Empty)
       view.CurrentLine = 0
+      view.CurrentCharacter = 0
     End Sub
 
     Private Sub HandleEnter(document As ObservableCollection(Of String), view As SubmissionView)

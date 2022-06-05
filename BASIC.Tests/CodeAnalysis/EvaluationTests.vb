@@ -178,7 +178,30 @@ b * b }", 100)>
     let a = a + 1
   loop while a < 10
   a
-}", 10)> Public Sub Evaluator_Computes_CorrectValues(text As String, expectedValue As Object)
+}", 10)>
+    <InlineData("
+if true then
+  dim i = 0
+  while i < 5
+    let i = i + 1
+    if i = 5 then
+      continue while
+    end if
+  wend
+  i
+end if", 5)>
+    <InlineData("
+if true then
+  dim i = 0
+  do
+    let i = i + 1
+    if i = 5 then
+      continue do
+    end if
+  loop while i < 5
+  i
+end if", 5)>
+    Public Sub Evaluator_Computes_CorrectValues(text As String, expectedValue As Object)
       AssertValue(text, expectedValue)
     End Sub
     '    <InlineData("

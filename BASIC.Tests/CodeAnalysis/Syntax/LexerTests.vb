@@ -138,6 +138,7 @@ Namespace BASIC.CodeAnalysis.Syntax
       If t1Kind = SyntaxKind.LessThanToken AndAlso t2Kind = SyntaxKind.EqualToken Then Return True
       If t1Kind = SyntaxKind.LessThanToken AndAlso t2Kind = SyntaxKind.GreaterThanToken Then Return True
       If t1Kind = SyntaxKind.LessThanToken AndAlso t2Kind = SyntaxKind.GreaterThanEqualToken Then Return True
+      If t2Kind = SyntaxKind.DollarToken Then Return True
       Return False
     End Function
 

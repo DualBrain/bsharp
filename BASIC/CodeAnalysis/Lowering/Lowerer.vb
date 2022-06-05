@@ -156,28 +156,21 @@ Namespace Basic.CodeAnalysis.Lowering
       '   *statements*
       ' continue:
       '   gotoTrue *expression* body
-      ' end:
+      ' exit:
 
-      'Dim continueLabel = GenerateLabel()
-      Dim checkLabel = GenerateLabel()
-      'Dim endLabel = GenerateLabel()
+      Dim bodyLabel = GenerateLabel()
 
-      Dim gotoCheck = New BoundGotoStatement(checkLabel)
-      'Dim continueLabelStatement = New BoundLabelStatement(continueLabel)
+      Dim gotoContinue = New BoundGotoStatement(node.ContinueLabel)
+      Dim bodyLabelStatement = New BoundLabelStatement(bodyLabel)
       Dim continueLabelStatement = New BoundLabelStatement(node.ContinueLabel)
-      Dim checkLabelStatement = New BoundLabelStatement(checkLabel)
-      'Dim gotoTrue = New BoundConditionalGotoStatement(continueLabel, node.Expression, True)
-      Dim gotoTrue = New BoundConditionalGotoStatement(node.ContinueLabel, node.Expression, True)
-      'Dim endLabelStatement = New BoundLabelStatement(endLabel)
+      Dim gotoTrue = New BoundConditionalGotoStatement(bodyLabel, node.Expression, True)
       Dim exitLabelStatement = New BoundLabelStatement(node.ExitLabel)
 
       Dim builder = ImmutableArray.CreateBuilder(Of BoundStatement)
-      builder.Add(gotoCheck)
-      builder.Add(continueLabelStatement)
-      'For Each statement In node.Body
+      builder.Add(gotoContinue)
+      builder.Add(bodyLabelStatement)
       builder.Add(node.Statements)
-      'Next
-      builder.Add(checkLabelStatement)
+      builder.Add(continueLabelStatement)
       builder.Add(gotoTrue)
       builder.Add(exitLabelStatement)
       Dim result = New BoundBlockStatement(builder.ToImmutable)
@@ -214,22 +207,20 @@ Namespace Basic.CodeAnalysis.Lowering
       '
       ' body:
       '   *statements*
-      ' check:
       ' continue:
       ' gotoTrue *expression* body
-      ' break:
+      ' exit:
 
-      'Dim continueLabel = GenerateLabel()
-
-      'Dim continueLabelStatement = New BoundLabelStatement(continueLabel)
-      'Dim gotoTrue = New BoundConditionalGotoStatement(continueLabel, node.Expression)
+      Dim bodyLabel = GenerateLabel()
+      Dim bodyLabelStatement = New BoundLabelStatement(bodyLabel)
       Dim continueLabelStatement = New BoundLabelStatement(node.ContinueLabel)
-      Dim gotoTrue = New BoundConditionalGotoStatement(node.ContinueLabel, node.Expression)
+      Dim gotoTrue = New BoundConditionalGotoStatement(bodyLabel, node.Expression)
       Dim exitLabelStatement = New BoundLabelStatement(node.ExitLabel)
 
       Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(
-        continueLabelStatement,
+        bodyLabelStatement,
         node.Statements,
+        continueLabelStatement,
         gotoTrue,
         exitLabelStatement))
 
@@ -256,17 +247,16 @@ Namespace Basic.CodeAnalysis.Lowering
       ' gotoTrue *expression* body
       ' break:
 
-      'Dim continueLabel = GenerateLabel()
-
-      'Dim continueLabelStatement = New BoundLabelStatement(continueLabel)
-      'Dim gotoTrue = New BoundConditionalGotoStatement(continueLabel, node.Expression)
+      Dim bodyLabel = GenerateLabel()
+      Dim bodyLabelStatement = New BoundLabelStatement(bodyLabel)
       Dim continueLabelStatement = New BoundLabelStatement(node.ContinueLabel)
-      Dim gotoTrue = New BoundConditionalGotoStatement(node.ContinueLabel, node.Expression)
+      Dim gotoTrue = New BoundConditionalGotoStatement(bodyLabel, node.Expression)
       Dim exitLabelStatement = New BoundLabelStatement(node.ExitLabel)
 
       Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(
-        continueLabelStatement,
+        bodyLabelStatement,
         node.Statements,
+        continueLabelStatement,
         gotoTrue,
         exitLabelStatement))
 
@@ -324,8 +314,6 @@ Namespace Basic.CodeAnalysis.Lowering
                   BoundBinaryOperator.Bind(SyntaxKind.PlusToken, TypeSymbol.Integer, TypeSymbol.Integer),
                   New BoundLiteralExpression(1))))
 
-      'Dim whileBody = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(node.Body, increment))
-      'Dim whileStatement = New BoundWhileStatement(condition, whileBody)
       Dim whileBody = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(
           node.Body,
           continueLabelStatement,
