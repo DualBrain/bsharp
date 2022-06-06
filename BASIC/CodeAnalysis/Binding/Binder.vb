@@ -301,8 +301,8 @@ Namespace Basic.CodeAnalysis.Binding
 
     Private Function BindForStatement(syntax As ForStatementSyntax) As BoundStatement
 
-      Dim lowerBound = BindExpression(syntax.startValue, TypeSymbol.Integer)
-      Dim upperBound = BindExpression(syntax.endValue, TypeSymbol.Integer)
+      Dim lowerBound = BindExpression(syntax.StartValue, TypeSymbol.Integer)
+      Dim upperBound = BindExpression(syntax.EndValue, TypeSymbol.Integer)
       Dim stepper = If(syntax.Increment Is Nothing, Nothing, BindExpression(syntax.Increment, TypeSymbol.Integer))
 
       m_scope = New BoundScope(m_scope)
@@ -537,18 +537,37 @@ Namespace Basic.CodeAnalysis.Binding
       End If
 
       If syntax.Arguments.Count <> f.Parameters.Length Then
-        m_diagnostics.ReportWrongArgumentCount(syntax.Span, f.Name, f.Parameters.Length, syntax.Arguments.Count)
+        Dim span1 As TextSpan
+        If syntax.Arguments.Count > f.Parameters.Length Then
+          Dim firstExceedingNode As SyntaxNode
+          If f.Parameters.Length > 0 Then
+            firstExceedingNode = syntax.Arguments.GetSeparator(f.Parameters.Length - 1)
+          Else firstExceedingNode = syntax.Arguments(0)
+          End If
+          Dim lastExceedingArgument = syntax.Arguments(syntax.Arguments.Count - 1)
+          span1 = TextSpan.FromBounds(firstExceedingNode.Span.Start, lastExceedingArgument.Span.[End])
+        Else
+          span1 = syntax.CloseParenToken.Span
+        End If
+        m_diagnostics.ReportWrongArgumentCount(span1, f.Name, f.Parameters.Length, syntax.Arguments.Count)
         Return New BoundErrorExpression
       End If
 
+      Dim hasErrors = False
       For i = 0 To syntax.Arguments.Count - 1
         Dim argument = boundArguments(i)
         Dim parameter = f.Parameters(i)
         If argument.Type IsNot parameter.Type Then
-          m_diagnostics.ReportWrongArgumentType(syntax.Arguments(i).Span, parameter.Name, parameter.Type, argument.Type)
-          Return New BoundErrorExpression
+          If argument.Type IsNot TypeSymbol.Error Then
+            m_diagnostics.ReportWrongArgumentType(syntax.Arguments(i).Span, parameter.Name, parameter.Type, argument.Type)
+          End If
+          hasErrors = True
         End If
       Next
+
+      If hasErrors Then
+        Return New BoundErrorExpression
+      End If
 
       Return New BoundCallExpression(f, boundArguments.ToImmutable())
 

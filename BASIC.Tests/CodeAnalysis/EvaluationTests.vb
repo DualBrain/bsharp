@@ -476,6 +476,33 @@ end if", 5)>
 
     End Sub
 
+
+    <Fact>
+    Public Sub Evaluator_InvokeFunctionArguments_Missing()
+
+      Dim text As String = "
+        print([)]"
+
+      Dim diagnostics As String = "
+        Function 'print' requires 1 arguments but was given 0."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_InvokeFunctionArguments_Exceeding()
+
+      Dim text As String = "
+        print(""Hello""[, "" "", "" world!""])"
+
+      Dim diagnostics As String = "
+        Function 'print' requires 1 arguments but was given 3."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
     <Fact>
     Public Shared Sub Evaluator_AssignmentExpression_Reports_CannotConvert()
 
