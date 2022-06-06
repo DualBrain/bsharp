@@ -79,7 +79,9 @@ Namespace Basic.CodeAnalysis.Syntax
 
       Select Case text
 
-        Case "end" : Return SyntaxKind.EndKeyword
+        'Case "end" : Return SyntaxKind.EndKeyword
+        Case "end if" : Return SyntaxKind.EndIfKeyword
+        Case "end function" : Return SyntaxKind.EndFunctionKeyword
 
         Case "if" : Return SyntaxKind.IfKeyword
         Case "then" : Return SyntaxKind.ThenKeyword
@@ -135,7 +137,8 @@ Namespace Basic.CodeAnalysis.Syntax
 
       Select Case kind
 
-        Case SyntaxKind.EndKeyword : Return "end"
+        Case SyntaxKind.EndFunctionKeyword : Return "end function"
+        Case SyntaxKind.EndIfKeyword : Return "end if"
 
         Case SyntaxKind.WhileKeyword : Return "while"
         Case SyntaxKind.WendKeyword : Return "wend"
@@ -193,7 +196,7 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.CloseParenToken : Return ")"
         Case SyntaxKind.OpenBraceToken : Return "{"
         Case SyntaxKind.CloseBraceToken : Return "}"
-        Case SyntaxKind.PipeToken : Return "|"
+        'Case SyntaxKind.PipeToken : Return "|"
         Case SyntaxKind.EqualToken : Return "="
         Case SyntaxKind.LessThanToken : Return "<"
         Case SyntaxKind.PeriodToken : Return "."
@@ -201,7 +204,7 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.CommaToken : Return ","
         Case SyntaxKind.SemicolonToken : Return ";"
         Case SyntaxKind.QuestionToken : Return "?"
-        Case SyntaxKind.DollarToken : Return "$"
+        'Case SyntaxKind.DollarToken : Return "$"
         Case SyntaxKind.GreaterThanEqualToken : Return ">="
         Case SyntaxKind.LessThanEqualToken : Return "<="
         Case SyntaxKind.LessThanGreaterThanToken : Return "<>"

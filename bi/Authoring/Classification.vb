@@ -2,8 +2,8 @@
 
   Public Enum Classification
     Text
-    Identifier
     Keyword
+    Identifier
     Number
     [String]
     Comment

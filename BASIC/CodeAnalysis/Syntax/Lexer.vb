@@ -214,7 +214,7 @@ Namespace Basic.CodeAnalysis.Syntax
         Case ")"c : m_kind = SyntaxKind.CloseParenToken : m_position += 1
         Case "{"c : m_kind = SyntaxKind.OpenBraceToken : m_position += 1
         Case "}"c : m_kind = SyntaxKind.CloseBraceToken : m_position += 1
-        Case "|"c : m_kind = SyntaxKind.PipeToken : m_position += 1
+        'Case "|"c : m_kind = SyntaxKind.PipeToken : m_position += 1
         Case "="c : m_kind = SyntaxKind.EqualToken : m_position += 1
         Case ">"c ' > >=
           Select Case LookAhead
@@ -232,7 +232,7 @@ Namespace Basic.CodeAnalysis.Syntax
         Case ":"c : m_kind = SyntaxKind.ColonToken : m_position += 1
         Case ";"c : m_kind = SyntaxKind.SemicolonToken : m_position += 1
         Case "?"c : m_kind = SyntaxKind.QuestionToken : m_position += 1
-        Case "$"c : m_kind = SyntaxKind.DollarToken : m_position += 1
+        'Case "$"c : m_kind = SyntaxKind.DollarToken : m_position += 1
         Case ChrW(34)
           ReadString()
         Case "0"c, "1"c, "2"c, "3"c, "4"c, "5"c, "6"c, "7"c, "8"c, "9"c
@@ -333,12 +333,40 @@ Namespace Basic.CodeAnalysis.Syntax
       'Dim text = m_text.ToString(m_start, length)
       'm_kind = SyntaxFacts.GetKeywordKind(text)
 
-      While Char.IsLetter(Current) OrElse Current = "_"c OrElse Current = "$"c
+      While Char.IsLetterOrDigit(Current) OrElse Current = "_"c OrElse Current = "$"c
         m_position += 1
       End While
 
       Dim length = m_position - m_start
       Dim text = m_text.ToString(m_start, length)
+
+      If text = "end" AndAlso Current = " "c Then
+
+        Dim currentPosition = m_position
+
+        ' skip spaces...
+        While Current = " "c
+          m_position += 1
+        End While
+
+        Dim st = m_position
+
+        While Char.IsLetter(Current)
+          m_position += 1
+        End While
+
+        Dim l = m_position - st
+        Dim possible = m_text.ToString(st, l)
+
+        Select Case possible
+          Case "function", "if"
+            length = m_position - m_start
+            text = m_text.ToString(m_start, length)
+          Case Else
+            m_position = currentPosition
+        End Select
+
+      End If
 
       m_kind = SyntaxFacts.GetKeywordKind(text)
 

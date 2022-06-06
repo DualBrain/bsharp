@@ -1,4 +1,5 @@
 ﻿'Imports System.Reflection
+Imports System.Reflection
 Imports Basic.CodeAnalysis.Text
 
 Namespace Basic.CodeAnalysis.Syntax
@@ -43,30 +44,30 @@ Namespace Basic.CodeAnalysis.Syntax
       End Get
     End Property
 
-    Public MustOverride Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
+    'Public MustOverride Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
 
-    'Public Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
+    Public Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
 
-    '  Dim properties = [GetType].GetProperties(BindingFlags.Public Or BindingFlags.Instance)
+      Dim properties = [GetType].GetProperties(BindingFlags.Public Or BindingFlags.Instance)
 
-    '  For Each prop In properties
-    '    If GetType(SyntaxNode).IsAssignableFrom(prop.PropertyType) Then
-    '      Dim child = TryCast(prop.GetValue(Me), SyntaxNode)
-    '      If child IsNot Nothing Then Yield child
-    '    ElseIf GetType(SeparatedSyntaxList).IsAssignableFrom(prop.PropertyType) Then
-    '      Dim separatedSyntaxList = TryCast(prop.GetValue(Me), SeparatedSyntaxList)
-    '      For Each child In separatedSyntaxList.GetWithSeparators
-    '        If child IsNot Nothing Then Yield child
-    '      Next
-    '    ElseIf GetType(IEnumerable(Of SyntaxNode)).IsAssignableFrom(prop.PropertyType) Then
-    '      Dim values = TryCast(prop.GetValue(Me), IEnumerable(Of SyntaxNode))
-    '      For Each child In values
-    '        If child IsNot Nothing Then Yield child
-    '      Next
-    '    End If
-    '  Next
+      For Each prop In properties
+        If GetType(SyntaxNode).IsAssignableFrom(prop.PropertyType) Then
+          Dim child = TryCast(prop.GetValue(Me), SyntaxNode)
+          If child IsNot Nothing Then Yield child
+        ElseIf GetType(SeparatedSyntaxList).IsAssignableFrom(prop.PropertyType) Then
+          Dim separatedSyntaxList = TryCast(prop.GetValue(Me), SeparatedSyntaxList)
+          For Each child In separatedSyntaxList.GetWithSeparators
+            If child IsNot Nothing Then Yield child
+          Next
+        ElseIf GetType(IEnumerable(Of SyntaxNode)).IsAssignableFrom(prop.PropertyType) Then
+          Dim values = TryCast(prop.GetValue(Me), IEnumerable(Of SyntaxNode))
+          For Each child In values
+            If child IsNot Nothing Then Yield child
+          Next
+        End If
+      Next
 
-    'End Function
+    End Function
 
     Public Function GetLastToken() As SyntaxToken
       If TypeOf Me Is SyntaxToken Then Return CType(Me, SyntaxToken)

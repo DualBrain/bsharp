@@ -1,14 +1,6 @@
-﻿Option Explicit On
-Option Strict On
-Option Infer On
-
-Imports System.Collections.ObjectModel
+﻿Imports System.Collections.ObjectModel
 Imports System.Collections.Specialized
-Imports System.ComponentModel
-Imports System.Console
-Imports System.ConsoleColor
 Imports System.Reflection
-Imports System.Security.Cryptography
 Imports System.Text
 Imports Basic.IO
 
@@ -28,16 +20,14 @@ Namespace Basic
     Private Sub InitializeMetaCommands()
 
       Dim methods = [GetType]().GetMethods(BindingFlags.Public Or
-                                         BindingFlags.NonPublic Or
-                                         BindingFlags.Static Or
-                                         BindingFlags.Instance Or
-                                         BindingFlags.FlattenHierarchy)
+                                           BindingFlags.NonPublic Or
+                                           BindingFlags.Static Or
+                                           BindingFlags.Instance Or
+                                           BindingFlags.FlattenHierarchy)
 
       For Each method In methods
 
-        'Dim attribute = CType(method.GetCustomAttribute(GetType(MetaCommandAttribute)), MetaCommandAttribute)
         Dim attribute = method.GetCustomAttribute(Of MetaCommandAttribute)
-
         If attribute Is Nothing Then Continue For
 
         Dim metaCommand = New MetaCommand(attribute.Name, attribute.Description, method)
@@ -51,7 +41,7 @@ Namespace Basic
       Do
         Dim text = EditSubmission()
         If String.IsNullOrEmpty(text) Then
-          'Return
+          Continue Do
         End If
         If Not text.Contains(Environment.NewLine) AndAlso text.StartsWith("#") Then
           EvaluateMetaCommand(text)
@@ -67,9 +57,9 @@ Namespace Basic
 
     Private NotInheritable Class SubmissionView
 
-      Private WithEvents SubmissionDocument As ObservableCollection(Of String)
-      Private ReadOnly m_cursorTop As Integer
       Private ReadOnly m_lineRenderer As LineRenderHandler
+      Private WithEvents SubmissionDocument As ObservableCollection(Of String)
+      Private m_cursorTop As Integer
       Private m_renderedLineCount As Integer
       Private m_currentLine As Integer
       Private m_currentCharacter As Integer
@@ -77,7 +67,7 @@ Namespace Basic
       Sub New(lineRenderer As LineRenderHandler, submissionDocument As ObservableCollection(Of String))
         m_lineRenderer = lineRenderer
         Me.SubmissionDocument = submissionDocument
-        m_cursorTop = CursorTop
+        m_cursorTop = Console.CursorTop
         Render()
       End Sub
 
@@ -87,48 +77,56 @@ Namespace Basic
 
       Private Sub Render()
 
-        'SetCursorPosition(0, Me.m_cursorTop)
-        CursorVisible = False
+        'Console.SetCursorPosition(0, Me.m_cursorTop)
+        Console.CursorVisible = False
 
         Dim lineCount = 0
         Dim state = CObj(Nothing)
 
         For Each line In SubmissionDocument
 
-          SetCursorPosition(0, m_cursorTop + lineCount)
-          ForegroundColor = Green
-
-          If lineCount = 0 Then
-            Write("» ")
-          Else
-            Write("· ")
+          If m_cursorTop + lineCount >= Console.WindowHeight Then
+            Console.SetCursorPosition(0, Console.WindowHeight - 1)
+            Console.WriteLine()
+            If m_cursorTop > 0 Then m_cursorTop -= 1
           End If
 
-          ResetColor()
-          m_lineRenderer(SubmissionDocument, lineCount, state)
-          Write(New String(" "c, WindowWidth - line.Length - 2))
+          Console.SetCursorPosition(0, m_cursorTop + lineCount)
+          Console.ForegroundColor = ConsoleColor.Green
+
+          If lineCount = 0 Then
+            Console.Write("» ")
+          Else
+            Console.Write("· ")
+          End If
+
+          Console.ResetColor()
+          state = m_lineRenderer(SubmissionDocument, lineCount, state)
+          Console.Write(New String(" "c, Console.WindowWidth - line.Length - 2))
           lineCount += 1
 
         Next
 
         Dim numberOfBlankLines = m_renderedLineCount - lineCount
         If numberOfBlankLines > 0 Then
-          Dim blankLine = New String(" "c, WindowWidth)
+          Dim blankLine = New String(" "c, Console.WindowWidth)
           For i = 0 To numberOfBlankLines - 1
-            SetCursorPosition(0, m_cursorTop + lineCount + i)
-            WriteLine(blankLine)
-            'numberOfBlankLines -= 1
+            Console.SetCursorPosition(0, m_cursorTop + lineCount + i)
+            Console.WriteLine(blankLine)
           Next
         End If
 
         m_renderedLineCount = lineCount
-        CursorVisible = True
+
+        Console.CursorVisible = True
         UpdateCursorPosition()
 
       End Sub
 
       Private Sub UpdateCursorPosition()
-        SetCursorPosition(2 + CurrentCharacter, m_cursorTop + CurrentLine)
+        'Console.SetCursorPosition(2 + CurrentCharacter, m_cursorTop + CurrentLine)
+        Console.CursorTop = m_cursorTop + m_currentLine
+        Console.CursorLeft = 2 + m_currentCharacter
       End Sub
 
       Public Property CurrentLine As Integer
@@ -166,13 +164,13 @@ Namespace Basic
       Dim view = New SubmissionView(AddressOf RenderLine, document)
 
       While Not m_done
-        Dim key = ReadKey(True)
+        Dim key = Console.ReadKey(True)
         HandleKey(key, document, view)
       End While
 
       view.CurrentLine = document.Count - 1
       view.CurrentCharacter = document(view.CurrentLine).Length
-      WriteLine()
+      Console.WriteLine()
 
       Return String.Join(Environment.NewLine, document)
 
@@ -203,7 +201,6 @@ Namespace Basic
           Case Else
         End Select
       End If
-      'If key.KeyChar >= " "c Then
       If key.Key <> ConsoleKey.Backspace AndAlso key.KeyChar >= " "c Then
         HandleTyping(document, view, key.KeyChar.ToString)
       End If
@@ -239,8 +236,6 @@ Namespace Basic
     End Sub
 
     Private Sub HandleLeftArrow(document As ObservableCollection(Of String), view As SubmissionView)
-      If document Is Nothing Then
-      End If
       If view.CurrentCharacter > 0 Then
         view.CurrentCharacter -= 1
       End If
@@ -254,8 +249,6 @@ Namespace Basic
     End Sub
 
     Private Sub HandleUpArrow(document As ObservableCollection(Of String), view As SubmissionView)
-      If document Is Nothing Then
-      End If
       If view.CurrentLine > 0 Then
         view.CurrentLine -= 1
       End If
@@ -292,9 +285,7 @@ Namespace Basic
       Dim line = document(lineIndex)
       Dim start = view.CurrentCharacter
       If start >= line.Length Then
-        If view.CurrentLine = document.Count - 1 Then
-          Return
-        End If
+        If view.CurrentLine = document.Count - 1 Then Return
         Dim nextLine = document(view.CurrentLine + 1)
         document(view.CurrentLine) &= nextLine
         document.RemoveAt(view.CurrentLine + 1)
@@ -306,8 +297,6 @@ Namespace Basic
     End Sub
 
     Private Sub HandleHome(document As ObservableCollection(Of String), view As SubmissionView)
-      If document Is Nothing Then
-      End If
       view.CurrentCharacter = 0
     End Sub
 
@@ -324,7 +313,6 @@ Namespace Basic
     End Sub
 
     Private Sub HandlePageDown(document As ObservableCollection(Of String), view As SubmissionView)
-      If m_submissionHistory.Count = 0 Then Return
       m_submissionHistoryIndex += 1
       If m_submissionHistoryIndex > m_submissionHistory.Count - 1 Then
         m_submissionHistoryIndex = 0
@@ -407,9 +395,9 @@ Namespace Basic
       Dim command = m_metaCommands.SingleOrDefault(Function(mc) mc.Name = commandName)
 
       If command Is Nothing Then
-        ForegroundColor = Red
-        WriteLine($"Invalid command {input}.")
-        ResetColor()
+        Console.ForegroundColor = ConsoleColor.Red
+        Console.WriteLine($"Invalid command {input}.")
+        Console.ResetColor()
         Return
       End If
 
@@ -417,10 +405,10 @@ Namespace Basic
 
       If args.Count <> parameters.Length Then
         Dim parameterNames = String.Join(" ", parameters.Select(Function(p) $"<{p.Name}>"))
-        ForegroundColor = Red
-        WriteLine($"error: invalid number of arguments")
-        WriteLine($"usage: #{command.Name} {parameterNames}")
-        ResetColor()
+        Console.ForegroundColor = ConsoleColor.Red
+        Console.WriteLine($"error: invalid number of arguments")
+        Console.WriteLine($"usage: #{command.Name} {parameterNames}")
+        Console.ResetColor()
         Return
       End If
 
@@ -447,7 +435,7 @@ Namespace Basic
     End Sub
 
     Protected Overridable Function RenderLine(lines As IReadOnlyList(Of String), lineIndex As Integer, state As Object) As Object
-      Write(lines(lineIndex))
+      Console.Write(lines(lineIndex))
       Return state
     End Function
 

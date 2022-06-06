@@ -61,24 +61,27 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData("1 xor 0", 1)>
     <InlineData("0 xor 1", 1)>
     <InlineData("1 xor 2", 3)>
-    <InlineData("dim a = 10", 10)>
+    <InlineData("dim a = 10
+return a", 10)>
     <InlineData("string(true)", "True")>
     <InlineData("string(1)", "1")>
     <InlineData("boolean(""true"")", True)>
     <InlineData("integer(""1"")", 1)>
     <InlineData("rnd(0)", 0)>
-    <InlineData("{ dim a = 10
-(a * a) }", 100)>
+    <InlineData("if true then
+    dim a = 10
+    return (a * a) 
+end if", 100)>
     <InlineData("{ dim b = 0
 let b = 10
-b * b }", 100)>
+return b * b }", 100)>
     <InlineData("
 { 
   dim c = 0
   if c = 0 then
     let c = 10
   end if
-  c
+  return c
 }", 10)>
     <InlineData("
 { 
@@ -86,7 +89,7 @@ b * b }", 100)>
   if d = 4 then
     let d = 10
   end if
-  d
+  return d
 }", 0)>
     <InlineData("
 { 
@@ -94,10 +97,10 @@ b * b }", 100)>
   if e = 4 then
     let e = 10
   else
-    let e = 20
+    let e = 22
   end if
-  e
-}", 20)>
+  return e
+}", 22)>
     <InlineData("
 { 
   dim f = 10
@@ -108,7 +111,7 @@ b * b }", 100)>
     let f = f - 1
   }
   wend
-  result
+  return result
 }", 55)>
     <InlineData("
 { 
@@ -116,44 +119,30 @@ b * b }", 100)>
   for g = 1 to 10
     let result = result + g
   next
-  result
+  return result
 }", 55)>
     <InlineData("
 { 
-  dim result = 0
-  if true then let result = 10
-  result
-}", 10)>
-    <InlineData("
-{ 
-  dim result = 0
-  if true then let result = 10 else
-  result
-}", 10)>
-    <InlineData("
-{ 
-  dim result = 0
-  if false then let result = 10 else let result = 20
-  result
-}", 20)>
-    <InlineData("
-{ 
-  dim result = 0
-  if true then 
-    let result = 10 
-  end if
-  result
+  dim resultA = 0
+  if true then let resultA = 10
+  return resultA
 }", 10)>
     <InlineData("
 { 
   dim result = 0
   if true then 
     let result = 10 
-  else 
-    let result = 20
   end if
-  result
+  return result
 }", 10)>
+    <InlineData("
+{ 
+  dim result = 0
+  if true then 
+    let result = 11
+  end if
+  return result
+}", 11)>
     <InlineData("
 { 
   dim result = 0
@@ -161,20 +150,17 @@ b * b }", 100)>
     dim h = 0
     let h = h + 10
     let result = h
-  else
-    dim i = 0
-    let i = i + 10
-    let result = i
   end if
-  let result = result + 10
-}", 20)>
+  let result = result + 11
+  return result
+}", 21)>
     <InlineData("
 { 
   dim j = 10
   for i = 1 to j - 1
     let j = j + i
   next 
-  j
+  return j
 }", 55)>
     <InlineData("
 { 
@@ -182,7 +168,7 @@ b * b }", 100)>
   do
     let a = a + 1
   loop while a < 10
-  a
+  return a
 }", 10)>
     <InlineData("
 if true then
@@ -193,7 +179,7 @@ if true then
       continue while
     end if
   wend
-  i
+  return i
 end if", 5)>
     <InlineData("
 if true then
@@ -204,7 +190,7 @@ if true then
       continue do
     end if
   loop while i < 5
-  i
+  return i
 end if", 5)>
     Public Sub Evaluator_Computes_CorrectValues(text As String, expectedValue As Object)
       AssertValue(text, expectedValue)
@@ -254,11 +240,10 @@ end if", 5)>
             dim x = 20 
           else
             dim y = 30
-          [][]"
+          []"
 
       Dim diagnostics = "
-        Unexpected token <EndOfFileToken>, expected <EndKeyword>.
-        Unexpected token <EndOfFileToken>, expected <IfKeyword>."
+        Unexpected token <EndOfFileToken>, expected <EndIfKeyword>."
 
       AssertDiagnostics(text, diagnostics)
 
@@ -272,12 +257,10 @@ end if", 5)>
             dim x = 20 
           else
             dim y = 30
-          [end] [][]"
+          end []"
 
       Dim diagnostics = "
-         Unexpected token <EndKeyword>, expected <IdentifierToken>.
-         Unexpected token <EndOfFileToken>, expected <EndKeyword>.
-         Unexpected token <EndOfFileToken>, expected <IfKeyword>."
+         Unexpected token <EndOfFileToken>, expected <EndIfKeyword>."
 
       AssertDiagnostics(text, diagnostics)
 
@@ -287,12 +270,11 @@ end if", 5)>
     Public Sub Evaluator_If_MissingTrueStatement()
 
       Dim text = "
-          if true then [][]
+          if true then []
 "
 
       Dim diagnostics = "
-        Unexpected token <EndOfFileToken>, expected <EndKeyword>.
-        Unexpected token <EndOfFileToken>, expected <IfKeyword>."
+        Unexpected token <EndOfFileToken>, expected <EndIfKeyword>."
 
       AssertDiagnostics(text, diagnostics)
 
@@ -397,7 +379,7 @@ end if", 5)>
     <Fact>
     Public Sub Evaluator_NameExpression_Reports_Undefined()
 
-      Dim text = "let [x] * 10"
+      Dim text = "let [x] = 10"
 
       Dim diagnostics = "Variable 'x' doesn't exist."
 
@@ -549,7 +531,7 @@ end if", 5)>
         end function"
 
       Dim diagnostics = "
-        Since the function 'test' does not return a value the 'return' keyword cannot be followed by an expression."
+        Since the function 'test' does not return a value, the 'return' keyword cannot be followed by an expression."
 
       AssertDiagnostics(text, diagnostics)
 
@@ -656,19 +638,6 @@ end if", 5)>
     'End Sub
 
     <Fact>
-    Public Sub Evaluator_Invalid_Return()
-
-      Dim text = "
-        [return]"
-
-      Dim diagnostics = "
-        The 'return' keyword can only be used inside of functions."
-
-      AssertDiagnostics(text, diagnostics)
-
-    End Sub
-
-    <Fact>
     Public Sub Evaluator_Parameter_Already_Declared()
 
       Dim text = "
@@ -709,7 +678,7 @@ end if", 5)>
         test([testValue])"
 
       Dim diagnostics = "
-        Parameter 'n' requires a value of type 'integer' but was given a value of type 'string'."
+        Cannot convert type 'string' to 'integer'. An explicit conversion exists (are you missing a cast?)"
 
       AssertDiagnostics(text, diagnostics)
 
@@ -732,7 +701,7 @@ end if", 5)>
 
     Private Shared Sub AssertValue(text As String, expectedValue As Object)
       Dim tree = SyntaxTree.Parse(text)
-      Dim c = New Compilation(tree)
+      Dim c = Basic.CodeAnalysis.Compilation.CreateScript(Nothing, tree)
       Dim vars = New Dictionary(Of VariableSymbol, Object)
       Dim result = c.Evaluate(vars)
       Assert.Empty(result.Diagnostics)
@@ -743,7 +712,7 @@ end if", 5)>
 
       Dim at = AnnotatedText.Parse(text)
       Dim tree = SyntaxTree.Parse(at.Text)
-      Dim compilation = New Compilation(tree) 'compilation.CreateScript(Nothing, tree)
+      Dim compilation = Basic.CodeAnalysis.Compilation.CreateScript(Nothing, tree)
       Dim result = compilation.Evaluate(New Dictionary(Of VariableSymbol, Object))
 
       Dim expectedDiagnostics = AnnotatedText.UnindentLines(diagnosticText)
@@ -761,7 +730,7 @@ end if", 5)>
         Assert.Equal(expectedMessage, actualMessage)
 
         Dim expectedSpan = at.Spans(i)
-        Dim actualSpan = result.Diagnostics(i).Span 'result.Diagnostics(i).Location.Span
+        Dim actualSpan = result.Diagnostics(i).Location.Span
         Assert.Equal(expectedSpan, actualSpan)
 
       Next

@@ -39,9 +39,9 @@ Namespace Basic.CodeAnalysis.Syntax
     Public ReadOnly Property LeadingTrivia As ImmutableArray(Of SyntaxTrivia)
     Public ReadOnly Property TrailingTrivia As ImmutableArray(Of SyntaxTrivia)
 
-    Public Overrides Function GetChildren() As IEnumerable(Of SyntaxNode)
-      Return Array.Empty(Of SyntaxNode)
-    End Function
+    'Public Overrides Function GetChildren() As IEnumerable(Of SyntaxNode)
+    '  Return Array.Empty(Of SyntaxNode)
+    'End Function
 
     ''' <summary>
     ''' A token is missing if it was inserted by the parser and doesn't appear in source

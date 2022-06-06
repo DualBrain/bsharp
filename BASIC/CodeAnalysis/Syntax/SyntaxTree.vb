@@ -70,7 +70,7 @@ Namespace Basic.CodeAnalysis.Syntax
       m_parsedTokens.Clear()
       ' ParseTokens local function was here....
       Dim st = New SyntaxTree(text, AddressOf ParseTokens_ParseTokens)
-      diagnostics = st.Diagnostics.ToImmutableArray
+      diagnostics = st.Diagnostics '.ToImmutableArray
       Return m_parsedTokens.ToImmutableArray
     End Function
 

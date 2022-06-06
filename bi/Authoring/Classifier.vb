@@ -15,19 +15,27 @@ Namespace BASIC.CodeAnalysis.Authoring
     End Function
 
     Private Shared Sub ClassifyNode(node As SyntaxNode, span As TextSpan, result As ImmutableArray(Of ClassifiedSpan).Builder)
-      If node Is Nothing Then Return
-      Dim test As Boolean
-      Try
-        test = node.FullSpan.OverlapsWith(span)
-      Catch
-      End Try
-      If Not test Then Return
+
+      ' The following line is causing significant issues with
+      ' how the text is rendered; this is especially true of the
+      ' IF statements.
+      '
+      ' >> if true then
+      '
+      ' The above would be rendered invisible until something else is
+      ' typed after...
+
+      ' Removing the line appears to resolve this particular problem.
+
+      'If Not node.FullSpan.OverlapsWith(span) Then Return
+
       If TypeOf node Is SyntaxToken Then
         ClassifyToken(CType(node, SyntaxToken), span, result)
       End If
       For Each child In node.GetChildren
         ClassifyNode(child, span, result)
       Next
+
     End Sub
 
     Private Shared Sub ClassifyToken(token As SyntaxToken, span As TextSpan, result As ImmutableArray(Of ClassifiedSpan).Builder)
@@ -50,6 +58,16 @@ Namespace BASIC.CodeAnalysis.Authoring
 
       Dim adjustedStart = Math.Max(elementSpan.Start, span.Start)
       Dim adjustedEnd = Math.Min(elementSpan.End, span.End)
+
+      ' If I remove the above Overlap check, need the following 
+      ' in place as a protection. Encountered when I do...
+      ' 
+      ' >> if true then
+      '  . 
+      '
+      'If adjustedStart > adjustedEnd Then adjustedEnd = adjustedStart
+      If adjustedStart > adjustedEnd Then If Debugger.IsAttached Then Stop
+
       Dim adjustedSpan = TextSpan.FromBounds(adjustedStart, adjustedEnd)
       Dim classification = GetClassification(elementKind)
 
@@ -61,8 +79,8 @@ Namespace BASIC.CodeAnalysis.Authoring
     Private Shared Function GetClassification(kind As SyntaxKind) As Classification
 
       Dim isKeyword = kind.Is_Keyword
-      Dim isNumber = kind = SyntaxKind.NumberToken
       Dim isIdentifier = kind = SyntaxKind.IdentifierToken
+      Dim isNumber = kind = SyntaxKind.NumberToken
       Dim isString = kind = SyntaxKind.StringToken
       Dim isComment = kind.IsComment
 

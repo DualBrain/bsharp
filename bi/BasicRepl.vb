@@ -7,8 +7,8 @@ Imports BASIC.CodeAnalysis.Symbols
 Imports BASIC.CodeAnalysis.Syntax
 Imports BASIC.CodeAnalysis.Authoring
 Imports BASIC.IO
-Imports System.Console
-Imports System.ConsoleColor
+'Imports System.Console
+'Imports System.ConsoleColor
 Imports System.IO
 
 Namespace BASIC
@@ -50,35 +50,26 @@ Namespace BASIC
         tree = CType(state, SyntaxTree)
       End If
 
-      If True Then
+      Dim lineSpan = tree.Text.Lines(lineIndex).Span
+      Dim classifiedSpans = Classifier.Classify(tree, lineSpan)
 
-        ' TODO: We have some sort of issues in this area....
+      For Each classifiedSpan In classifiedSpans
 
-        Dim lineSpan = tree.Text.Lines(lineIndex).Span
-        Dim classifiedSpans = Classifier.Classify(tree, lineSpan)
+        Dim classifiedText = tree.Text.ToString(classifiedSpan.Span)
 
-        For Each classifiedSpan In classifiedSpans
+        Select Case classifiedSpan.Classification
+          Case Classification.Keyword : Console.ForegroundColor = ConsoleColor.Blue
+          Case Classification.Identifier : Console.ForegroundColor = ConsoleColor.DarkYellow
+          Case Classification.Number : Console.ForegroundColor = ConsoleColor.Cyan
+          Case Classification.String : Console.ForegroundColor = ConsoleColor.Magenta
+          Case Classification.Comment : Console.ForegroundColor = ConsoleColor.Green
+          Case Else : Console.ForegroundColor = ConsoleColor.White 'DarkGray
+        End Select
 
-          Dim classifiedText = tree.Text.ToString(classifiedSpan.Span)
+        Console.Write(classifiedText)
+        Console.ResetColor()
 
-          Select Case classifiedSpan.Classification
-            Case Classification.Keyword : ForegroundColor = Blue
-            Case Classification.Identifier : ForegroundColor = DarkYellow
-            Case Classification.Number : ForegroundColor = Cyan
-            Case Classification.String : ForegroundColor = Magenta
-            Case Classification.Comment : ForegroundColor = Green
-            Case Else : ForegroundColor = DarkGray
-          End Select
-
-          Write(classifiedText)
-          ResetColor()
-
-        Next
-
-      Else
-        Write(tree.Text.Lines(lineIndex))
-        ResetColor()
-      End If
+      Next
 
       Return tree
 
@@ -91,7 +82,7 @@ Namespace BASIC
 
     <MetaCommand("cls", "Clears the screen")>
     Protected Sub EvaluateCls()
-      Clear()
+      Console.Clear()
     End Sub
 
     <MetaCommand("reset", "Clears all previous submissions")>
@@ -173,14 +164,12 @@ Namespace BASIC
       If String.IsNullOrEmpty(text) Then Return True
 
       Dim lastTwoLinesAreBlank = text.Split(Environment.NewLine).
-                                          Reverse().
-                                          TakeWhile(Function(s) String.IsNullOrEmpty(s)).
-                                          Take(2).
-                                          Count() = 2
+                                            Reverse().
+                                            TakeWhile(Function(s) String.IsNullOrEmpty(s)).
+                                            Take(2).
+                                            Count() = 2
 
-      If lastTwoLinesAreBlank Then
-        Return True
-      End If
+      If lastTwoLinesAreBlank Then Return True
 
       Dim tree = SyntaxTree.Parse(text)
 
@@ -199,37 +188,23 @@ Namespace BASIC
       Dim tree = SyntaxTree.Parse(text)
       Dim compilation = BASIC.CodeAnalysis.Compilation.CreateScript(m_previous, tree)
 
-      If m_showTree Then
-        Dim color = Console.ForegroundColor
-        ForegroundColor = DarkGray
-        tree.Root.WriteTo(Console.Out)
-        ResetColor()
-      End If
-
-      If m_showProgram Then
-        compilation.EmitTree(Console.Out)
-        ResetColor()
-      End If
+      If m_showTree Then tree.Root.WriteTo(Console.Out)
+      If m_showProgram Then compilation.EmitTree(Console.Out)
 
       Dim result = compilation.Evaluate(m_variables)
+      Console.Out.WriteDiagnostics(result.Diagnostics)
 
-      If Not result.ErrorDiagnostics.Any Then
-
-        Console.Out.WriteDiagnostics(result.WarningDiagnostics)
+      If Not result.Diagnostics.HasErrors Then
 
         If result.Value IsNot Nothing Then
-          ForegroundColor = White
-          WriteLine(result.Value)
-          ResetColor()
+          Console.ForegroundColor = ConsoleColor.White
+          Console.WriteLine(result.Value)
+          Console.ResetColor()
         End If
 
         m_previous = compilation
 
         SaveSubmission(text)
-
-      Else
-
-        Console.Out.WriteDiagnostics(result.Diagnostics)
 
       End If
 
@@ -237,7 +212,7 @@ Namespace BASIC
 
     Private Shared Function GetSubmissionsDirectory() As String
       Dim localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
-      Dim submissionsDirectory = Path.Combine(localAppData, "Minsk", "Submissions")
+      Dim submissionsDirectory = Path.Combine(localAppData, "BASIC", "Submissions")
       Return submissionsDirectory
     End Function
 
@@ -254,8 +229,8 @@ Namespace BASIC
 
       m_loadingSubmission = True
 
-      For Each File In files
-        Dim text = System.IO.File.ReadAllText(File)
+      For Each file In files
+        Dim text = System.IO.File.ReadAllText(file)
         EvaluateSubmission(text)
       Next
 

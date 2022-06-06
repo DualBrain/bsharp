@@ -179,9 +179,8 @@ Namespace Basic.CodeAnalysis.Syntax
       Dim closeParenToken = MatchToken(SyntaxKind.CloseParenToken)
       Dim asClause = ParseOptionalAsClause()
       Dim statements = ParseBlockStatement()
-      Dim endKeyword = MatchToken(SyntaxKind.EndKeyword)
-      Dim closingKeyword = MatchToken(SyntaxKind.FunctionKeyword)
-      Return New FunctionDeclarationSyntax(m_syntaxTree, functionKeyword, identifier, openParenToken, parameters, closeParenToken, asClause, statements, endKeyword, closingKeyword)
+      Dim endFunctionKeyword = MatchToken(SyntaxKind.EndFunctionKeyword)
+      Return New FunctionDeclarationSyntax(m_syntaxTree, functionKeyword, identifier, openParenToken, parameters, closeParenToken, asClause, statements, endFunctionKeyword)
 
     End Function
 
@@ -461,16 +460,26 @@ Namespace Basic.CodeAnalysis.Syntax
       Dim statements = ParseBlockStatement()
 
       If multiLine Then
-        Dim ifStatement = New IfStatementSyntax(m_syntaxTree, ifKeyword, expression, thenKeyword, statements)
+        'Dim ifStatement = New IfStatementSyntax(m_syntaxTree, ifKeyword, expression, thenKeyword, statements)
         'TODO: Need to handle ElseIf...
         'Dim elseIfStatements = ImmutableArray(Of ElseIfStatementSyntax).Empty
-        Dim elseStatement = ParseOptionalElseStatementSyntax()
-        Dim endKeyword = MatchToken(SyntaxKind.EndKeyword)
-        Dim closingKeyword = MatchToken(SyntaxKind.IfKeyword)
-        Return New MultiLineIfBlock(m_syntaxTree, ifStatement, elseStatement, endKeyword, closingKeyword)
+        Dim elseClause = ParseOptionalElseClauseSyntax()
+        Dim endIfKeyword = MatchToken(SyntaxKind.EndIfKeyword)
+        Return New IfStatementSyntax(m_syntaxTree,
+                                     ifKeyword,
+                                     expression,
+                                     thenKeyword,
+                                     statements,
+                                     elseClause,
+                                     endIfKeyword)
       Else
         Dim elseClause = ParseOptionalSingleLineElseClause()
-        Return New SingleLineIfStatementSyntax(m_syntaxTree, ifKeyword, expression, thenKeyword, statements, elseClause)
+        Return New SingleLineIfStatementSyntax(m_syntaxTree,
+                                               ifKeyword,
+                                               expression,
+                                               thenKeyword,
+                                               statements,
+                                               elseClause)
       End If
 
     End Function
@@ -486,7 +495,7 @@ Namespace Basic.CodeAnalysis.Syntax
 
     End Function
 
-    Private Function ParseOptionalElseStatementSyntax() As ElseStatementSyntax
+    Private Function ParseOptionalElseClauseSyntax() As ElseClauseSyntax
 
       ' ...
       ' ELSE
@@ -496,7 +505,7 @@ Namespace Basic.CodeAnalysis.Syntax
       If Current.Kind <> SyntaxKind.ElseKeyword Then Return Nothing
       Dim elseKeyword = MatchToken(SyntaxKind.ElseKeyword)
       Dim statements = ParseBlockStatement()
-      Return New ElseStatementSyntax(m_syntaxTree, elseKeyword, statements)
+      Return New ElseClauseSyntax(m_syntaxTree, elseKeyword, statements)
 
     End Function
 
@@ -604,16 +613,17 @@ Namespace Basic.CodeAnalysis.Syntax
       ' Using/End Using
       ' SyncLock/End SyncLock
       Select Case Current.Kind
-        Case SyntaxKind.EndKeyword
-          Select Case Peek(1).Kind
-            Case SyntaxKind.IfKeyword,
-                 SyntaxKind.WhileKeyword,
-                 SyntaxKind.ForKeyword,
-                 SyntaxKind.FunctionKeyword
-              Return True
-            Case Else
-              Return False
-          End Select
+        Case SyntaxKind.EndIfKeyword,
+             SyntaxKind.EndFunctionKeyword
+          'Select Case Peek(1).Kind
+          '  Case SyntaxKind.IfKeyword,
+          '       SyntaxKind.WhileKeyword,
+          '       SyntaxKind.ForKeyword,
+          '       SyntaxKind.FunctionKeyword
+          Return True
+          '  Case Else
+          '    Return False
+          'End Select
         Case SyntaxKind.CloseBraceToken,
              SyntaxKind.ElseKeyword,
              SyntaxKind.ElseIfKeyword,
@@ -679,13 +689,13 @@ Namespace Basic.CodeAnalysis.Syntax
 
       If Current.Kind = SyntaxKind.LetKeyword Then 'SyntaxFacts.GetKeywordKind(Current.Text) = SyntaxKind.LetKeyword Then
         Dim letKeyword = MatchToken(SyntaxKind.LetKeyword)
-        If Peek(0).Kind = SyntaxKind.IdentifierToken AndAlso
-           Peek(1).Kind = SyntaxKind.EqualToken Then
-          Dim identifierToken = NextToken()
-          Dim operatorToken = MatchToken(SyntaxKind.EqualToken)
-          Dim right = ParseAssignmentExpression()
-          Return New AssignmentExpressionSyntax(m_syntaxTree, identifierToken, operatorToken, right)
-        End If
+        'If Peek(0).Kind = SyntaxKind.IdentifierToken AndAlso
+        '   Peek(1).Kind = SyntaxKind.EqualToken Then
+        Dim identifierToken = NextToken()
+        Dim operatorToken = MatchToken(SyntaxKind.EqualToken)
+        Dim right = ParseAssignmentExpression()
+        Return New AssignmentExpressionSyntax(m_syntaxTree, letKeyword, identifierToken, operatorToken, right)
+        'End If
       End If
 
       Return ParseBinaryExpression()

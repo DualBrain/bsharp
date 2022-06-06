@@ -10,8 +10,7 @@
                    closeParenToken As SyntaxToken,
                    asClause As AsClauseSyntax,
                    statements As StatementSyntax,
-                   endKeyword As SyntaxToken,
-                   closingKeyword As SyntaxToken)
+                   endFunctionKeyword As SyntaxToken)
       MyBase.New(tree)
       Me.FunctionKeyword = functionKeyword
       Me.Identifier = identifier
@@ -20,8 +19,7 @@
       Me.CloseParenToken = closeParenToken
       Me.AsClause = asClause
       Me.Statements = statements
-      Me.EndKeyword = endKeyword
-      Me.ClosingKeyword = closingKeyword
+      Me.EndFunctionKeyword = endFunctionKeyword
     End Sub
 
     Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.FunctionDeclaration
@@ -32,8 +30,7 @@
     Public ReadOnly Property CloseParenToken As SyntaxToken
     Public ReadOnly Property AsClause As AsClauseSyntax
     Public ReadOnly Property Statements As StatementSyntax
-    Public ReadOnly Property EndKeyword As SyntaxToken
-    Public ReadOnly Property ClosingKeyword As SyntaxToken
+    Public ReadOnly Property EndFunctionKeyword As SyntaxToken
 
   End Class
 

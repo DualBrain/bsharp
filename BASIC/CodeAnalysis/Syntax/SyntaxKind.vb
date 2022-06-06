@@ -13,7 +13,7 @@
 
     ' Tokens
     EndOfFileToken
-    WhitespaceToken
+    'WhitespaceToken
     NumberToken
     PlusToken
     MinusToken
@@ -38,8 +38,8 @@
     CloseBraceToken
     IdentifierToken
     StringToken
-    PipeToken
-    DollarToken
+    'PipeToken
+    'DollarToken
 
     ' Keywords
     FalseKeyword
@@ -61,7 +61,9 @@
     DoKeyword
 
     ' Potential start of a Command 
-    EndKeyword
+    'EndKeyword
+    EndIfKeyword
+    EndFunctionKeyword
 
     ' Blocks (NOTE: Commands are a combination of 2 or more keywords that make up a command "phrase".)
     FunctionKeyword
