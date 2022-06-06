@@ -51,8 +51,18 @@ Namespace Basic.CodeAnalysis
       Report(span, message)
     End Sub
 
-    Public Sub ReportUndefinedName(span As TextSpan, name As String)
+    Public Sub ReportUndefinedVariable(span As TextSpan, name As String)
       Dim message = $"Variable '{name}' doesn't exist."
+      Report(span, message)
+    End Sub
+
+    Public Sub ReportNotAFunction(span As TextSpan, name As String)
+      Dim message = $"'{name}' is not a function."
+      Report(span, message)
+    End Sub
+
+    Public Sub ReportNotAVariable(span As TextSpan, name As String)
+      Dim message = $"'{name}' is not a variable."
       Report(span, message)
     End Sub
 
@@ -130,8 +140,23 @@ Namespace Basic.CodeAnalysis
       Report(span, message)
     End Sub
 
-    Public Sub XXX_ReportFunctionsAreUnsupported(span As TextSpan)
-      Dim message = "Functions with return values are unsupported."
+    Public Sub ReportAllPathsMustReturn(span As TextSpan)
+      Dim message = "Not all code paths return a value."
+      Report(span, message)
+    End Sub
+
+    Public Sub ReportInvalidReturn(span As TextSpan)
+      Dim message = "The 'return' keyword can only be used inside of functions."
+      Report(span, message)
+    End Sub
+
+    Public Sub ReportInvalidReturnExpression(span As TextSpan, functionName As String)
+      Dim message = $"Since the function '{functionName}' does not return a value the 'return' keyword cannot be followed by an expression."
+      Report(span, message)
+    End Sub
+
+    Public Sub ReportMissingReturnExpression(span As TextSpan, returnType As TypeSymbol)
+      Dim message = $"An expression of type '{returnType}' is expected."
       Report(span, message)
     End Sub
 

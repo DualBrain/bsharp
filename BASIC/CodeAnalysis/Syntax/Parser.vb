@@ -93,6 +93,7 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.ContinueKeyword : Return ParseContinueStatement()
         Case SyntaxKind.ExitKeyword : Return ParseExitStatement()
         Case SyntaxKind.SelectKeyword : Return ParseSelectCaseStatement()
+        Case SyntaxKind.ReturnKeyword : Return ParseReturnStatement()
         Case Else : Return ParseExpressionStatement()
       End Select
     End Function
@@ -190,6 +191,20 @@ Namespace Basic.CodeAnalysis.Syntax
 #End Region
 
 #Region "Flow Control Blocks"
+
+    Private Function ParseReturnStatement() As StatementSyntax
+
+      ' RETURN [*expression*]
+
+      Dim returnKeyword = MatchToken(SyntaxKind.ReturnKeyword)
+      Dim keywordLine = m_text.GetLineIndex(returnKeyword.Span.Start)
+      Dim currentLine = m_text.GetLineIndex(Current.Span.Start)
+      Dim isEof = Current.Kind = SyntaxKind.EndOfFileToken
+      Dim sameLine = Not isEof AndAlso keywordLine = currentLine
+      Dim expression = If(sameLine, ParseExpression(), Nothing)
+      Return New ReturnStatementSyntax(returnKeyword, expression)
+
+    End Function
 
     Private Function ParseExitStatement() As StatementSyntax
 

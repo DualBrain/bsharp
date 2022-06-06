@@ -7,7 +7,7 @@ Namespace Basic.CodeAnalysis.Binding
     Public Overridable Function RewriteStatement(node As BoundStatement) As BoundStatement
       Select Case node.Kind
         Case BoundNodeKind.BlockStatement : Return RewriteBlockStatement(DirectCast(node, BoundBlockStatement))
-        'Case BoundNodeKind.NopStatement : Return RewriteNopStatement(DirectCast(node, BoundNopStatement))
+        Case BoundNodeKind.NopStatement : Return RewriteNopStatement(DirectCast(node, BoundNopStatement))
         Case BoundNodeKind.VariableDeclaration : Return RewriteVariableDeclaration(DirectCast(node, BoundVariableDeclaration))
         Case BoundNodeKind.IfStatement : Return RewriteIfStatement(DirectCast(node, BoundIfStatement))
         Case BoundNodeKind.WhileStatement : Return RewriteWhileStatement(DirectCast(node, BoundWhileStatement))
@@ -17,7 +17,7 @@ Namespace Basic.CodeAnalysis.Binding
         Case BoundNodeKind.LabelStatement : Return RewriteLabeltatement(DirectCast(node, BoundLabelStatement))
         Case BoundNodeKind.GotoStatement : Return RewriteGotoStatement(DirectCast(node, BoundGotoStatement))
         Case BoundNodeKind.ConditionalGotoStatement : Return RewriteConditionalGotoStatement(DirectCast(node, BoundConditionalGotoStatement))
-        'Case BoundNodeKind.ReturnStatement : Return RewriteReturnStatement(DirectCast(node, BoundReturnStatement))
+        Case BoundNodeKind.ReturnStatement : Return RewriteReturnStatement(DirectCast(node, BoundReturnStatement))
         Case BoundNodeKind.ExpressionStatement : Return RewriteExpressionStatement(DirectCast(node, BoundExpressionStatement))
         Case Else
           Throw New Exception($"Unexpected node: {node.Kind}")
@@ -85,9 +85,9 @@ Namespace Basic.CodeAnalysis.Binding
       Return New BoundBlockStatement(builder.MoveToImmutable)
     End Function
 
-    'Protected Overridable Function RewriteNopStatement(node As BoundNopStatement) As BoundStatement
-    '  Return node
-    'End Function
+    Protected Overridable Function RewriteNopStatement(node As BoundNopStatement) As BoundStatement
+      Return node
+    End Function
 
     Protected Overridable Function RewriteVariableDeclaration(node As BoundVariableDeclaration) As BoundStatement
       Dim initializer = RewriteExpression(node.Initializer)
@@ -168,13 +168,13 @@ Namespace Basic.CodeAnalysis.Binding
       Return New BoundConditionalGotoStatement(node.Label, condition, node.JumpIfTrue)
     End Function
 
-    'Protected Overridable Function RewriteReturnStatement(node As BoundReturnStatement) As BoundStatement
-    '  Dim expression = If(node.Expression Is Nothing, Nothing, RewriteExpression(node.Expression))
-    '  If expression Is node.Expression Then
-    '    Return node
-    '  End If
-    '  Return New BoundReturnStatement(expression)
-    'End Function
+    Protected Overridable Function RewriteReturnStatement(node As BoundReturnStatement) As BoundStatement
+      Dim expression = If(node.Expression Is Nothing, Nothing, RewriteExpression(node.Expression))
+      If expression Is node.Expression Then
+        Return node
+      End If
+      Return New BoundReturnStatement(expression)
+    End Function
 
     Protected Overridable Function RewriteExpressionStatement(node As BoundExpressionStatement) As BoundStatement
       Dim expression = RewriteExpression(node.Expression)

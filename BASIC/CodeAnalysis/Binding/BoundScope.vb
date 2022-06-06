@@ -45,33 +45,39 @@ Namespace Basic.CodeAnalysis.Binding
       Return True
     End Function
 
-    Public Function TryLookupVariable(name As String, ByRef variable As VariableSymbol) As Boolean
-      Return TryLookupSymbol(name, variable)
-      'If m_variables IsNot Nothing AndAlso m_variables.TryGetValue(name, variable) Then Return True
-      'If Parent Is Nothing Then Return False
-      'Return Parent.TryLookupVariable(name, variable)
-    End Function
+    'Public Function TryLookupVariable(name As String, ByRef variable As VariableSymbol) As Boolean
+    '  Return TryLookupSymbol(name, variable)
+    '  'If m_variables IsNot Nothing AndAlso m_variables.TryGetValue(name, variable) Then Return True
+    '  'If Parent Is Nothing Then Return False
+    '  'Return Parent.TryLookupVariable(name, variable)
+    'End Function
 
-    Public Function TryLookupFunction(name As String, ByRef f As FunctionSymbol) As Boolean
-      Return TryLookupSymbol(name, f)
-      'f = Nothing
-      'If m_functions IsNot Nothing AndAlso m_functions.TryGetValue(name, f) Then Return True
-      'If Parent Is Nothing Then Return False
-      'Return Parent.TryLookupFunction(name, f)
-    End Function
+    'Public Function TryLookupFunction(name As String, ByRef f As FunctionSymbol) As Boolean
+    '  Return TryLookupSymbol(name, f)
+    '  'f = Nothing
+    '  'If m_functions IsNot Nothing AndAlso m_functions.TryGetValue(name, f) Then Return True
+    '  'If Parent Is Nothing Then Return False
+    '  'Return Parent.TryLookupFunction(name, f)
+    'End Function
 
-    Private Function TryLookupSymbol(Of TSymbol As Symbol)(name As String, ByRef symbol As TSymbol) As Boolean
-      symbol = Nothing
-      Dim declaredSymbol As Symbol = Nothing
-      If m_symbols IsNot Nothing AndAlso m_symbols.TryGetValue(name, declaredSymbol) Then
-        If TypeOf declaredSymbol Is TSymbol Then
-          symbol = DirectCast(declaredSymbol, TSymbol)
-          Return True
-        End If
-        Return False
+    'Public Function TryLookupSymbol(Of TSymbol As Symbol)(name As String, ByRef symbol As TSymbol) As Symbol 'Boolean
+    Public Function TryLookupSymbol(name As String) As Symbol 'Boolean
+      'symbol = Nothing
+      'Dim declaredSymbol As Symbol = Nothing
+      'If m_symbols IsNot Nothing AndAlso m_symbols.TryGetValue(name, declaredSymbol) Then
+      '  If TypeOf declaredSymbol Is TSymbol Then
+      '    symbol = DirectCast(declaredSymbol, TSymbol)
+      '    Return True
+      '  End If
+      '  Return False
+      'End If
+      'If Parent Is Nothing Then Return False
+      Dim symbol As Symbols.Symbol = Nothing
+      If m_symbols IsNot Nothing AndAlso m_symbols.TryGetValue(name, symbol) Then
+        Return symbol
       End If
-      If Parent Is Nothing Then Return False
-      Return Parent.TryLookupSymbol(name, symbol)
+      'Return Parent.TryLookupSymbol(name, symbol)
+      Return Parent?.TryLookupSymbol(name)
     End Function
 
     Public ReadOnly Property GetDeclaredVariables As ImmutableArray(Of VariableSymbol)

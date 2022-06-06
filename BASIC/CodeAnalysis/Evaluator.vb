@@ -61,6 +61,10 @@ Namespace Basic.CodeAnalysis
               index += 1
             End If
           Case BoundNodeKind.LabelStatement : index += 1
+          Case BoundNodeKind.ReturnStatement
+            Dim rs = CType(s, BoundReturnStatement)
+            m_lastValue = If(rs.Expression Is Nothing, Nothing, EvaluateExpression(rs.Expression))
+            Return m_lastValue
           Case Else
             Throw New Exception($"Unexpected kind {s.Kind}")
         End Select

@@ -92,6 +92,7 @@ Namespace Basic.CodeAnalysis.Syntax
 
         Case "continue" : Return SyntaxKind.ContinueKeyword
         Case "exit" : Return SyntaxKind.ExitKeyword
+        Case "return" : Return SyntaxKind.ReturnKeyword
 
         Case "function" : Return SyntaxKind.FunctionKeyword
         Case "as" : Return SyntaxKind.AsKeyword
@@ -142,6 +143,7 @@ Namespace Basic.CodeAnalysis.Syntax
 
         Case SyntaxKind.ContinueKeyword : Return "continue"
         Case SyntaxKind.ExitKeyword : Return "exit"
+        Case SyntaxKind.ReturnKeyword : Return "return"
 
         Case SyntaxKind.FunctionKeyword : Return "function"
         Case SyntaxKind.AsKeyword : Return "as"

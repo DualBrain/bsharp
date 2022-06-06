@@ -31,6 +31,7 @@
     IdentifierToken
     StringToken
     PipeToken
+    DollarToken
 
     ' Keywords
     FalseKeyword
@@ -76,6 +77,7 @@
     UntilKeyword
     ContinueKeyword
     ExitKeyword
+    ReturnKeyword
 
     ' Nodes
     CompilationUnit
@@ -107,6 +109,7 @@
     UntilClause
     ExitStatement
     ContinueStatement
+    ReturnStatement
 
     ' Expressions
     LiteralExpression
@@ -116,7 +119,7 @@
     ParenthesizedExpression
     AssignmentExpression
     CallExpression
-    DollarToken
+
   End Enum
 
 End Namespace

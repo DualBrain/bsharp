@@ -41,6 +41,17 @@ Namespace Basic.CodeAnalysis
       Dim diagnostics = SyntaxTree.Diagnostics.Concat(GlobalScope.Diagnostics).ToImmutableArray
       If diagnostics.Any Then Return New EvaluationResult(diagnostics, Nothing)
       Dim program = Binder.BindProgram(GlobalScope)
+
+
+      Dim appPath = Environment.GetCommandLineArgs(0)
+      Dim appDirectory = System.IO.Path.GetDirectoryName(appPath)
+      Dim cfgPath = System.IO.Path.Combine(appDirectory, "cfg.dot")
+      Dim cfgStatement = If(Not program.Statement.Statements.Any AndAlso program.Functions.Any, program.Functions.Last.Value, program.Statement)
+      Dim cfg = ControlFlowGraph.Create(cfgStatement)
+      Using sw = New System.IO.StreamWriter(cfgPath)
+        cfg.WriteTo(sw)
+      End Using
+
       If program.Diagnostics.Any Then Return New EvaluationResult(program.Diagnostics, Nothing)
       Dim evaluator = New Evaluator(program, variables)
       Dim value = Evaluator.Evaluate

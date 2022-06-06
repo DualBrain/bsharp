@@ -12,6 +12,7 @@
     WhileStatement
     ForStatement
     DoWhileStatement
+    DoUntilStatement
 
     SelectCaseStatement
     BoundMatchStatement
@@ -20,6 +21,7 @@
     GotoStatement
     LabelStatement
     ConditionalGotoStatement
+    ReturnStatement
 
     ' Expressions
     ErrorExpression
@@ -30,7 +32,7 @@
     BinaryExpression
     CallExpression
     ConversionExpression
-    DoUntilStatement
+
   End Enum
 
 End Namespace

@@ -62,6 +62,11 @@ Namespace Global.BASIC.Tests.CodeAnalysis
     <InlineData("0 xor 1", 1)>
     <InlineData("1 xor 2", 3)>
     <InlineData("dim a = 10", 10)>
+    <InlineData("string(true)", "True")>
+    <InlineData("string(1)", "1")>
+    <InlineData("boolean(""true"")", True)>
+    <InlineData("integer(""1"")", 1)>
+    <InlineData("rnd(0)", 0)>
     <InlineData("{ dim a = 10
 (a * a) }", 100)>
     <InlineData("{ dim b = 0
@@ -225,16 +230,17 @@ end if", 5)>
 
     <Fact>
     Public Sub Evaluator_DoWhileStatement_Reports_CannotConvert()
-      Dim text As String = "
-        {
-            dim x = 0
-            do
-              let x = 10
-            loop while [10]
-        }"
 
-      Dim diagnostics As String = "
-          Cannot convert type 'integer' to 'boolean'."
+      Dim text = "
+        if true then
+          dim x = 0
+          do
+            let x = 10
+          loop while [10]
+        end if"
+
+      Dim diagnostics = "
+        Cannot convert type 'integer' to 'boolean'."
 
       AssertDiagnostics(text, diagnostics)
 
@@ -322,6 +328,22 @@ end if", 5)>
     End Sub
 
     <Fact>
+    Public Sub Evaluator_Variables_Can_Shadow_Functions()
+
+      Dim text = "
+        if true then
+          const print = 42
+          [print](""test"")
+        end if"
+
+      Dim diagnostics = "
+        'print' is not a function."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
     Public Sub Evaluator_VariableDeclaration_Reports_Redeclaration()
 
       Dim text = "
@@ -342,16 +364,14 @@ end if", 5)>
     End Sub
 
     <Fact>
-    Public Sub Evaluator_Varibles_Can_Shadow_Functions()
+    Public Sub Evaluator_FunctionReturn_Missing()
 
       Dim text = "
-        {
-          dim print = 42
-          [print](""test"")
-        }"
+        function [add](a as integer, b as integer) as integer
+        end function"
 
       Dim diagnostics = "
-        Function 'print' doesn't exist."
+        Not all code paths return a value."
 
       AssertDiagnostics(text, diagnostics)
 
@@ -447,10 +467,10 @@ end if", 5)>
     '<Fact>
     Public Shared Sub Evaluator_InvokeFunctionArguments_NoInfiniteLoop()
 
-      Dim text As String = "
+      Dim text = "
         print([""Hi""=][)]"
 
-      Dim diagnostics As String = "
+      Dim diagnostics = "
         Unexpected token <CloseParenToken>, expected <IdentifierToken>.
         Parameter 'text' requires a value of type 'string' but was given a value of type '?'."
 
@@ -461,12 +481,12 @@ end if", 5)>
     <Fact>
     Public Sub Evaluator_FunctionParameters_NoInfiniteLoop()
 
-      Dim text As String = "
+      Dim text = "
         function hi(name as string[[=]][[)]]
             print(""Hi "" + name + ""!"" )
         end function"
 
-      Dim diagnostics As String = "
+      Dim diagnostics = "
         Unexpected token <EqualToken>, expected <CloseParenToken>.
         Unexpected token <EqualToken>, expected <IdentifierToken>.
         Unexpected token <CloseParenToken>, expected <IdentifierToken>.
@@ -480,10 +500,10 @@ end if", 5)>
     <Fact>
     Public Sub Evaluator_InvokeFunctionArguments_Missing()
 
-      Dim text As String = "
+      Dim text = "
         print([)]"
 
-      Dim diagnostics As String = "
+      Dim diagnostics = "
         Function 'print' requires 1 arguments but was given 0."
 
       AssertDiagnostics(text, diagnostics)
@@ -493,10 +513,10 @@ end if", 5)>
     <Fact>
     Public Sub Evaluator_InvokeFunctionArguments_Exceeding()
 
-      Dim text As String = "
+      Dim text = "
         print(""Hello""[, "" "", "" world!""])"
 
-      Dim diagnostics As String = "
+      Dim diagnostics = "
         Function 'print' requires 1 arguments but was given 3."
 
       AssertDiagnostics(text, diagnostics)
@@ -519,6 +539,196 @@ end if", 5)>
       AssertDiagnostics(text, diagnostics)
 
     End Sub
+
+    <Fact>
+    Public Sub Evaluator_Void_Function_Should_Not_Return_Value()
+
+      Dim text = "
+        function test()
+          return [1]
+        end function"
+
+      Dim diagnostics = "
+        Since the function 'test' does not return a value the 'return' keyword cannot be followed by an expression."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Function_With_ReturnValue_Should_Not_Return_Void()
+
+      Dim text = "
+        function test() as integer
+          [return]
+        end function"
+
+      Dim diagnostics = "
+        An expression of type 'integer' is expected."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Not_All_Code_Paths_Return_Value()
+
+      Dim text = "
+        function [test](n as integer) as boolean
+          if n > 10 then
+            return true
+          end if
+        end function"
+
+      Dim diagnostics = "
+        Not all code paths return a value."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_AssignmentExpression_Reports_NotAVariable()
+
+      Dim text = "[print] = 42"
+
+      Dim diagnostics = "
+        'print' is not a variable."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_CallExpression_Reports_Undefined()
+
+      Dim text = "[foo](42)"
+
+      Dim diagnostics = "
+        Function 'foo' doesn't exist."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_CallExpression_Reports_NotAFunction()
+
+      Dim text = "
+        if true then
+          const foo = 42
+          [foo](42)
+        end if"
+
+      Dim diagnostics = "
+        'foo' is not a function."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Expression_Must_Have_Value()
+
+      Dim text = "
+        function test(n as integer)
+          return
+        end function
+        dim value = [test(100)]"
+
+      Dim diagnostics = "
+        Expression must have a value."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    '<Theory>
+    '<InlineData("[exit for]", "exit")>
+    '<InlineData("[continue for]", "continue")>
+    'Public Sub Evaluator_Invalid_Break_Or_Continue(text As String, keyword As String)
+
+    '  Dim diagnostics  = $"
+    '    The keyword '{keyword}' can only be used inside of loops."
+
+    '  AssertDiagnostics(text, diagnostics)
+
+    'End Sub
+
+    <Fact>
+    Public Sub Evaluator_Invalid_Return()
+
+      Dim text = "
+        [return]"
+
+      Dim diagnostics = "
+        The 'return' keyword can only be used inside of functions."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Parameter_Already_Declared()
+
+      Dim text = "
+        function sum(a as integer, b as integer, [a as integer]) as integer
+          return a + b + c
+        end function"
+
+      Dim diagnostics = "
+        A parameter with the name 'a' already exists."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Function_Must_Have_Name()
+
+      Dim text = "
+        function [(]a as integer, b as integer) as integer
+          return a + b
+        end function"
+
+      Dim diagnostics = "
+        Unexpected token <OpenParenToken>, expected <IdentifierToken>."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Wrong_Argument_Type()
+
+      Dim text = "
+        function test(n as integer) as boolean
+          return n > 10
+        end function
+        dim testValue = ""string""
+        test([testValue])"
+
+      Dim diagnostics = "
+        Parameter 'n' requires a value of type 'integer' but was given a value of type 'string'."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Bad_Type()
+
+      Dim text = "
+        function test(n as [invalidtype])
+        end function"
+
+      Dim diagnostics = "
+        Type 'invalidtype' doesn't exist."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
 
     Private Shared Sub AssertValue(text As String, expectedValue As Object)
       Dim tree = SyntaxTree.Parse(text)

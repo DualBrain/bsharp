@@ -31,7 +31,7 @@ Namespace Basic.CodeAnalysis.Binding
         Case BoundNodeKind.LabelStatement : WriteLabelStatement(CType(node, BoundLabelStatement), writer)
         Case BoundNodeKind.GotoStatement : WriteGotoStatement(CType(node, BoundGotoStatement), writer)
         Case BoundNodeKind.ConditionalGotoStatement : WriteConditionalGotoStatement(CType(node, BoundConditionalGotoStatement), writer)
-        'Case BoundNodeKind.ReturnStatement: WriteReturnStatement(CType(node, BoundReturnStatement), writer)
+        Case BoundNodeKind.ReturnStatement : WriteReturnStatement(CType(node, BoundReturnStatement), writer)
         Case BoundNodeKind.ExpressionStatement : WriteExpressionStatement(CType(node, BoundExpressionStatement), writer)
         Case BoundNodeKind.ErrorExpression : WriteErrorExpression(CType(node, BoundErrorExpression), writer)
         Case BoundNodeKind.LiteralExpression : WriteLiteralExpression(CType(node, BoundLiteralExpression), writer)
@@ -210,14 +210,14 @@ Namespace Basic.CodeAnalysis.Binding
       writer.WriteLine()
     End Sub
 
-    'Private Sub WriteReturnStatement(node As BoundReturnStatement, writer As IndentedTextWriter)
-    '  writer.WriteKeyword(SyntaxKind.ReturnKeyword)
-    '  If node.Expression IsNot Nothing Then
-    '    writer.WriteSpace()
-    '    node.Expression.WriteTo(writer)
-    '  End If
-    '  writer.WriteLine()
-    'End Sub
+    Private Sub WriteReturnStatement(node As BoundReturnStatement, writer As IndentedTextWriter)
+      writer.WriteKeyword(SyntaxKind.ReturnKeyword)
+      If node.Expression IsNot Nothing Then
+        writer.WriteSpace()
+        node.Expression.WriteTo(writer)
+      End If
+      writer.WriteLine()
+    End Sub
 
     Private Sub WriteExpressionStatement(node As BoundExpressionStatement, writer As IndentedTextWriter)
       node.Expression.WriteTo(writer)
