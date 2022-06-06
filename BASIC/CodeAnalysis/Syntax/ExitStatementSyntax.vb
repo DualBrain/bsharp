@@ -3,9 +3,8 @@
   Partial Friend Class ExitStatementSyntax
     Inherits StatementSyntax
 
-    'tree As SyntaxTree, 
-    Public Sub New(exitKeyword As SyntaxToken, scopeKeyword As SyntaxToken)
-      'MyBase.New(tree)
+    Public Sub New(tree As SyntaxTree, exitKeyword As SyntaxToken, scopeKeyword As SyntaxToken)
+      MyBase.New(tree)
       Me.ExitKeyword = exitKeyword
       Me.ScopeKeyword = scopeKeyword
     End Sub

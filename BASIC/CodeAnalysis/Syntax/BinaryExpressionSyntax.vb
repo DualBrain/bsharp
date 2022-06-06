@@ -1,9 +1,10 @@
 ﻿Namespace Basic.CodeAnalysis.Syntax
 
-  Public NotInheritable Class BinaryExpressionSyntax
+  Partial Public NotInheritable Class BinaryExpressionSyntax
     Inherits ExpressionSyntax
 
-    Sub New(left As ExpressionSyntax, operatorToken As SyntaxToken, right As ExpressionSyntax)
+    Sub New(tree As SyntaxTree, left As ExpressionSyntax, operatorToken As SyntaxToken, right As ExpressionSyntax)
+      MyBase.New(tree)
       Me.Left = left
       Me.OperatorToken = operatorToken
       Me.Right = right

@@ -3,7 +3,7 @@
   Partial Public NotInheritable Class FunctionDeclarationSyntax
     Inherits MemberSyntax
 
-    Public Sub New(functionKeyword As SyntaxToken,
+    Public Sub New(tree As SyntaxTree, functionKeyword As SyntaxToken,
                    identifier As SyntaxToken,
                    openParenToken As SyntaxToken,
                    parameters As SeparatedSyntaxList(Of ParameterSyntax),
@@ -12,6 +12,7 @@
                    statements As StatementSyntax,
                    endKeyword As SyntaxToken,
                    closingKeyword As SyntaxToken)
+      MyBase.New(tree)
       Me.FunctionKeyword = functionKeyword
       Me.Identifier = identifier
       Me.OpenParenToken = openParenToken

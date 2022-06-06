@@ -14,9 +14,9 @@
     DoWhileStatement
     DoUntilStatement
 
-    SelectCaseStatement
-    BoundMatchStatement
-    BoundCaseStatement
+    'SelectCaseStatement
+    'BoundMatchStatement
+    'BoundCaseStatement
 
     GotoStatement
     LabelStatement

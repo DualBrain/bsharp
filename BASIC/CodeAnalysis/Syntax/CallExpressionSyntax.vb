@@ -3,9 +3,8 @@
   Partial Public NotInheritable Class CallExpressionSyntax
     Inherits ExpressionSyntax
 
-    Sub New(identifier As SyntaxToken, openParenToken As SyntaxToken, arguments As SeparatedSyntaxList(Of ExpressionSyntax), closeParenToken As SyntaxToken)
-      'tree As SyntaxTree, 
-      'MyBase.New(tree)
+    Sub New(tree As SyntaxTree, identifier As SyntaxToken, openParenToken As SyntaxToken, arguments As SeparatedSyntaxList(Of ExpressionSyntax), closeParenToken As SyntaxToken)
+      MyBase.New(tree)
       Me.Identifier = identifier
       Me.OpenParenToken = openParenToken
       Me.Arguments = arguments

@@ -1,6 +1,6 @@
 ﻿Imports Xunit
 
-Namespace BASIC.CodeAnalysis.Syntax
+Namespace Basic.CodeAnalysis.Syntax
 
   Public Class SyntaxFactTests
 

@@ -1,17 +1,18 @@
 ﻿Namespace Basic.CodeAnalysis.Syntax
 
-  Public NotInheritable Class AssignmentExpressionSyntax
+  Partial Public NotInheritable Class AssignmentExpressionSyntax
     Inherits ExpressionSyntax
 
-    Public Sub New(identifierToken As SyntaxToken, equalsToken As SyntaxToken, expression As ExpressionSyntax)
+    Sub New(tree As SyntaxTree, identifierToken As SyntaxToken, equalsToken As SyntaxToken, expression As ExpressionSyntax)
+      MyBase.New(tree)
       Me.IdentifierToken = identifierToken
-      Me.EqualsToken = equalsToken
+      Me.EqualToken = equalsToken
       Me.Expression = expression
     End Sub
 
     Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.AssignmentExpression
     Public ReadOnly Property IdentifierToken As SyntaxToken
-    Public ReadOnly Property EqualsToken As SyntaxToken
+    Public ReadOnly Property EqualToken As SyntaxToken
     Public ReadOnly Property Expression As ExpressionSyntax
 
   End Class

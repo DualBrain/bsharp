@@ -3,7 +3,8 @@
   Public NotInheritable Class DoWhileStatementSyntax
     Inherits StatementSyntax
 
-    Public Sub New(doKeyword As SyntaxToken, whileClause As WhileClauseSyntax, body As StatementSyntax, loopKeyword As SyntaxToken)
+    Public Sub New(tree As SyntaxTree, doKeyword As SyntaxToken, whileClause As WhileClauseSyntax, body As StatementSyntax, loopKeyword As SyntaxToken)
+      MyBase.New(tree)
       Me.DoKeyword = doKeyword
       Me.WhileClause = whileClause
       Me.Statements = body

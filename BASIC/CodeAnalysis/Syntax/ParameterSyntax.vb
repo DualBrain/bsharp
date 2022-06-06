@@ -3,7 +3,8 @@
   Partial Public NotInheritable Class ParameterSyntax
     Inherits SyntaxNode
 
-    Sub New(identifier As SyntaxToken, asClause As AsClauseSyntax)
+    Sub New(tree As SyntaxTree, identifier As SyntaxToken, asClause As AsClauseSyntax)
+      MyBase.New(tree)
       Me.Identifier = identifier
       Me.AsClause = asClause
     End Sub

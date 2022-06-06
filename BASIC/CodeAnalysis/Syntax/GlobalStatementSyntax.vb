@@ -3,9 +3,8 @@
   Partial Public NotInheritable Class GlobalStatementSyntax
     Inherits MemberSyntax
 
-    'tree As SyntaxTree, 
-    Sub New(statement As StatementSyntax)
-      'MyBase.New(tree)
+    Sub New(tree As SyntaxTree, statement As StatementSyntax)
+      MyBase.New(tree)
       Me.Statement = statement
     End Sub
 

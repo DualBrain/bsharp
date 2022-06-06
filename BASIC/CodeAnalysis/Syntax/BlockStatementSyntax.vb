@@ -2,19 +2,20 @@
 
 Namespace Basic.CodeAnalysis.Syntax
 
-  Public NotInheritable Class BlockStatementSyntax
+  Partial Public NotInheritable Class BlockStatementSyntax
     Inherits StatementSyntax
 
-    Public Sub New(openBraceToken As SyntaxToken, statements As ImmutableArray(Of StatementSyntax), closedBraceToken As SyntaxToken)
+    Sub New(tree As SyntaxTree, openBraceToken As SyntaxToken, statements As ImmutableArray(Of StatementSyntax), closeBraceToken As SyntaxToken)
+      MyBase.New(tree)
       Me.OpenBraceToken = openBraceToken
       Me.Statements = statements
-      Me.ClosedBraceToken = closedBraceToken
+      Me.CloseBraceToken = closeBraceToken
     End Sub
 
     Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.BlockStatement
     Public ReadOnly Property OpenBraceToken As SyntaxToken
     Public ReadOnly Property Statements As ImmutableArray(Of StatementSyntax)
-    Public ReadOnly Property ClosedBraceToken As SyntaxToken
+    Public ReadOnly Property CloseBraceToken As SyntaxToken
 
   End Class
 

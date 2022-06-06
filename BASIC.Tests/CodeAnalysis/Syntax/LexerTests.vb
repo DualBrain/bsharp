@@ -1,8 +1,8 @@
 Imports System.Collections.Immutable
-Imports BASIC.CodeAnalysis.Text
+Imports Basic.CodeAnalysis.Text
 Imports Xunit
 
-Namespace BASIC.CodeAnalysis.Syntax
+Namespace Basic.CodeAnalysis.Syntax
 
   Public Class LexerTests
 

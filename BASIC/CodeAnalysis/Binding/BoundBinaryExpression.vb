@@ -9,14 +9,19 @@ Namespace Basic.CodeAnalysis.Binding
       Me.Left = left
       Me.Op = op
       Me.Right = right
-      Me.Type = op.Type
+      ConstantValue = ConstantFolding.Fold(left, op, right)
     End Sub
 
     Public Overrides ReadOnly Property Kind As BoundNodeKind = BoundNodeKind.BinaryExpression
-    Public Overrides ReadOnly Property Type As TypeSymbol '= Left.Type
+    Public Overrides ReadOnly Property Type As TypeSymbol
+      Get
+        Return Op.Type
+      End Get
+    End Property
     Public ReadOnly Property Left As BoundExpression
     Public ReadOnly Property Op As BoundBinaryOperator
     Public ReadOnly Property Right As BoundExpression
+    Public Overrides ReadOnly Property ConstantValue As BoundConstant
 
   End Class
 

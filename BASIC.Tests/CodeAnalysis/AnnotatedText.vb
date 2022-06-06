@@ -5,9 +5,9 @@ Option Infer On
 Imports System.Collections.Immutable
 Imports System.IO
 Imports System.Text
-Imports BASIC.CodeAnalysis.Text
+Imports Basic.CodeAnalysis.Text
 
-Namespace BASIC.Tests.CodeAnalysis
+Namespace Basic.Tests.CodeAnalysis
 
   ' {
   '   const x = 100

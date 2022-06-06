@@ -3,7 +3,8 @@
   Public NotInheritable Class NameExpressionSyntax
     Inherits ExpressionSyntax
 
-    Public Sub New(identifierToken As SyntaxToken)
+    Public Sub New(tree As SyntaxTree, identifierToken As SyntaxToken)
+      MyBase.New(tree)
       Me.IdentifierToken = identifierToken
     End Sub
 

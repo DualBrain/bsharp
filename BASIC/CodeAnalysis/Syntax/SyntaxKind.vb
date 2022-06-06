@@ -2,8 +2,16 @@
 
   Public Enum SyntaxKind
 
-    ' Tokens
     BadToken
+
+    ' Trivia
+    SkippedTextTrivia
+    LineBreakTrivia
+    WhiteSpaceTrivia
+    SingleLineCommentTrivia
+    MultiLineCommentTrivia
+
+    ' Tokens
     EndOfFileToken
     WhitespaceToken
     NumberToken
@@ -69,9 +77,9 @@
     ToKeyword
     StepKeyword
     NextKeyword
-    SelectKeyword
-    CaseKeyword
-    IsKeyword
+    'SelectKeyword
+    'CaseKeyword
+    'IsKeyword
     AsKeyword
     LoopKeyword
     UntilKeyword
@@ -81,32 +89,32 @@
 
     ' Nodes
     CompilationUnit
-    FunctionDeclaration
     GlobalStatement
+    FunctionDeclaration
     Parameter
-    TypeClause
+    AsClause
+    SingleLineElseClause
+    'CaseElseClauseSyntax
+    'CaseClauseSyntax
+    WhileClause
+    UntilClause
 
     ' Statements
     BlockStatement
     VariableDeclaration
     ExpressionStatement
     SingleLineIfStatement
-    SingleLineElseClause
     MultiLineIfBlock
     IfStatement
     ElseIfStatement
     ElseStatement
-    SelectCaseStatement
-    CaseMatchExpressionSyntax
-    CaseElseClauseSyntax
-    CaseClauseSyntax
+    'SelectCaseStatement
+    'CaseMatchExpressionSyntax
     ForEachStatement
     ForStatement
     WhileStatement
     DoWhileStatement
     DoUntilStatement
-    WhileClause
-    UntilClause
     ExitStatement
     ContinueStatement
     ReturnStatement
@@ -116,7 +124,7 @@
     NameExpression
     UnaryExpression
     BinaryExpression
-    ParenthesizedExpression
+    ParenExpression
     AssignmentExpression
     CallExpression
 

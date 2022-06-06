@@ -28,6 +28,7 @@ Namespace Basic.CodeAnalysis.Syntax
 
   Public Module SyntaxFacts
 
+    <Extension()>
     Public Function GetUnaryOperatorPrecedence(kind As SyntaxKind) As Integer
       Select Case kind
         Case SyntaxKind.PlusToken, SyntaxKind.MinusToken : Return 12
@@ -37,6 +38,7 @@ Namespace Basic.CodeAnalysis.Syntax
       End Select
     End Function
 
+    <Extension()>
     Public Function GetBinaryOperatorPrecedence(kind As SyntaxKind) As Integer
       Select Case kind
         Case SyntaxKind.HatToken : Return 13
@@ -104,9 +106,9 @@ Namespace Basic.CodeAnalysis.Syntax
         Case "step" : Return SyntaxKind.StepKeyword
         Case "next" : Return SyntaxKind.NextKeyword
 
-        Case "select" : Return SyntaxKind.SelectKeyword
-        Case "case" : Return SyntaxKind.CaseKeyword
-        Case "is" : Return SyntaxKind.IsKeyword
+        'Case "select" : Return SyntaxKind.SelectKeyword
+        'Case "case" : Return SyntaxKind.CaseKeyword
+        'Case "is" : Return SyntaxKind.IsKeyword
 
         Case "const" : Return SyntaxKind.ConstKeyword
         Case "dim" : Return SyntaxKind.DimKeyword
@@ -155,9 +157,9 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.StepKeyword : Return "step"
         Case SyntaxKind.NextKeyword : Return "next"
 
-        Case SyntaxKind.SelectKeyword : Return "select"
-        Case SyntaxKind.CaseKeyword : Return "case"
-        Case SyntaxKind.IsKeyword : Return "is"
+        'Case SyntaxKind.SelectKeyword : Return "select"
+        'Case SyntaxKind.CaseKeyword : Return "case"
+        'Case SyntaxKind.IsKeyword : Return "is"
 
         Case SyntaxKind.IfKeyword : Return "if"
         Case SyntaxKind.ThenKeyword : Return "then"
@@ -212,8 +214,39 @@ Namespace Basic.CodeAnalysis.Syntax
     End Function
 
     <Extension>
+    Public Function IsComment(kind As SyntaxKind) As Boolean
+      Select Case kind
+        Case SyntaxKind.SingleLineCommentTrivia,
+             SyntaxKind.MultiLineCommentTrivia
+          Return True
+        Case Else
+          Return False
+      End Select
+    End Function
+
+    <Extension>
+    Public Function IsTrivia(kind As SyntaxKind) As Boolean
+      Select Case kind
+        Case SyntaxKind.SkippedTextTrivia,
+             SyntaxKind.LineBreakTrivia,
+             SyntaxKind.WhitespaceTrivia,
+             SyntaxKind.SingleLineCommentTrivia,
+             SyntaxKind.MultiLineCommentTrivia
+          Return True
+        Case Else
+          Return False
+      End Select
+    End Function
+
+    <Extension>
     Public Function Is_Keyword(kind As SyntaxKind) As Boolean
       Return kind.ToString.EndsWith("Keyword")
+    End Function
+
+    <Extension>
+    Public Function IsToken(kind As SyntaxKind) As Boolean
+      Return Not kind.IsTrivia AndAlso
+             (kind.Is_Keyword OrElse kind.ToString.EndsWith("Token"))
     End Function
 
   End Module

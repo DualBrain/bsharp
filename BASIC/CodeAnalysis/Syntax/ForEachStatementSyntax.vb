@@ -3,13 +3,14 @@
   Public NotInheritable Class ForEachStatementSyntax
     Inherits StatementSyntax
 
-    Public Sub New(forKeyword As SyntaxToken,
+    Public Sub New(tree As SyntaxTree, forKeyword As SyntaxToken,
                    eachKeyword As SyntaxToken,
                    value As SyntaxToken,
                    inKeyword As SyntaxToken,
                    array As SyntaxToken,
                    statements As BlockStatementSyntax,
                    nextKeyword As SyntaxToken)
+      MyBase.New(tree)
       Me.ForKeyword = forKeyword
       Me.EachKeyword = eachKeyword
       Me.Value = value

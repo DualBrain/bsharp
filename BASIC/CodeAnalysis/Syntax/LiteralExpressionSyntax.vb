@@ -3,11 +3,12 @@
   Public NotInheritable Class LiteralExpressionSyntax
     Inherits ExpressionSyntax
 
-    Sub New(literalToken As SyntaxToken)
-      Me.New(literalToken, literalToken.Value)
+    Sub New(tree As SyntaxTree, literalToken As SyntaxToken)
+      Me.New(tree, literalToken, literalToken.Value)
     End Sub
 
-    Sub New(literalToken As SyntaxToken, value As Object)
+    Sub New(tree As SyntaxTree, literalToken As SyntaxToken, value As Object)
+      MyBase.New(tree)
       Me.LiteralToken = literalToken
       Me.Value = value
     End Sub

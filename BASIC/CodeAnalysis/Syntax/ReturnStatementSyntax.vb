@@ -3,9 +3,8 @@
   Partial Public NotInheritable Class ReturnStatementSyntax
     Inherits StatementSyntax
 
-    'tree As SyntaxTree, 
-    Public Sub New(returnKeyword As SyntaxToken, expression As ExpressionSyntax)
-      'MyBase.New(tree)
+    Public Sub New(tree As SyntaxTree, returnKeyword As SyntaxToken, expression As ExpressionSyntax)
+      MyBase.New(tree)
       Me.ReturnKeyword = returnKeyword
       Me.Expression = expression
     End Sub

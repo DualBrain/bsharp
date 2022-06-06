@@ -5,11 +5,12 @@ Namespace Basic.CodeAnalysis.Syntax
   Public NotInheritable Class SingleLineIfStatementSyntax
     Inherits StatementSyntax
 
-    Public Sub New(ifKeyword As SyntaxToken,
+    Public Sub New(tree As SyntaxTree, ifKeyword As SyntaxToken,
                    expression As ExpressionSyntax,
                    thenKeyword As SyntaxToken,
                    statements As StatementSyntax,
                    elseClause As SingleLineElseClauseSyntax)
+      MyBase.New(tree)
       Me.IfKeyword = ifKeyword
       Me.Expression = expression
       Me.ThenKeyword = thenKeyword
@@ -29,7 +30,8 @@ Namespace Basic.CodeAnalysis.Syntax
   Public NotInheritable Class SingleLineElseClauseSyntax
     Inherits SyntaxNode
 
-    Public Sub New(elseKeyword As SyntaxToken, statements As StatementSyntax)
+    Public Sub New(tree As SyntaxTree, elseKeyword As SyntaxToken, statements As StatementSyntax)
+      MyBase.New(tree)
       Me.ElseKeyword = elseKeyword
       Me.Statements = statements
     End Sub
@@ -43,13 +45,15 @@ Namespace Basic.CodeAnalysis.Syntax
   Public NotInheritable Class MultiLineIfBlock
     Inherits StatementSyntax
 
-    Public Sub New(ifStatement As IfStatementSyntax,
-                   elseIfStatements As ImmutableArray(Of ElseIfStatementSyntax),
+    'elseIfStatements As ImmutableArray(Of ElseIfStatementSyntax),
+    Public Sub New(tree As SyntaxTree,
+                   ifStatement As IfStatementSyntax,
                    elseStatement As ElseStatementSyntax,
                    endKeyword As SyntaxToken,
                    closingKeyword As SyntaxToken)
+      MyBase.New(tree)
       Me.IfStatement = ifStatement
-      Me.ElseIfStatements = elseIfStatements
+      'Me.ElseIfStatements = ElseIfStatements
       Me.ElseStatement = elseStatement
       Me.EndKeyword = endKeyword
       Me.ClosingKeyword = closingKeyword
@@ -57,7 +61,7 @@ Namespace Basic.CodeAnalysis.Syntax
 
     Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.MultiLineIfBlock
     Public ReadOnly Property IfStatement As IfStatementSyntax
-    Public ReadOnly Property ElseIfStatements As ImmutableArray(Of ElseIfStatementSyntax)
+    'Public ReadOnly Property ElseIfStatements As ImmutableArray(Of ElseIfStatementSyntax)
     Public ReadOnly Property ElseStatement As ElseStatementSyntax
     Public ReadOnly Property EndKeyword As SyntaxToken
     Public ReadOnly Property ClosingKeyword As SyntaxToken
@@ -67,10 +71,11 @@ Namespace Basic.CodeAnalysis.Syntax
   Public NotInheritable Class IfStatementSyntax
     Inherits StatementSyntax
 
-    Public Sub New(ifKeyword As SyntaxToken,
+    Public Sub New(tree As SyntaxTree, ifKeyword As SyntaxToken,
                    expression As ExpressionSyntax,
                    thenKeyword As SyntaxToken,
                    statements As StatementSyntax)
+      MyBase.New(tree)
       Me.IfKeyword = ifKeyword
       Me.Expression = expression
       Me.ThenKeyword = thenKeyword
@@ -88,7 +93,8 @@ Namespace Basic.CodeAnalysis.Syntax
   Public NotInheritable Class ElseIfStatementSyntax
     Inherits SyntaxNode
 
-    Public Sub New(elseIfKeyword As SyntaxToken, expression As ExpressionSyntax, thenKeyword As SyntaxToken, statements As StatementSyntax)
+    Public Sub New(tree As SyntaxTree, elseIfKeyword As SyntaxToken, expression As ExpressionSyntax, thenKeyword As SyntaxToken, statements As StatementSyntax)
+      MyBase.New(tree)
       Me.ElseIfKeyword = elseIfKeyword
       Me.Expression = expression
       Me.ThenKeyword = thenKeyword
@@ -106,7 +112,8 @@ Namespace Basic.CodeAnalysis.Syntax
   Public NotInheritable Class ElseStatementSyntax
     Inherits SyntaxNode
 
-    Public Sub New(elseKeyword As SyntaxToken, statements As StatementSyntax)
+    Public Sub New(tree As SyntaxTree, elseKeyword As SyntaxToken, statements As StatementSyntax)
+      MyBase.New(tree)
       Me.ElseKeyword = elseKeyword
       Me.Statements = statements
     End Sub

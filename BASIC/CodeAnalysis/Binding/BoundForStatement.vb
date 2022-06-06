@@ -20,6 +20,7 @@ Namespace Basic.CodeAnalysis.Binding
     Public ReadOnly Property UpperBound As BoundExpression
     Public ReadOnly Property Stepper As BoundExpression
     Public ReadOnly Property Body As BoundStatement
+
   End Class
 
 End Namespace

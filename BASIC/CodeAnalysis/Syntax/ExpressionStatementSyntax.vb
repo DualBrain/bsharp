@@ -12,7 +12,8 @@
     ' ---------
     ' a + 1
 
-    Public Sub New(expression As ExpressionSyntax)
+    Public Sub New(tree As SyntaxTree, expression As ExpressionSyntax)
+      MyBase.New(tree)
       Me.Expression = expression
     End Sub
 

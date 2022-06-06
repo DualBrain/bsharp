@@ -2,7 +2,6 @@
 
   Public Enum SymbolKind
     [Function]
-    'Variable
     GlobalVariable
     LocalVariable
     Parameter

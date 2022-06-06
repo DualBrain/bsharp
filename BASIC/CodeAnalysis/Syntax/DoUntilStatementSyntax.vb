@@ -3,7 +3,8 @@
   Public NotInheritable Class DoUntilStatementSyntax
     Inherits StatementSyntax
 
-    Public Sub New(doKeyword As SyntaxToken, untilClause As UntilClauseSyntax, body As StatementSyntax, loopKeyword As SyntaxToken)
+    Public Sub New(tree As SyntaxTree, doKeyword As SyntaxToken, untilClause As UntilClauseSyntax, body As StatementSyntax, loopKeyword As SyntaxToken)
+      MyBase.New(tree)
       Me.DoKeyword = doKeyword
       Me.UntilClause = untilClause
       Me.Statements = body

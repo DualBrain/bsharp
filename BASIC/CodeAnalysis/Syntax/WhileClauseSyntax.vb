@@ -3,7 +3,8 @@
   Public NotInheritable Class WhileClauseSyntax
     Inherits SyntaxNode
 
-    Public Sub New(whileKeyword As SyntaxToken, expression As ExpressionSyntax, atBeginning As Boolean)
+    Public Sub New(tree As SyntaxTree, whileKeyword As SyntaxToken, expression As ExpressionSyntax, atBeginning As Boolean)
+      MyBase.New(tree)
       Me.WhileKeyword = whileKeyword
       Me.Expression = expression
       Me.AtBeginning = atBeginning

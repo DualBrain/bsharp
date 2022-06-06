@@ -5,13 +5,19 @@ Namespace Basic.CodeAnalysis.Syntax
 
   Public NotInheritable Class SyntaxTree
 
-    Private Sub New(text As SourceText)
+    Private Delegate Sub ParseHandler(tree As SyntaxTree,
+                                      ByRef root As CompilationUnitSyntax,
+                                      ByRef diagnostics As ImmutableArray(Of Diagnostic))
 
-      Dim parser = New Parser(text)
-      Dim root = parser.ParseCompilationUnit
+    Private Sub New(text As SourceText, handler As ParseHandler)
 
       Me.Text = text
-      Me.Diagnostics = parser.Diagnostics.ToImmutableArray()
+
+      Dim root As CompilationUnitSyntax = Nothing
+      Dim d As ImmutableArray(Of Diagnostic) = Nothing
+      handler(Me, root, d)
+
+      Me.Diagnostics = d
       Me.Root = root
 
     End Sub
@@ -20,44 +26,69 @@ Namespace Basic.CodeAnalysis.Syntax
     Public ReadOnly Property Diagnostics As ImmutableArray(Of Diagnostic)
     Public ReadOnly Property Root As CompilationUnitSyntax
 
+    Public Shared Function Load(fileName As String) As SyntaxTree
+      Dim text = System.IO.File.ReadAllText(fileName)
+      Dim source = SourceText.From(text, fileName)
+      Return Parse(source)
+    End Function
+
+    Private Shared Sub Parse(tree As SyntaxTree, ByRef root As CompilationUnitSyntax, ByRef diagnostics As ImmutableArray(Of Diagnostic))
+      Dim parser = New Parser(tree)
+      root = parser.ParseCompilationUnit
+      diagnostics = parser.Diagnostics.ToImmutableArray
+    End Sub
+
     Public Shared Function Parse(text As String) As SyntaxTree
-      Dim srcText = SourceText.From(text)
-      Return Parse(srcText)
+      Dim source = SourceText.From(text)
+      Return Parse(source)
     End Function
 
     Public Shared Function Parse(text As SourceText) As SyntaxTree
-      Return New SyntaxTree(text)
+      Return New SyntaxTree(text, AddressOf Parse)
     End Function
 
-    Public Shared Function ParseTokens(text As String) As ImmutableArray(Of SyntaxToken)
-      Dim srcText = SourceText.From(text)
-      Return ParseTokens(srcText)
+    Public Shared Function ParseTokens(text As String, Optional includeEndOfFile As Boolean = False) As ImmutableArray(Of SyntaxToken)
+      Dim source = SourceText.From(text)
+      Return ParseTokens(source, includeEndOfFile)
     End Function
 
-    Public Shared Function ParseTokens(text As String, ByRef diagnostics As ImmutableArray(Of Diagnostic)) As ImmutableArray(Of SyntaxToken)
-      Dim st = SourceText.From(text)
-      Return ParseTokens(st, diagnostics)
+    Public Shared Function ParseTokens(text As String, ByRef diagnostics As ImmutableArray(Of Diagnostic), Optional includeEndOfFile As Boolean = False) As ImmutableArray(Of SyntaxToken)
+      Dim source = SourceText.From(text)
+      Return ParseTokens(source, diagnostics, includeEndOfFile)
     End Function
 
-    Public Shared Function ParseTokens(text As SourceText) As ImmutableArray(Of SyntaxToken)
-      Dim diagnostics As ImmutableArray(Of Diagnostic) = Nothing
-      Return ParseTokens(text, diagnostics)
+    Public Shared Function ParseTokens(text As SourceText, Optional includeEndOfFile As Boolean = False) As ImmutableArray(Of SyntaxToken)
+      Return ParseTokens(text, Nothing, includeEndOfFile)
     End Function
 
-    Public Shared Function ParseTokens(text As SourceText, ByRef diagnostics As ImmutableArray(Of Diagnostic)) As ImmutableArray(Of SyntaxToken)
-      Dim l = New Lexer(text)
-      Dim result = LexTokens(l).ToImmutableArray
-      diagnostics = l.Diagnostics.ToImmutableArray
-      Return result
+    ' I think this will work; Minsk handled this by leveraging C#'s local function capability.
+    Private Shared ReadOnly m_parsedTokens As New List(Of SyntaxToken)
+    Private Shared m_includeEndOfFile As Boolean
+
+    Public Shared Function ParseTokens(text As SourceText, ByRef diagnostics As ImmutableArray(Of Diagnostic), Optional includeEndOfFile As Boolean = False) As ImmutableArray(Of SyntaxToken)
+      m_includeEndOfFile = includeEndOfFile
+      m_parsedTokens.Clear()
+      ' ParseTokens local function was here....
+      Dim st = New SyntaxTree(text, AddressOf ParseTokens_ParseTokens)
+      diagnostics = st.Diagnostics.ToImmutableArray
+      Return m_parsedTokens.ToImmutableArray
     End Function
 
-    Private Shared Iterator Function LexTokens(lexer As Lexer) As IEnumerable(Of SyntaxToken)
+    Private Shared Sub ParseTokens_ParseTokens(st As SyntaxTree, ByRef root As CompilationUnitSyntax, ByRef d As ImmutableArray(Of Diagnostic))
+      'root = Nothing
+      Dim l = New Lexer(st)
       Do
-        Dim token = lexer.Lex
+        Dim token = l.Lex
+        If token.Kind = SyntaxKind.EndOfFileToken Then
+          root = New CompilationUnitSyntax(st, ImmutableArray(Of MemberSyntax).Empty, token)
+        End If
+        If token.Kind <> SyntaxKind.EndOfFileToken OrElse m_includeEndOfFile Then
+          m_parsedTokens.Add(token)
+        End If
         If token.Kind = SyntaxKind.EndOfFileToken Then Exit Do
-        Yield token
       Loop
-    End Function
+      d = l.Diagnostics.ToImmutableArray
+    End Sub
 
   End Class
 

@@ -1,6 +1,7 @@
 ﻿Imports Basic.CodeAnalysis.Symbols
 Imports Basic.CodeAnalysis.Syntax
 Imports Basic.CodeAnalysis.Text
+Imports Mono.Cecil
 
 Namespace Basic.CodeAnalysis
 
@@ -9,155 +10,205 @@ Namespace Basic.CodeAnalysis
 
     Private ReadOnly m_diagnostics As New List(Of Diagnostic)
 
-    Private Sub Report(span As TextSpan, message As String)
-      Dim diagnostic = New Diagnostic(span, message)
-      m_diagnostics.Add(diagnostic)
-    End Sub
-
     Public Function GetEnumerator() As IEnumerator(Of Diagnostic) Implements IEnumerable(Of Diagnostic).GetEnumerator
-      Return m_diagnostics.GetEnumerator()
+      Return m_diagnostics.GetEnumerator
     End Function
 
     Private Function IEnumerable_GetEnumerator() As IEnumerator Implements IEnumerable.GetEnumerator
       Return GetEnumerator()
     End Function
 
-    Public Sub AddRange(diagnostics As DiagnosticBag)
-      m_diagnostics.AddRange(diagnostics.m_diagnostics)
+    Private Sub ReportError(location As TextLocation, message As String)
+      Dim d = Diagnostic.Error(location, message)
+      m_diagnostics.Add(d)
     End Sub
 
-    Public Sub ReportInvalidNumber(span As TextSpan, text As String, type As Type)
-      Dim message = $"The number {text} isn't a valid {type}."
-      Report(span, message)
+    Private Sub ReportWarning(location As TextLocation, message As String)
+      Dim d = Diagnostic.Warning(location, message)
+      m_diagnostics.Add(d)
     End Sub
 
-    Public Sub ReportBadCharacter(position As Integer, character As Char)
-      Dim message = $"Bad character input: '{character}'."
-      Report(New TextSpan(position, 1), message)
+    Public Sub AddRange(diagnostics As IEnumerable(Of Diagnostic))
+      m_diagnostics.AddRange(diagnostics)
     End Sub
 
-    Public Sub ReportUnexpectedToken(span As TextSpan, actualKind As SyntaxKind, expectedKind As SyntaxKind)
-      Dim message = $"Unexpected token <{actualKind}>, expected <{expectedKind}>."
-      Report(span, message)
+    Public Sub Concat(diagnostics As DiagnosticBag)
+      m_diagnostics.Concat(diagnostics.m_diagnostics)
     End Sub
 
-    Public Sub ReportUndefinedUnaryOperator(span As TextSpan, operatorText As String, operandType As TypeSymbol)
-      Dim message = $"Unary operator '{operatorText}' is not defined for type '{operandType}'."
-      Report(span, message)
+    Public Sub ReportInvalidNumber(location As TextLocation, text As String, type As TypeSymbol)
+      ReportError(location, $"The number {text} isn't valid {type}.")
     End Sub
 
-    Public Sub ReportUndefinedBinaryOperator(span As TextSpan, operatorText As String, leftType As TypeSymbol, rightType As TypeSymbol)
-      Dim message = $"Binary operator '{operatorText}' is not defined for type '{leftType}' and '{rightType}'."
-      Report(span, message)
-    End Sub
-
-    Public Sub ReportUndefinedVariable(span As TextSpan, name As String)
-      Dim message = $"Variable '{name}' doesn't exist."
-      Report(span, message)
-    End Sub
-
-    Public Sub ReportNotAFunction(span As TextSpan, name As String)
-      Dim message = $"'{name}' is not a function."
-      Report(span, message)
-    End Sub
-
-    Public Sub ReportNotAVariable(span As TextSpan, name As String)
-      Dim message = $"'{name}' is not a variable."
-      Report(span, message)
-    End Sub
-
-    Public Sub ReportSymbolAlreadyDeclared(span As TextSpan, name As String)
-      Dim message = $"'{name}' is already declared."
-      Report(span, message)
-    End Sub
-
-    Public Sub ReportCannotConvert(span As TextSpan, fromType As TypeSymbol, toType As TypeSymbol)
-      Dim message = $"Cannot convert type '{fromType}' to '{toType}'."
-      Report(span, message)
-    End Sub
-
-    Public Sub ReportCannotAssign(span As TextSpan, name As String)
-      Dim message = $"Variable '{name}' is read-only and cannot be assigned to."
-      Report(span, message)
-    End Sub
-
-    Public Sub ReportMissingEndIf(span As TextSpan)
-      Dim message = $"Missing End If."
-      Report(span, message)
-    End Sub
-
-    Friend Sub XXX_ReportFunctionsAreUnsupported(span As Object)
-      Throw New NotImplementedException()
-    End Sub
-
-    Public Sub ReportMissingIf(span As TextSpan)
-      Dim message = $"Missing If."
-      Report(span, message)
+    Public Sub ReportBadCharacter(location As TextLocation, character As Char)
+      ReportError(location, $"Bad character input: '{character}'.")
     End Sub
 
     Public Sub ReportUnterminatedString(location As TextLocation)
-      Dim message = $"Unterminated string literal."
-      Report(location.Span, message)
+      ReportError(location, $"Unterminated string literal.")
     End Sub
 
-    Public Sub ReportUndefinedFunction(span As TextSpan, name As String)
-      Dim message = $"Function '{name}' doesn't exist."
-      Report(span, message)
+    Public Sub ReportUnterminatedMultiLineComment(location As TextLocation)
+      ReportError(location, $"Unterminated mult-line comment.")
     End Sub
 
-    Public Sub ReportWrongArgumentCount(span As TextSpan, name As String, expectedCount As Integer, actualCount As Integer)
-      Dim message = $"Function '{name}' requires {expectedCount} arguments but was given {actualCount}."
-      Report(span, message)
+    Public Sub ReportUnexpectedToken(location As TextLocation, actualKind As SyntaxKind, expectedKind As SyntaxKind)
+      ReportError(location, $"Unexpected token <{actualKind}>, expected <{expectedKind}>.")
     End Sub
 
-    Public Sub ReportWrongArgumentType(span As TextSpan, name As String, expectedType As TypeSymbol, actualType As TypeSymbol)
-      Dim message = $"Parameter '{name}' requires a value of type '{expectedType}' but was given a value of type '{actualType}'."
-      Report(span, message)
+    Public Sub ReportUndefinedUnaryOperator(location As TextLocation, operatorText As String, operandType As TypeSymbol)
+      ReportError(location, $"Unary operator '{operatorText}' is not defined for type '{operandType}'.")
     End Sub
 
-    Public Sub ReportExpressionMustHaveValue(span As TextSpan)
-      Dim message = "Expression must have a value."
-      Report(span, message)
+    Public Sub ReportUndefinedBinaryOperator(location As TextLocation, operatorText As String, leftType As TypeSymbol, rightType As TypeSymbol)
+      ReportError(location, $"Binary operator '{operatorText}' is not defined for type '{leftType}' and '{rightType}'.")
     End Sub
 
-    Public Sub ReportParameterAlreadyDeclared(span As TextSpan, parameterName As String)
-      Dim message = $"A parameter with the name '{parameterName}' already exists."
-      Report(span, message)
+    Public Sub ReportParameterAlreadyDeclared(location As TextLocation, parameterName As String)
+      ReportError(location, $"A parameter with the name '{parameterName}' already exists.")
     End Sub
 
-    Public Sub ReportUndefinedType(span As TextSpan, name As String)
-      Dim message = $"Type '{name}' doesn't exist."
-      Report(span, message)
+    'Public Sub ReportUndefinedName(location As TextLocation, name As String)
+    Public Sub ReportUndefinedVariable(location As TextLocation, name As String)
+      ReportError(location, $"Variable '{name}' doesn't exist.")
     End Sub
 
-    Public Sub ReportCannotConvertImplicitly(span As TextSpan, fromType As TypeSymbol, toType As TypeSymbol)
-      Dim message = $"Cannot convert type '{fromType}' to '{toType}'. An explicit conversion exists (are you missing a cast?)"
-      Report(span, message)
+    Public Sub ReportNotAVariable(location As TextLocation, name As String)
+      ReportError(location, $"'{name}' is not a variable.")
     End Sub
 
-    Public Sub ReportInvalidBreakOrContinue(span As TextSpan, text As String)
-      Dim message = $"The keyword '{text}' can only be used inside of loops."
-      Report(span, message)
+    Friend Sub ReportUndefinedType(location As TextLocation, name As String)
+      ReportError(location, $"Type '{name}' doesn't exist.")
     End Sub
 
-    Public Sub ReportAllPathsMustReturn(span As TextSpan)
-      Dim message = "Not all code paths return a value."
-      Report(span, message)
+    Public Sub ReportCannotConvert(location As TextLocation, fromType As TypeSymbol, toType As TypeSymbol)
+      ReportError(location, $"Cannot convert type '{fromType}' to '{toType}'.")
     End Sub
 
-    Public Sub ReportInvalidReturn(span As TextSpan)
-      Dim message = "The 'return' keyword can only be used inside of functions."
-      Report(span, message)
+    Public Sub ReportCannotConvertImplicitly(location As TextLocation, fromType As TypeSymbol, toType As TypeSymbol)
+      ReportError(location, $"Cannot convert type '{fromType}' to '{toType}'. An explicit conversion exists (are you missing a cast?)")
     End Sub
 
-    Public Sub ReportInvalidReturnExpression(span As TextSpan, functionName As String)
-      Dim message = $"Since the function '{functionName}' does not return a value the 'return' keyword cannot be followed by an expression."
-      Report(span, message)
+    Public Sub ReportSymbolAlreadyDeclared(location As TextLocation, name As String)
+      ReportError(location, $"'{name}' is already declared.")
     End Sub
 
-    Public Sub ReportMissingReturnExpression(span As TextSpan, returnType As TypeSymbol)
-      Dim message = $"An expression of type '{returnType}' is expected."
-      Report(span, message)
+    Public Sub ReportCannotAssign(location As TextLocation, name As String)
+      ReportError(location, $"Variable '{name}' is read-only and cannot be assigned to.")
+    End Sub
+
+    Public Sub ReportUndefinedFunction(location As TextLocation, name As String)
+      ReportError(location, $"Function '{name}' doesn't exist.")
+    End Sub
+
+    Public Sub ReportExpressionMustHaveValue(location As TextLocation)
+      ReportError(location, "Expression must have a value.")
+    End Sub
+
+    Public Sub ReportNotAFunction(location As TextLocation, name As String)
+      ReportError(location, $"'{name}' is not a function.")
+    End Sub
+
+    Public Sub ReportWrongArgumentCount(location As TextLocation, name As String, expectedCount As Integer, actualCount As Integer)
+      ReportError(location, $"Function '{name}' requires {expectedCount} arguments but was given {actualCount}.")
+    End Sub
+
+    Public Sub ReportWrongArgumentType(location As TextLocation, name As String, expectedType As TypeSymbol, actualType As TypeSymbol)
+      ReportError(location, $"Parameter '{name}' requires a value of type '{expectedType}' but was given a value of type '{actualType}'.")
+    End Sub
+
+    Public Sub ReportInvalidBreakOrContinue(location As TextLocation, text As String)
+      ReportError(location, $"The keyword '{text}' can only be used inside of loops.")
+    End Sub
+
+    Public Sub ReportAllPathsMustReturn(location As TextLocation)
+      ReportError(location, "Not all code paths return a value.")
+    End Sub
+
+    Public Sub ReportInvalidReturnExpression(location As TextLocation, functionName As String)
+      ReportError(location, $"Since the function '{functionName}' does not return a value, the 'return' keyword cannot be followed by an expression.")
+    End Sub
+
+    Public Sub ReportInvalidReturnWithValueInGlobalStatements(location As TextLocation)
+      ReportError(location, $"The 'return' keyword cannot be followed by an expression in global statements.")
+    End Sub
+
+    Public Sub ReportMissingReturnExpression(location As TextLocation, returnType As TypeSymbol)
+      ReportError(location, $"An expression of type '{returnType}' is expected.")
+    End Sub
+
+    Public Sub ReportInvalidExpressionStatement(location As TextLocation)
+      ReportError(location, "Only assignment and call epxressions can be used as a statement.")
+    End Sub
+
+    Public Sub ReportOnlyOneFileCanHaveGlobalStatements(location As TextLocation)
+      ReportError(location, "At most one file can have global statements.")
+    End Sub
+
+    Public Sub ReportMainMustHaveCorrectSignature(location As TextLocation)
+      ReportError(location, "main must not take arguments and not return anything.")
+    End Sub
+
+    Public Sub ReportCannotMixMainAndGlobalStatements(location As TextLocation)
+      ReportError(location, "Cannot declare main function when global statements are used.")
+    End Sub
+
+    Public Sub ReportInvalidReference(path As String)
+      ReportError(Nothing, $"The reference is not a valid .NET assembly: '{path}'")
+    End Sub
+
+    Public Sub ReportRequiredTypeNotFound(internalName As String, metadataName As String)
+      ReportError(Nothing, If(internalName Is Nothing,
+                         $"The required type '{metadataName}' cannot be resolved among the given references.",
+                         $"The required type '{internalName}' ('{metadataName}') cannot be resolved among the given references."))
+    End Sub
+
+    Public Sub ReportRequiredTypeAmbiguous(internalName As String, metadataName As String, foundTypes() As TypeDefinition)
+      Dim assemblyNames = foundTypes.Select(Function(t) t.Module.Assembly.Name.Name)
+      Dim assemblyNameList = String.Join(", ", assemblyNames)
+      ReportError(Nothing, If(internalName Is Nothing,
+                         $"The required type '{metadataName}' was found in multiple references: {assemblyNameList}",
+                         $"The required type '{internalName}' ('{metadataName}') was found in multiple references: {assemblyNameList}"))
+    End Sub
+
+    Public Sub ReportRequiredMethodNotFound(typeName As String, methodName As String, parameterTypeNames() As String)
+      Dim parameterTypeNameList = String.Join(", ", parameterTypeNames)
+      ReportError(Nothing, $"The required method '{typeName}.{methodName}({parameterTypeNameList})' cann be resolved among the given references.")
+    End Sub
+
+    Public Sub ReportUnreachableCode(location As TextLocation)
+      ReportError(location, $"Unreachable code detected.")
+    End Sub
+
+    Public Sub ReportUnreachableCode(node As SyntaxNode)
+      Select Case node.Kind
+        Case SyntaxKind.BlockStatement
+          Dim firstStatement = CType(node, BlockStatementSyntax).Statements.FirstOrDefault()
+          ' Report just for non empty blocks.
+          If firstStatement IsNot Nothing Then ReportUnreachableCode(firstStatement)
+        Case SyntaxKind.VariableDeclaration
+          ReportUnreachableCode(CType(node, VariableDeclarationSyntax).Keyword.Location)
+        Case SyntaxKind.IfStatement
+          ReportUnreachableCode(CType(node, IfStatementSyntax).IfKeyword.Location)
+        Case SyntaxKind.WhileStatement
+          ReportUnreachableCode(CType(node, WhileStatementSyntax).WhileKeyword.Location)
+        Case SyntaxKind.DoWhileStatement
+          ReportUnreachableCode(CType(node, DoWhileStatementSyntax).DoKeyword.Location)
+        Case SyntaxKind.ForStatement
+          ReportUnreachableCode(CType(node, ForStatementSyntax).ForKeyword.Location)
+        Case SyntaxKind.ExitStatement
+          ReportUnreachableCode(CType(node, ExitStatementSyntax).ExitKeyword.Location)
+        Case SyntaxKind.ContinueStatement
+          ReportUnreachableCode(CType(node, ContinueStatementSyntax).ContinueKeyword.Location)
+        Case SyntaxKind.ReturnStatement
+          ReportUnreachableCode(CType(node, ReturnStatementSyntax).ReturnKeyword.Location)
+        Case SyntaxKind.ExpressionStatement
+          ReportUnreachableCode(CType(node, ExpressionStatementSyntax).Expression)
+        Case SyntaxKind.CallExpression
+          ReportUnreachableCode(CType(node, CallExpressionSyntax).Identifier.Location)
+        Case Else
+          Throw New Exception($"Unexpected syntax {node.Kind}")
+      End Select
     End Sub
 
   End Class

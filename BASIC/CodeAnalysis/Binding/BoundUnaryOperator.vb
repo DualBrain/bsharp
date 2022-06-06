@@ -28,15 +28,12 @@ Namespace Basic.CodeAnalysis.Binding
        New BoundUnaryOperator(SyntaxKind.MinusToken, BoundUnaryOperatorKind.Negation, TypeSymbol.Integer)}
 
     Public Shared Function Bind(SyntaxKind As SyntaxKind, operandType As TypeSymbol) As BoundUnaryOperator
-
       For Each op In m_operators
         If op.SyntaxKind = SyntaxKind AndAlso op.OperandType Is operandType Then
           Return op
         End If
       Next
-
       Return Nothing
-
     End Function
 
   End Class

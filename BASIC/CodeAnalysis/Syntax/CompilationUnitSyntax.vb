@@ -5,9 +5,8 @@ Namespace Basic.CodeAnalysis.Syntax
   Public NotInheritable Class CompilationUnitSyntax
     Inherits SyntaxNode
 
-    'Public Sub New(statement As StatementSyntax, endOfFileToken As SyntaxToken)
-    Public Sub New(members As ImmutableArray(Of MemberSyntax), endOfFileToken As SyntaxToken)
-      'Me.Statement = Statement
+    Public Sub New(tree As SyntaxTree, members As ImmutableArray(Of MemberSyntax), endOfFileToken As SyntaxToken)
+      MyBase.New(tree)
       Me.Members = members
       Me.EndOfFileToken = endOfFileToken
     End Sub

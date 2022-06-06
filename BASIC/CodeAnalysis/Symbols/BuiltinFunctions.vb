@@ -20,9 +20,9 @@ Namespace Basic.CodeAnalysis.Symbols
     Public ReadOnly UCase As New FunctionSymbol("UCASE$", ImmutableArray.Create(New ParameterSymbol("value", TypeSymbol.String)), TypeSymbol.String)
     Public ReadOnly Val As New FunctionSymbol("VAL", ImmutableArray.Create(New ParameterSymbol("value", TypeSymbol.String)), TypeSymbol.Int)
 #End If
-    Public ReadOnly Print As New FunctionSymbol("print", ImmutableArray.Create(New ParameterSymbol("text", TypeSymbol.String)), TypeSymbol.Nothing)
+    Public ReadOnly Print As New FunctionSymbol("print", ImmutableArray.Create(New ParameterSymbol("text", TypeSymbol.String, 0)), TypeSymbol.Nothing)
     Public ReadOnly Input As New FunctionSymbol("input", ImmutableArray(Of ParameterSymbol).Empty, TypeSymbol.String)
-    Public ReadOnly Rnd As New FunctionSymbol("rnd", ImmutableArray.Create(New ParameterSymbol("max", TypeSymbol.Integer)), TypeSymbol.Integer)
+    Public ReadOnly Rnd As New FunctionSymbol("rnd", ImmutableArray.Create(New ParameterSymbol("max", TypeSymbol.Integer, 0)), TypeSymbol.Integer)
 
     Friend Function GetAll() As IEnumerable(Of FunctionSymbol)
       Return GetType(BuiltinFunctions).GetFields(BindingFlags.Public Or BindingFlags.Static).

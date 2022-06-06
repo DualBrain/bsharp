@@ -3,11 +3,11 @@ Option Strict On
 Option Infer On
 
 Imports Xunit
-Imports BASIC.CodeAnalysis
-Imports BASIC.CodeAnalysis.Syntax
-Imports BASIC.CodeAnalysis.Symbols
+Imports Basic.CodeAnalysis
+Imports Basic.CodeAnalysis.Syntax
+Imports Basic.CodeAnalysis.Symbols
 
-Namespace Global.BASIC.Tests.CodeAnalysis
+Namespace Global.Basic.Tests.CodeAnalysis
 
   Public Class EvaluationTests
 

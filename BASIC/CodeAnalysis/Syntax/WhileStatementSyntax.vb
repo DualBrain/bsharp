@@ -3,7 +3,8 @@
   Friend Class WhileStatementSyntax
     Inherits StatementSyntax
 
-    Public Sub New(whileKeyword As SyntaxToken, expression As ExpressionSyntax, body As StatementSyntax, wendKeyword As SyntaxToken)
+    Public Sub New(tree As SyntaxTree, whileKeyword As SyntaxToken, expression As ExpressionSyntax, body As StatementSyntax, wendKeyword As SyntaxToken)
+      MyBase.New(tree)
       Me.WhileKeyword = whileKeyword
       Me.Expression = expression
       Me.Statements = body

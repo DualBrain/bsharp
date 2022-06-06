@@ -3,7 +3,8 @@
   Public NotInheritable Class ForStatementSyntax
     Inherits StatementSyntax
 
-    Public Sub New(forKeyword As SyntaxToken,
+    Public Sub New(tree As SyntaxTree,
+                   forKeyword As SyntaxToken,
                    identifier As SyntaxToken,
                    equalToken As SyntaxToken,
                    startValue As ExpressionSyntax,
@@ -13,12 +14,13 @@
                    increment As ExpressionSyntax,
                    statements As StatementSyntax,
                    nextKeyword As SyntaxToken)
+      MyBase.New(tree)
       Me.ForKeyword = forKeyword
       Me.Identifier = identifier
       Me.EqualToken = equalToken
-      Me.startValue = startValue
+      Me.StartValue = startValue
       Me.ToKeyword = toKeyword
-      Me.endValue = endValue
+      Me.EndValue = endValue
       Me.StepKeyword = stepKeyword
       Me.Increment = increment
       Me.Statements = statements

@@ -22,13 +22,13 @@ Namespace Basic.CodeAnalysis.Lowering
       Return New BoundLabel(name)
     End Function
 
-    Public Shared Function Lower(statement As BoundStatement) As BoundBlockStatement
+    Public Shared Function Lower(func As FunctionSymbol, statement As BoundStatement) As BoundBlockStatement
       Dim lowerer = New Lowerer
       Dim result = lowerer.RewriteStatement(statement)
-      Return Flatten(result)
+      Return RemoveDeadCode(Flatten(func, result))
     End Function
 
-    Private Shared Function Flatten(statement As BoundStatement) As BoundBlockStatement
+    Private Shared Function Flatten(func As FunctionSymbol, statement As BoundStatement) As BoundBlockStatement
       Dim builder = ImmutableArray.CreateBuilder(Of BoundStatement)
       Dim stack = New Stack(Of BoundStatement)
       stack.Push(statement)
@@ -42,29 +42,34 @@ Namespace Basic.CodeAnalysis.Lowering
           builder.Add(current)
         End If
       End While
+      If func.Type Is TypeSymbol.Nothing Then
+        If builder.Count = 0 OrElse CanFallThrough(builder.Last) Then
+          builder.Add(New BoundReturnStatement(Nothing))
+        End If
+      End If
       Return New BoundBlockStatement(builder.ToImmutable)
     End Function
 
-    '    Private Shared Function CanFallThrough(boundStatement As BoundStatement) As Boolean
-    '      Return boundStatement.Kind <> BoundNodeKind.ReturnStatement AndAlso
-    '             boundStatement.Kind <> BoundNodeKind.GotoStatement
-    '    End Function
+    Private Shared Function CanFallThrough(boundStatement As BoundStatement) As Boolean
+      Return boundStatement.Kind <> BoundNodeKind.ReturnStatement AndAlso
+             boundStatement.Kind <> BoundNodeKind.GotoStatement
+    End Function
 
-    '    Private Shared Function RemoveDeadCode(node As BoundBlockStatement) As BoundBlockStatement
+    Private Shared Function RemoveDeadCode(node As BoundBlockStatement) As BoundBlockStatement
 
-    '      Dim controlFlow = ControlFlowGraph.Create(node)
-    '      Dim reachableStatements = New HashSet(Of BoundStatement)(controlFlow.Blocks.SelectMany(Function(b) b.Statements))
+      Dim controlFlow = ControlFlowGraph.Create(node)
+      Dim reachableStatements = New HashSet(Of BoundStatement)(controlFlow.Blocks.SelectMany(Function(b) b.Statements))
 
-    '      Dim builder = node.Statements.ToBuilder
-    '      For i = builder.Count - 1 To 0 Step -1
-    '        If Not reachableStatements.Contains(builder(i)) Then
-    '          builder.RemoveAt(i)
-    '        End If
-    '      Next
+      Dim builder = node.Statements.ToBuilder
+      For i = builder.Count - 1 To 0 Step -1
+        If Not reachableStatements.Contains(builder(i)) Then
+          builder.RemoveAt(i)
+        End If
+      Next
 
-    '      Return New BoundBlockStatement(builder.ToImmutable)
+      Return New BoundBlockStatement(builder.ToImmutable)
 
-    '    End Function
+    End Function
 
     Protected Overrides Function RewriteIfStatement(node As BoundIfStatement) As BoundStatement
 
@@ -83,11 +88,12 @@ Namespace Basic.CodeAnalysis.Lowering
         Dim endLabel = GenerateLabel()
         Dim gotoFalse = New BoundConditionalGotoStatement(endLabel, node.Expression, False)
         Dim endLabelStatement = New BoundLabelStatement(endLabel)
-        Dim builder = ImmutableArray.CreateBuilder(Of BoundStatement)
-        builder.Add(gotoFalse)
-        builder.Add(node.Statements)
-        builder.Add(endLabelStatement)
-        Dim result = New BoundBlockStatement(builder.ToImmutable)
+
+        Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(
+          gotoFalse,
+          node.Statements,
+          endLabelStatement))
+
         Return RewriteStatement(result)
 
       Else
@@ -116,27 +122,14 @@ Namespace Basic.CodeAnalysis.Lowering
         Dim elseLabelStatement = New BoundLabelStatement(elseLabel)
         Dim endLabelStatement = New BoundLabelStatement(endLabel)
 
-        Dim builder = ImmutableArray.CreateBuilder(Of BoundStatement)
-        builder.Add(gotoFalse)
-        builder.Add(node.Statements)
-        'For Each statement In node.IfStatement
-        '  builder.Add(statement)
-        'Next
-        builder.Add(gotoEndStatement)
-        builder.Add(elseLabelStatement)
-        builder.Add(node.ElseStatement)
-        'For Each statement In node.ElseStatement
-        '  builder.Add(statement)
-        'Next
-        builder.Add(endLabelStatement)
-        Dim result = New BoundBlockStatement(builder.ToImmutable)
+        Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(
+          gotoFalse,
+          node.Statements,
+          gotoEndStatement,
+          elseLabelStatement,
+          node.ElseStatement,
+          endLabelStatement))
 
-        'Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(gotoFalse,
-        '                                                                              node.ThenStatement,
-        '                                                                              gotoEndStatement,
-        '                                                                              elseLabelStatement,
-        '                                                                              node.ElseStatement,
-        '                                                                              endLabelStatement))
         Return RewriteStatement(result)
 
       End If
@@ -163,35 +156,16 @@ Namespace Basic.CodeAnalysis.Lowering
       Dim gotoContinue = New BoundGotoStatement(node.ContinueLabel)
       Dim bodyLabelStatement = New BoundLabelStatement(bodyLabel)
       Dim continueLabelStatement = New BoundLabelStatement(node.ContinueLabel)
-      Dim gotoTrue = New BoundConditionalGotoStatement(bodyLabel, node.Expression, True)
+      Dim gotoTrue = New BoundConditionalGotoStatement(bodyLabel, node.Expression)
       Dim exitLabelStatement = New BoundLabelStatement(node.ExitLabel)
 
-      Dim builder = ImmutableArray.CreateBuilder(Of BoundStatement)
-      builder.Add(gotoContinue)
-      builder.Add(bodyLabelStatement)
-      builder.Add(node.Statements)
-      builder.Add(continueLabelStatement)
-      builder.Add(gotoTrue)
-      builder.Add(exitLabelStatement)
-      Dim result = New BoundBlockStatement(builder.ToImmutable)
-
-      ' ------
-
-      'Dim bodyLabel = GenerateLabel()
-
-      'Dim gotoContinue = New BoundGotoStatement(node.ContinueLabel)
-      'Dim bodyLabelStatement = New BoundLabelStatement(bodyLabel)
-      'Dim continueLabelStatement = New BoundLabelStatement(node.ContinueLabel)
-      'Dim gotoTrue = New BoundConditionalGotoStatement(bodyLabel, node.Condition)
-      'Dim breakLabelStatement = New BoundLabelStatement(node.BreakLabel)
-
-      'Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(
-      '  gotoContinue,
-      '  bodyLabelStatement,
-      '  node.Body,
-      '  continueLabelStatement,
-      '  gotoTrue,
-      '  breakLabelStatement))
+      Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(
+        gotoContinue,
+        bodyLabelStatement,
+        node.Statements,
+        continueLabelStatement,
+        gotoTrue,
+        exitLabelStatement))
 
       Return RewriteStatement(result)
 
@@ -260,19 +234,6 @@ Namespace Basic.CodeAnalysis.Lowering
         gotoTrue,
         exitLabelStatement))
 
-      'Dim bodyLabel = GenerateLabel()
-
-      'Dim bodyLabelStatement = New BoundLabelStatement(bodyLabel)
-      'Dim continueLabelStatement = New BoundLabelStatement(node.ContinueLabel)
-      'Dim gotoTrue = New BoundConditionalGotoStatement(bodyLabel, node.Condition)
-      'Dim breakLabelStatement = New BoundLabelStatement(node.BreakLabel)
-
-      'Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(bodyLabelStatement,
-      '                                                                              node.Body,
-      '                                                                              continueLabelStatement,
-      '                                                                              gotoTrue,
-      '                                                                              breakLabelStatement))
-
       Return RewriteStatement(result)
 
     End Function
@@ -296,7 +257,7 @@ Namespace Basic.CodeAnalysis.Lowering
 
       Dim variableExpression = New BoundVariableExpression(node.Variable)
 
-      Dim upperBoundSymbol = New LocalVariableSymbol("upperBound", True, TypeSymbol.Integer)
+      Dim upperBoundSymbol = New LocalVariableSymbol("upperBound", True, TypeSymbol.Integer, node.UpperBound.ConstantValue)
       Dim upperBoundDeclaration = New BoundVariableDeclaration(upperBoundSymbol, node.UpperBound)
 
       Dim condition = New BoundBinaryExpression(
@@ -328,21 +289,21 @@ Namespace Basic.CodeAnalysis.Lowering
 
     End Function
 
-    '    Protected Overrides Function RewriteConditionalGotoStatement(node As BoundConditionalGotoStatement) As BoundStatement
+    Protected Overrides Function RewriteConditionalGotoStatement(node As BoundConditionalGotoStatement) As BoundStatement
 
-    '      If node.Condition.ConstantValue IsNot Nothing Then
-    '        Dim condition = CBool(node.Condition.ConstantValue.Value)
-    '        condition = If(node.JumpIfTrue, condition, Not condition)
-    '        If condition Then
-    '          Return RewriteStatement(New BoundGotoStatement(node.Label))
-    '        Else
-    '          Return RewriteStatement(New BoundNopStatement())
-    '        End If
-    '      End If
+      If node.Condition.ConstantValue IsNot Nothing Then
+        Dim condition = CBool(node.Condition.ConstantValue.Value)
+        condition = If(node.JumpIfTrue, condition, Not condition)
+        If condition Then
+          Return RewriteStatement(New BoundGotoStatement(node.Label))
+        Else
+          Return RewriteStatement(New BoundNopStatement())
+        End If
+      End If
 
-    '      Return MyBase.RewriteConditionalGotoStatement(node)
+      Return MyBase.RewriteConditionalGotoStatement(node)
 
-    '    End Function
+    End Function
 
   End Class
 

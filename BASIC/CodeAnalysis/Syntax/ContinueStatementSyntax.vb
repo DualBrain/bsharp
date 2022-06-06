@@ -3,9 +3,8 @@
   Partial Friend Class ContinueStatementSyntax
     Inherits StatementSyntax
 
-    'tree As SyntaxTree, 
-    Public Sub New(continueKeyword As SyntaxToken, scopeKeyword As SyntaxToken)
-      'MyBase.New(tree)
+    Public Sub New(tree As SyntaxTree, continueKeyword As SyntaxToken, scopeKeyword As SyntaxToken)
+      MyBase.New(tree)
       Me.ContinueKeyword = continueKeyword
       Me.ScopeKeyword = scopeKeyword
     End Sub

@@ -1,8 +1,4 @@
-﻿Imports System
-Imports System.Collections.Generic
-Imports System.IO
-Imports System.Linq
-Imports System.Reflection
+﻿Imports System.IO
 
 Namespace Basic.CodeAnalysis.Binding
 
@@ -103,8 +99,7 @@ Namespace Basic.CodeAnalysis.Binding
     'End Function
 
     Public Overrides Function ToString() As String
-      Using writer = New System.IO.StringWriter
-        'WriteTo(writer)
+      Using writer = New StringWriter
         WriteTo(writer)
         Return writer.ToString
       End Using

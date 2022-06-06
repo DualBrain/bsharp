@@ -4,7 +4,7 @@ Option Infer On
 
 Imports Xunit
 
-Namespace BASIC.CodeAnalysis.Syntax
+Namespace Basic.CodeAnalysis.Syntax
 
   Friend NotInheritable Class AssertingEnumerator
     Implements IDisposable
