@@ -9,7 +9,7 @@
     LineBreakTrivia
     WhiteSpaceTrivia
     SingleLineCommentTrivia
-    MultiLineCommentTrivia
+    'MultiLineCommentTrivia
 
     ' Tokens
     EndOfFileToken

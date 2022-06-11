@@ -51,6 +51,8 @@ Namespace Basic.CodeAnalysis.Binding
       Dim r = rightConstant.Value
 
       Select Case op.Kind
+        Case BoundBinaryOperatorKind.Raise
+          Return New BoundConstant(CInt(l) ^ CInt(r))
         Case BoundBinaryOperatorKind.Addition
           If left.Type Is TypeSymbol.Integer Then
             Return New BoundConstant(CInt(l) + CInt(r))

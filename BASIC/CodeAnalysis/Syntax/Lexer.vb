@@ -89,14 +89,15 @@ Namespace Basic.CodeAnalysis.Syntax
         Select Case Current
           Case ChrW(0)
             done = True
-          Case "/"c
-            If LookAhead = "/" Then
-              ReadSingleLineComment()
-            ElseIf LookAhead = "*" Then
-              ReadMultiLineComment()
-            Else
-              done = True
-            End If
+          Case "'"c
+            ReadSingleLineComment()
+            'If LookAhead = "/" Then
+            '  ReadSingleLineComment()
+            'ElseIf LookAhead = "*" Then
+            '  ReadMultiLineComment()
+            'Else
+            '  done = True
+            'End If
           Case ChrW(10), ChrW(13)
             If Not leading Then done = True
             ReadLineBreak()
@@ -153,7 +154,7 @@ Namespace Basic.CodeAnalysis.Syntax
 
     Private Sub ReadSingleLineComment()
 
-      m_position += 2
+      m_position += 1
 
       Dim done = False
       While Not done
@@ -169,32 +170,32 @@ Namespace Basic.CodeAnalysis.Syntax
 
     End Sub
 
-    Private Sub ReadMultiLineComment()
+    'Private Sub ReadMultiLineComment()
 
-      m_position += 2
+    '  m_position += 2
 
-      Dim done = False
-      While Not done
-        Select Case Current
-          Case ChrW(0)
-            Dim span = New TextSpan(m_start, 2)
-            Dim location = New TextLocation(m_text, span)
-            Diagnostics.ReportUnterminatedMultiLineComment(location)
-            done = True
-          Case "*"c
-            If LookAhead = "/" Then
-              done = True
-              m_position += 1
-            End If
-            m_position += 1
-          Case Else
-            m_position += 1
-        End Select
-      End While
+    '  Dim done = False
+    '  While Not done
+    '    Select Case Current
+    '      Case ChrW(0)
+    '        Dim span = New TextSpan(m_start, 2)
+    '        Dim location = New TextLocation(m_text, span)
+    '        Diagnostics.ReportUnterminatedMultiLineComment(location)
+    '        done = True
+    '      Case "*"c
+    '        If LookAhead = "/" Then
+    '          done = True
+    '          m_position += 1
+    '        End If
+    '        m_position += 1
+    '      Case Else
+    '        m_position += 1
+    '    End Select
+    '  End While
 
-      m_kind = SyntaxKind.MultiLineCommentTrivia
+    '  m_kind = SyntaxKind.MultiLineCommentTrivia
 
-    End Sub
+    'End Sub
 
     Private Sub ReadToken()
 
