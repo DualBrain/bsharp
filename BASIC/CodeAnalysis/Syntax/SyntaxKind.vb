@@ -9,7 +9,6 @@
     LineBreakTrivia
     WhiteSpaceTrivia
     SingleLineCommentTrivia
-    'MultiLineCommentTrivia
 
     ' Tokens
     EndOfFileToken
@@ -129,7 +128,7 @@
     ParenExpression
     AssignmentExpression
     CallExpression
-
+    LineNumberTrivia
   End Enum
 
 End Namespace

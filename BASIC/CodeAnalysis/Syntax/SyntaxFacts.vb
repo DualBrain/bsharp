@@ -219,8 +219,7 @@ Namespace Basic.CodeAnalysis.Syntax
     <Extension>
     Public Function IsComment(kind As SyntaxKind) As Boolean
       Select Case kind
-        Case SyntaxKind.SingleLineCommentTrivia ',
-          'SyntaxKind.MultiLineCommentTrivia
+        Case SyntaxKind.SingleLineCommentTrivia
           Return True
         Case Else
           Return False
@@ -230,11 +229,11 @@ Namespace Basic.CodeAnalysis.Syntax
     <Extension>
     Public Function IsTrivia(kind As SyntaxKind) As Boolean
       Select Case kind
-        Case SyntaxKind.SkippedTextTrivia,
+        Case SyntaxKind.LineNumberTrivia,
+             SyntaxKind.SkippedTextTrivia,
              SyntaxKind.LineBreakTrivia,
              SyntaxKind.WhiteSpaceTrivia,
-             SyntaxKind.SingleLineCommentTrivia ',
-          'SyntaxKind.MultiLineCommentTrivia
+             SyntaxKind.SingleLineCommentTrivia
           Return True
         Case Else
           Return False

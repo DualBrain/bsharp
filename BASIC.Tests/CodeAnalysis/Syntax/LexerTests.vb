@@ -153,8 +153,7 @@ Namespace Basic.CodeAnalysis.Syntax
               (SyntaxKind.WhiteSpaceTrivia, "  "),
               (SyntaxKind.LineBreakTrivia, vbCr),
               (SyntaxKind.LineBreakTrivia, vbLf),
-              (SyntaxKind.LineBreakTrivia, vbCrLf)} ',
-      '((SyntaxKind.MultiLineCommentTrivia, "/**/"))}
+              (SyntaxKind.LineBreakTrivia, vbCrLf)}
     End Function
 
     Public Shared Function RequiresSeparator(t1Kind As SyntaxKind, t2Kind As SyntaxKind) As Boolean
@@ -186,7 +185,6 @@ Namespace Basic.CodeAnalysis.Syntax
       If t1Kind = SyntaxKind.SlashToken AndAlso t2Kind = SyntaxKind.SlashToken Then Return True
       If t1Kind = SyntaxKind.SlashToken AndAlso t2Kind = SyntaxKind.StarToken Then Return True
       If t1Kind = SyntaxKind.SlashToken AndAlso t2Kind = SyntaxKind.SingleLineCommentTrivia Then Return True
-      'If t1Kind = SyntaxKind.SlashToken AndAlso t2Kind = SyntaxKind.MultiLineCommentTrivia Then Return True
       'If t2Kind = SyntaxKind.DollarToken Then Return True
       Return False
     End Function

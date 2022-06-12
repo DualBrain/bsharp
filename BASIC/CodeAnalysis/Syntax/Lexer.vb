@@ -50,6 +50,14 @@ Namespace Basic.CodeAnalysis.Syntax
 
     Public Function Lex() As SyntaxToken
 
+      ' If at beginning of a line, see if 
+      ' we have a whole number followed by nothing but whitespace/crlf.
+
+      'If m_position = 0 Then
+      '  ' beginning of file
+      '  ReadLineNumber()
+      'End If
+
       ReadTrivia(True)
 
       Dim leadingTrivia = m_triviaBuilder.ToImmutable
@@ -89,15 +97,19 @@ Namespace Basic.CodeAnalysis.Syntax
         Select Case Current
           Case ChrW(0)
             done = True
+          Case "0"c, "1"c, "2"c, "3"c, "4"c, "5"c, "6"c, "7"c, "8"c, "9"c
+            Dim line = m_text.GetLineIndex(m_position)
+            If m_position = 0 OrElse
+               m_text.Lines(line).Start = m_position Then
+              While Char.IsDigit(Current)
+                m_position += 1
+              End While
+              m_kind = SyntaxKind.LineNumberTrivia
+            Else
+              done = True
+            End If
           Case "'"c
             ReadSingleLineComment()
-            'If LookAhead = "/" Then
-            '  ReadSingleLineComment()
-            'ElseIf LookAhead = "*" Then
-            '  ReadMultiLineComment()
-            'Else
-            '  done = True
-            'End If
           Case ChrW(10), ChrW(13)
             If Not leading Then done = True
             ReadLineBreak()
@@ -169,33 +181,6 @@ Namespace Basic.CodeAnalysis.Syntax
       m_kind = SyntaxKind.SingleLineCommentTrivia
 
     End Sub
-
-    'Private Sub ReadMultiLineComment()
-
-    '  m_position += 2
-
-    '  Dim done = False
-    '  While Not done
-    '    Select Case Current
-    '      Case ChrW(0)
-    '        Dim span = New TextSpan(m_start, 2)
-    '        Dim location = New TextLocation(m_text, span)
-    '        Diagnostics.ReportUnterminatedMultiLineComment(location)
-    '        done = True
-    '      Case "*"c
-    '        If LookAhead = "/" Then
-    '          done = True
-    '          m_position += 1
-    '        End If
-    '        m_position += 1
-    '      Case Else
-    '        m_position += 1
-    '    End Select
-    '  End While
-
-    '  m_kind = SyntaxKind.MultiLineCommentTrivia
-
-    'End Sub
 
     Private Sub ReadToken()
 
