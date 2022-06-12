@@ -79,6 +79,8 @@ Namespace Basic.CodeAnalysis.Syntax
 
       Select Case text
 
+        Case "goto" : Return SyntaxKind.GotoKeyword
+
         'Case "end" : Return SyntaxKind.EndKeyword
         Case "end if" : Return SyntaxKind.EndIfKeyword
         Case "end function" : Return SyntaxKind.EndFunctionKeyword
@@ -136,6 +138,8 @@ Namespace Basic.CodeAnalysis.Syntax
     Public Function GetText(kind As SyntaxKind) As String
 
       Select Case kind
+
+        Case SyntaxKind.GotoKeyword : Return "goto"
 
         Case SyntaxKind.EndFunctionKeyword : Return "end function"
         Case SyntaxKind.EndIfKeyword : Return "end if"

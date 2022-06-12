@@ -129,6 +129,8 @@
     AssignmentExpression
     CallExpression
     LineNumberTrivia
+    GotoKeyword
+    GotoStatement
   End Enum
 
 End Namespace

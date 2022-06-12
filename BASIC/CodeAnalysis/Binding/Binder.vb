@@ -278,6 +278,7 @@ Namespace Basic.CodeAnalysis.Binding
 
     Private Function BindStatementInternal(syntax As StatementSyntax, Optional isGlobal As Boolean = False) As BoundStatement
       Select Case syntax.Kind
+        Case SyntaxKind.GotoStatement : Return BindGotoStatement(CType(syntax, GotoStatementSyntax))
         Case SyntaxKind.BlockStatement : Return BindBlockStatement(CType(syntax, BlockStatementSyntax))
         Case SyntaxKind.VariableDeclaration : Return BindVariableDeclaration(CType(syntax, VariableDeclarationSyntax))
         Case SyntaxKind.SingleLineIfStatement : Return BindSingleLineIfStatement(CType(syntax, SingleLineIfStatementSyntax))
@@ -294,6 +295,11 @@ Namespace Basic.CodeAnalysis.Binding
         Case Else
           Throw New Exception($"Unexpected syntax {syntax.Kind}")
       End Select
+    End Function
+
+    Private Function BindGotoStatement(syntax As GotoStatementSyntax) As BoundStatement
+      Dim label = New BoundLabel(syntax.IdentifierToken.Text)
+      Return New BoundGotoStatement(label)
     End Function
 
     Private Function BindBlockStatement(syntax As BlockStatementSyntax) As BoundStatement

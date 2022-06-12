@@ -118,6 +118,7 @@ Namespace Basic.CodeAnalysis.Syntax
 
     Private Function ParseStatement() As StatementSyntax
       Select Case Current.Kind
+        Case SyntaxKind.GotoKeyword : Return ParseGotoStatement()
         Case SyntaxKind.OpenBraceToken : Return ParseBlockStatement()
         Case SyntaxKind.DimKeyword, SyntaxKind.ConstKeyword : Return ParseVariableDeclaration()
         Case SyntaxKind.IfKeyword : Return ParseIfStatement()
@@ -130,6 +131,16 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.ReturnKeyword : Return ParseReturnStatement()
         Case Else : Return ParseExpressionStatement()
       End Select
+    End Function
+
+    Private Function ParseGotoStatement() As GotoStatementSyntax
+
+      ' RETURN *expression*
+
+      Dim gotoKeyword = MatchToken(SyntaxKind.GotoKeyword)
+      Dim identifierToken = MatchToken(SyntaxKind.IdentifierToken)
+      Return New GotoStatementSyntax(m_syntaxTree, gotoKeyword, identifierToken)
+
     End Function
 
     Private Function ParseVariableDeclaration() As StatementSyntax
