@@ -21,26 +21,27 @@ Namespace Basic.CodeAnalysis.Binding
     <Extension>
     Public Sub WriteTo(node As BoundNode, writer As IndentedTextWriter)
       Select Case node.Kind
-        Case BoundNodeKind.BlockStatement : WriteBlockStatement(CType(node, BoundBlockStatement), writer)
-        Case BoundNodeKind.NopStatement : WriteNopStatement(CType(node, BoundNopStatement), writer)
-        Case BoundNodeKind.VariableDeclaration : WriteVariableDeclaration(CType(node, BoundVariableDeclaration), writer)
-        Case BoundNodeKind.IfStatement : WriteIfStatement(CType(node, BoundIfStatement), writer)
-        Case BoundNodeKind.WhileStatement : WriteWhileStatement(CType(node, BoundWhileStatement), writer)
-        Case BoundNodeKind.DoWhileStatement : WriteDoWhileStatement(CType(node, BoundDoWhileStatement), writer)
-        Case BoundNodeKind.ForStatement : WriteForStatement(CType(node, BoundForStatement), writer)
-        Case BoundNodeKind.LabelStatement : WriteLabelStatement(CType(node, BoundLabelStatement), writer)
-        Case BoundNodeKind.GotoStatement : WriteGotoStatement(CType(node, BoundGotoStatement), writer)
-        Case BoundNodeKind.ConditionalGotoStatement : WriteConditionalGotoStatement(CType(node, BoundConditionalGotoStatement), writer)
-        Case BoundNodeKind.ReturnStatement : WriteReturnStatement(CType(node, BoundReturnStatement), writer)
-        Case BoundNodeKind.ExpressionStatement : WriteExpressionStatement(CType(node, BoundExpressionStatement), writer)
-        Case BoundNodeKind.ErrorExpression : WriteErrorExpression(CType(node, BoundErrorExpression), writer)
-        Case BoundNodeKind.LiteralExpression : WriteLiteralExpression(CType(node, BoundLiteralExpression), writer)
-        Case BoundNodeKind.VariableExpression : WriteVariableExpression(CType(node, BoundVariableExpression), writer)
         Case BoundNodeKind.AssignmentExpression : WriteAssignmentExpression(CType(node, BoundAssignmentExpression), writer)
-        Case BoundNodeKind.UnaryExpression : WriteUnaryExpression(CType(node, BoundUnaryExpression), writer)
         Case BoundNodeKind.BinaryExpression : WriteBinaryExpression(CType(node, BoundBinaryExpression), writer)
+        Case BoundNodeKind.BlockStatement : WriteBlockStatement(CType(node, BoundBlockStatement), writer)
         Case BoundNodeKind.CallExpression : WriteCallExpression(CType(node, BoundCallExpression), writer)
+        Case BoundNodeKind.ConditionalGotoStatement : WriteConditionalGotoStatement(CType(node, BoundConditionalGotoStatement), writer)
         Case BoundNodeKind.ConversionExpression : WriteConversionExpression(CType(node, BoundConversionExpression), writer)
+        Case BoundNodeKind.DoWhileStatement : WriteDoWhileStatement(CType(node, BoundDoWhileStatement), writer)
+        Case BoundNodeKind.ErrorExpression : WriteErrorExpression(CType(node, BoundErrorExpression), writer)
+        Case BoundNodeKind.ExpressionStatement : WriteExpressionStatement(CType(node, BoundExpressionStatement), writer)
+        Case BoundNodeKind.ForStatement : WriteForStatement(CType(node, BoundForStatement), writer)
+        Case BoundNodeKind.GotoStatement : WriteGotoStatement(CType(node, BoundGotoStatement), writer)
+        Case BoundNodeKind.IfStatement : WriteIfStatement(CType(node, BoundIfStatement), writer)
+        Case BoundNodeKind.LabelStatement : WriteLabelStatement(CType(node, BoundLabelStatement), writer)
+        Case BoundNodeKind.LiteralExpression : WriteLiteralExpression(CType(node, BoundLiteralExpression), writer)
+        Case BoundNodeKind.NopStatement : WriteNopStatement(CType(node, BoundNopStatement), writer)
+        Case BoundNodeKind.PrintStatement : WritePrintStatement(CType(node, BoundPrintStatement), writer)
+        Case BoundNodeKind.ReturnStatement : WriteReturnStatement(CType(node, BoundReturnStatement), writer)
+        Case BoundNodeKind.UnaryExpression : WriteUnaryExpression(CType(node, BoundUnaryExpression), writer)
+        Case BoundNodeKind.VariableDeclaration : WriteVariableDeclaration(CType(node, BoundVariableDeclaration), writer)
+        Case BoundNodeKind.VariableExpression : WriteVariableExpression(CType(node, BoundVariableExpression), writer)
+        Case BoundNodeKind.WhileStatement : WriteWhileStatement(CType(node, BoundWhileStatement), writer)
         Case Else
           Throw New Exception($"Unexpected node {node.Kind}")
       End Select
@@ -107,6 +108,15 @@ Namespace Basic.CodeAnalysis.Binding
       writer.WritePunctuation(SyntaxKind.CloseBraceToken)
       writer.WriteLine()
 
+    End Sub
+
+    Private Sub WritePrintStatement(node As BoundPrintStatement, writer As IndentedTextWriter)
+      writer.WriteKeyword(SyntaxKind.PrintKeyword)
+      writer.WriteSpace
+      For Each nd In node.Nodes
+        nd.WriteTo(writer)
+      Next
+      writer.WriteLine()
     End Sub
 
     Private Sub WriteNopStatement(node As BoundNopStatement, writer As IndentedTextWriter)

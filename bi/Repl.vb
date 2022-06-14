@@ -43,7 +43,7 @@ Namespace Basic
         If String.IsNullOrEmpty(text) Then
           Continue Do
         End If
-        If Not text.Contains(Environment.NewLine) AndAlso text.StartsWith("#") Then
+        If Not text.Contains(Environment.NewLine) AndAlso text.StartsWith("$") Then
           EvaluateMetaCommand(text)
         Else
           EvaluateSubmission(text)
@@ -215,7 +215,7 @@ Namespace Basic
 
     Private Sub HandleEnter(document As ObservableCollection(Of String), view As SubmissionView)
       Dim submissionText = String.Join(Environment.NewLine, document)
-      If submissionText.StartsWith("#") OrElse IsCompleteSubmission(submissionText) Then
+      If submissionText.StartsWith("$") OrElse IsCompleteSubmission(submissionText) Then
         m_done = True
         Return
       End If
@@ -482,10 +482,10 @@ Namespace Basic
         Dim metaParams = metaCommand.Method.GetParameters
         If metaParams.Length = 0 Then
           Dim paddedName = metaCommand.Name.PadRight(maxNameLength)
-          Console.Out.WritePunctuation("#")
+          Console.Out.WritePunctuation("$")
           Console.Out.WriteIdentifier(paddedName)
         Else
-          Console.Out.WritePunctuation("#")
+          Console.Out.WritePunctuation("$")
           Console.Out.WriteIdentifier(metaCommand.Name)
           For Each pi In metaParams
             Console.Out.WriteSpace()
