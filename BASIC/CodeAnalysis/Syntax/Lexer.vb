@@ -190,6 +190,7 @@ Namespace Basic.CodeAnalysis.Syntax
 
       Select Case Current
         Case Chr(0) : m_kind = SyntaxKind.EndOfFileToken
+        Case "#"c : m_kind = SyntaxKind.PoundToken : m_position += 1
         Case "+"c : m_kind = SyntaxKind.PlusToken : m_position += 1
         Case "-"c : m_kind = SyntaxKind.MinusToken : m_position += 1
         Case "*"c : m_kind = SyntaxKind.StarToken : m_position += 1

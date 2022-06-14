@@ -8,6 +8,7 @@ Namespace Basic.CodeAnalysis.Binding
       Select Case node.Kind
         Case BoundNodeKind.BlockStatement : Return RewriteBlockStatement(DirectCast(node, BoundBlockStatement))
         Case BoundNodeKind.NopStatement : Return RewriteNopStatement(DirectCast(node, BoundNopStatement))
+        Case BoundNodeKind.PrintStatement : Return RewritePrintStatement(DirectCast(node, BoundPrintStatement))
         Case BoundNodeKind.VariableDeclaration : Return RewriteVariableDeclaration(DirectCast(node, BoundVariableDeclaration))
         Case BoundNodeKind.IfStatement : Return RewriteIfStatement(DirectCast(node, BoundIfStatement))
         Case BoundNodeKind.WhileStatement : Return RewriteWhileStatement(DirectCast(node, BoundWhileStatement))
@@ -83,6 +84,10 @@ Namespace Basic.CodeAnalysis.Binding
         Return node
       End If
       Return New BoundBlockStatement(builder.MoveToImmutable)
+    End Function
+
+    Protected Overridable Function RewritePrintStatement(node As BoundPrintStatement) As BoundStatement
+      Return node
     End Function
 
     Protected Overridable Function RewriteNopStatement(node As BoundNopStatement) As BoundStatement

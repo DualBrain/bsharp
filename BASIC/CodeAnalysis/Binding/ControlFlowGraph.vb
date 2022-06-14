@@ -93,7 +93,7 @@ Namespace Basic.CodeAnalysis.Binding
             Case BoundNodeKind.GotoStatement, BoundNodeKind.ConditionalGotoStatement, BoundNodeKind.ReturnStatement
               m_statements.Add(statement)
               StartBlock()
-            Case BoundNodeKind.NopStatement, BoundNodeKind.VariableDeclaration, BoundNodeKind.ExpressionStatement
+            Case BoundNodeKind.NopStatement, BoundNodeKind.PrintStatement, BoundNodeKind.VariableDeclaration, BoundNodeKind.ExpressionStatement
               m_statements.Add(statement)
             Case Else
               Throw New Exception($"Unexpected statement: {statement.Kind}")
@@ -165,6 +165,7 @@ Namespace Basic.CodeAnalysis.Binding
               Case BoundNodeKind.ReturnStatement
                 Connect(current, m_end)
               Case BoundNodeKind.NopStatement,
+                   BoundNodeKind.PrintStatement,
                    BoundNodeKind.VariableDeclaration,
                    BoundNodeKind.LabelStatement,
                    BoundNodeKind.ExpressionStatement

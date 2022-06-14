@@ -57,6 +57,8 @@ Namespace Basic.CodeAnalysis
       While index < body.Statements.Length
         Dim s = body.Statements(index)
         Select Case s.Kind
+          Case BoundNodeKind.PrintStatement
+            EvaluatePrintStatement(CType(s, BoundPrintStatement)) : index += 1
           Case BoundNodeKind.NopStatement : index += 1
           Case BoundNodeKind.VariableDeclaration
             EvaluateVariableDeclaration(CType(s, BoundVariableDeclaration)) : index += 1
@@ -86,6 +88,36 @@ Namespace Basic.CodeAnalysis
       Return m_lastValue
 
     End Function
+
+    Private Sub EvaluatePrintStatement(s As BoundPrintStatement)
+      Dim cr = True
+      For Each entry In s.Nodes
+        If TypeOf entry Is BoundSymbol Then
+          Select Case CType(entry, BoundSymbol).Value
+            Case ";"c
+              cr = False
+            Case ","
+              'TODO: Need to determine where the current character
+              '      position is and then determine how many spaces
+              '      need to be printed so that the cursor is at the
+              '      next 14 character offset.
+              Console.Write("              ") ' for now, 14 characters - see above.
+              cr = False
+            Case Else
+              Throw New NotImplementedException
+              cr = True
+          End Select
+        Else
+          Dim value = EvaluateExpression(CType(entry, BoundExpression))
+          Dim str = CStr(value)
+          Console.Write(str)
+          cr = True
+        End If
+      Next
+      If cr Then
+        Console.WriteLine()
+      End If
+    End Sub
 
     Private Sub EvaluateVariableDeclaration(node As BoundVariableDeclaration)
       Dim value = EvaluateExpression(node.Initializer)
@@ -234,10 +266,10 @@ Namespace Basic.CodeAnalysis
     Private Function EvaluateCallExpression(node As BoundCallExpression) As Object
       If node.[Function] Is BuiltinFunctions.Input Then
         Return Console.ReadLine()
-      ElseIf node.[Function] Is BuiltinFunctions.Print Then
-        Dim message = CStr(EvaluateExpression(node.Arguments(0)))
-        Console.WriteLine(message)
-        Return Nothing
+        'ElseIf node.[Function] Is BuiltinFunctions.Print Then
+        '  Dim message = CStr(EvaluateExpression(node.Arguments(0)))
+        '  Console.WriteLine(message)
+        '  Return Nothing
       ElseIf node.[Function] Is BuiltinFunctions.Rnd Then
         Dim max = CInt(EvaluateExpression(node.Arguments(0)))
         If m_random Is Nothing Then m_random = New Random

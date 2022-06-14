@@ -118,19 +118,81 @@ Namespace Basic.CodeAnalysis.Syntax
 
     Private Function ParseStatement() As StatementSyntax
       Select Case Current.Kind
-        Case SyntaxKind.GotoKeyword : Return ParseGotoStatement()
-        Case SyntaxKind.OpenBraceToken : Return ParseBlockStatement()
-        Case SyntaxKind.DimKeyword, SyntaxKind.ConstKeyword : Return ParseVariableDeclaration()
-        Case SyntaxKind.IfKeyword : Return ParseIfStatement()
-        Case SyntaxKind.WhileKeyword : Return ParseWhileStatement()
-        Case SyntaxKind.DoKeyword : Return ParseDoStatement()
-        Case SyntaxKind.ForKeyword : Return ParseForStatement()
+        Case SyntaxKind.ConstKeyword : Return ParseVariableDeclaration()
         Case SyntaxKind.ContinueKeyword : Return ParseContinueStatement()
+        Case SyntaxKind.DimKeyword : Return ParseVariableDeclaration()
+        Case SyntaxKind.DoKeyword : Return ParseDoStatement()
         Case SyntaxKind.ExitKeyword : Return ParseExitStatement()
-        'Case SyntaxKind.SelectKeyword : Return ParseSelectCaseStatement()
+        Case SyntaxKind.ForKeyword : Return ParseForStatement()
+        Case SyntaxKind.GotoKeyword : Return ParseGotoStatement()
+        Case SyntaxKind.IfKeyword : Return ParseIfStatement()
+        Case SyntaxKind.PrintKeyword : Return ParsePrintStatement()
+        Case SyntaxKind.OpenBraceToken : Return ParseBlockStatement()
         Case SyntaxKind.ReturnKeyword : Return ParseReturnStatement()
+        Case SyntaxKind.WhileKeyword : Return ParseWhileStatement()
         Case Else : Return ParseExpressionStatement()
       End Select
+    End Function
+
+    Private Function ParsePrintStatement() As PrintStatementSyntax
+
+      ' PRINT [#*file_number*,][*output_list*][{;|,}]
+
+      Dim printKeyword = MatchToken(SyntaxKind.PrintKeyword)
+
+      Dim nodes = ImmutableArray.CreateBuilder(Of SyntaxNode)()
+
+      Dim printLine = m_text.GetLineIndex(printKeyword.Span.Start)
+
+      If Current.Kind = SyntaxKind.PoundToken Then
+        Dim poundToken = MatchToken(SyntaxKind.PoundToken)
+        Dim fileNumberExpression = ParseExpression()
+        Dim commaToken = MatchToken(SyntaxKind.CommaToken)
+        nodes.Add(poundToken)
+        nodes.Add(fileNumberExpression)
+        nodes.Add(commaToken)
+      End If
+
+      Dim lastToken = SyntaxKind.BadToken
+      While Current.Kind <> SyntaxKind.EndOfFileToken
+
+        Dim currentLine = m_text.GetLineIndex(Current.Span.Start)
+        If currentLine <> printLine Then Exit While
+
+        Dim expression = ParseExpression()
+        If expression IsNot Nothing Then
+          If lastToken = SyntaxKind.ExpressionStatement Then
+            Dim semiColonToken = New SyntaxToken(m_syntaxTree, SyntaxKind.SemicolonToken, expression.Span.Start, ";", Nothing, ImmutableArray(Of SyntaxTrivia).Empty, ImmutableArray(Of SyntaxTrivia).Empty)
+            nodes.Add(semiColonToken)
+          End If
+          nodes.Add(expression)
+          lastToken = SyntaxKind.ExpressionStatement
+        End If
+
+        ' NOTE: `PRINT "this""is""a""test"` will get converted
+        '       to `PRINT "this"; "is"; "a"; "test"`
+        '       I point this out because I seem to recall that
+        '       GW-BASIC is very laxed in whether or not a semi-
+        '       colon is required as a separator.
+        If Current.Kind = SyntaxKind.CommaToken Then
+          ' Multiple commas are allowed (and can serve a purpose)...
+          Dim commaToken = MatchToken(SyntaxKind.CommaToken)
+          nodes.Add(commaToken)
+          lastToken = SyntaxKind.CommaToken
+        ElseIf Current.Kind = SyntaxKind.SemicolonToken Then
+          ' If back-to-back semi-colons are encountered, they are 
+          ' automatically collapsed into a single on (by QBasic 1.1 IDE).
+          Dim semiColonToken = MatchToken(SyntaxKind.SemicolonToken)
+          If lastToken <> SyntaxKind.SemicolonToken Then
+            nodes.Add(semiColonToken)
+          End If
+          lastToken = SyntaxKind.SemicolonToken
+        End If
+
+      End While
+
+      Return New PrintStatementSyntax(m_syntaxTree, printKeyword, If(nodes IsNot Nothing, nodes.ToImmutable, Nothing))
+
     End Function
 
     Private Function ParseGotoStatement() As GotoStatementSyntax

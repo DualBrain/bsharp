@@ -3,90 +3,82 @@
   Public Enum SyntaxKind
 
     BadToken
+    EndOfFileToken
 
     ' Trivia
+    LineNumberTrivia
     SkippedTextTrivia
     LineBreakTrivia
     WhiteSpaceTrivia
     SingleLineCommentTrivia
 
     ' Tokens
-    EndOfFileToken
-    'WhitespaceToken
-    NumberToken
-    PlusToken
-    MinusToken
-    StarToken
-    SlashToken
     BackslashToken
-    HatToken
-    OpenParenToken
+    CloseBraceToken
     CloseParenToken
-    EqualToken
-    LessThanToken
-    PeriodToken
     ColonToken
     CommaToken
-    SemicolonToken
-    QuestionToken
+    EqualToken
     GreaterThanEqualToken
+    GreaterThanToken
+    HatToken
+    IdentifierToken
     LessThanEqualToken
     LessThanGreaterThanToken
-    GreaterThanToken
+    LessThanToken
+    MinusToken
+    NumberToken
     OpenBraceToken
-    CloseBraceToken
-    IdentifierToken
+    OpenParenToken
+    PeriodToken
+    PlusToken
+    PoundToken
+    QuestionToken
+    SemicolonToken
+    SlashToken
+    StarToken
     StringToken
-    'PipeToken
-    'DollarToken
 
     ' Keywords
-    FalseKeyword
-    TrueKeyword
-    ModKeyword
-    NotKeyword
-    AndKeyword
+
     AndAlsoKeyword
-    OrKeyword
-    OrElseKeyword
-    XorKeyword
-    EqvKeyword
-    ImpKeyword
-
+    AndKeyword
+    AsKeyword
     ConstKeyword
+    ContinueKeyword
     DimKeyword
-    LetKeyword
-
     DoKeyword
-
-    ' Potential start of a Command 
-    'EndKeyword
-    EndIfKeyword
-    EndFunctionKeyword
-
-    ' Blocks (NOTE: Commands are a combination of 2 or more keywords that make up a command "phrase".)
-    FunctionKeyword
-    IfKeyword
-    ThenKeyword
+    EachKeyword
     ElseIfKeyword
     ElseKeyword
-    WhileKeyword
-    WendKeyword
-    ForKeyword
-    EachKeyword
-    InKeyword
-    ToKeyword
-    StepKeyword
-    NextKeyword
-    'SelectKeyword
-    'CaseKeyword
-    'IsKeyword
-    AsKeyword
-    LoopKeyword
-    UntilKeyword
-    ContinueKeyword
+    EndFunctionKeyword
+    EndIfKeyword
+    EqvKeyword
     ExitKeyword
+    FalseKeyword
+    ForKeyword
+    FunctionKeyword
+    GotoKeyword
+    IfKeyword
+    ImpKeyword
+    InKeyword
+    LetKeyword
+    LoopKeyword
+    ModKeyword
+    NextKeyword
+    NotKeyword
+    OrElseKeyword
+    OrKeyword
+    PrintKeyword
     ReturnKeyword
+    StepKeyword
+    ThenKeyword
+    ToKeyword
+    TrueKeyword
+    UntilKeyword
+    WendKeyword
+    WhileKeyword
+    XorKeyword
 
     ' Nodes
     CompilationUnit
@@ -95,30 +87,28 @@
     Parameter
     AsClause
     SingleLineElseClause
-    'CaseElseClauseSyntax
-    'CaseClauseSyntax
     WhileClause
     UntilClause
 
     ' Statements
     BlockStatement
-    VariableDeclaration
-    ExpressionStatement
-    SingleLineIfStatement
-    MultiLineIfBlock
-    IfStatement
+    ContinueStatement
+    DoUntilStatement
+    DoWhileStatement
     ElseIfStatement
     ElseStatement
-    'SelectCaseStatement
-    'CaseMatchExpressionSyntax
+    ExitStatement
+    ExpressionStatement
     ForEachStatement
     ForStatement
-    WhileStatement
-    DoWhileStatement
-    DoUntilStatement
-    ExitStatement
-    ContinueStatement
+    GotoStatement
+    IfStatement
+    MultiLineIfBlock
+    PrintStatement
     ReturnStatement
+    SingleLineIfStatement
+    VariableDeclaration
+    WhileStatement
 
     ' Expressions
     LiteralExpression
@@ -128,9 +118,7 @@
     ParenExpression
     AssignmentExpression
     CallExpression
-    LineNumberTrivia
-    GotoKeyword
-    GotoStatement
+
   End Enum
 
 End Namespace

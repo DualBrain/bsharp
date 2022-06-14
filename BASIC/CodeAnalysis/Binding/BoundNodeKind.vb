@@ -2,36 +2,34 @@
 
   Friend Enum BoundNodeKind
 
+    Symbol
+
     ' Statements
-    NopStatement
     BlockStatement
-    VariableDeclaration
-    ExpressionStatement
-    IfStatement
-    ElseIfStatement
-    WhileStatement
-    ForStatement
-    DoWhileStatement
-    DoUntilStatement
-
-    'SelectCaseStatement
-    'BoundMatchStatement
-    'BoundCaseStatement
-
-    GotoStatement
-    LabelStatement
     ConditionalGotoStatement
+    DoUntilStatement
+    DoWhileStatement
+    ElseIfStatement
+    ExpressionStatement
+    ForStatement
+    GotoStatement
+    IfStatement
+    LabelStatement
+    NopStatement
+    PrintStatement
     ReturnStatement
+    VariableDeclaration
+    WhileStatement
 
     ' Expressions
+    BinaryExpression
+    AssignmentExpression
+    CallExpression
+    ConversionExpression
     ErrorExpression
     LiteralExpression
     VariableExpression
-    AssignmentExpression
     UnaryExpression
-    BinaryExpression
-    CallExpression
-    ConversionExpression
 
   End Enum
 

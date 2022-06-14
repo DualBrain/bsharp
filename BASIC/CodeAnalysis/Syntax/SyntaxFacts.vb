@@ -79,55 +79,44 @@ Namespace Basic.CodeAnalysis.Syntax
 
       Select Case text
 
-        Case "goto" : Return SyntaxKind.GotoKeyword
-
-        'Case "end" : Return SyntaxKind.EndKeyword
-        Case "end if" : Return SyntaxKind.EndIfKeyword
-        Case "end function" : Return SyntaxKind.EndFunctionKeyword
-
-        Case "if" : Return SyntaxKind.IfKeyword
-        Case "then" : Return SyntaxKind.ThenKeyword
-        Case "elseif" : Return SyntaxKind.ElseIfKeyword
-        Case "else" : Return SyntaxKind.ElseKeyword
-
-        Case "while" : Return SyntaxKind.WhileKeyword
-        Case "wend" : Return SyntaxKind.WendKeyword
-        Case "do" : Return SyntaxKind.DoKeyword
-        Case "loop" : Return SyntaxKind.LoopKeyword
-        Case "until" : Return SyntaxKind.UntilKeyword
-
-        Case "continue" : Return SyntaxKind.ContinueKeyword
-        Case "exit" : Return SyntaxKind.ExitKeyword
-        Case "return" : Return SyntaxKind.ReturnKeyword
-
-        Case "function" : Return SyntaxKind.FunctionKeyword
-        Case "as" : Return SyntaxKind.AsKeyword
-
-        Case "for" : Return SyntaxKind.ForKeyword
-        Case "to" : Return SyntaxKind.ToKeyword
-        Case "each" : Return SyntaxKind.EachKeyword
-        Case "in" : Return SyntaxKind.InKeyword
-        Case "step" : Return SyntaxKind.StepKeyword
-        Case "next" : Return SyntaxKind.NextKeyword
-
-        'Case "select" : Return SyntaxKind.SelectKeyword
-        'Case "case" : Return SyntaxKind.CaseKeyword
-        'Case "is" : Return SyntaxKind.IsKeyword
-
-        Case "const" : Return SyntaxKind.ConstKeyword
-        Case "dim" : Return SyntaxKind.DimKeyword
-        Case "let" : Return SyntaxKind.LetKeyword
-        Case "true" : Return SyntaxKind.TrueKeyword
-        Case "false" : Return SyntaxKind.FalseKeyword
-        Case "mod" : Return SyntaxKind.ModKeyword
-        Case "not" : Return SyntaxKind.NotKeyword
         Case "and" : Return SyntaxKind.AndKeyword
         Case "andalso" : Return SyntaxKind.AndAlsoKeyword
+        Case "as" : Return SyntaxKind.AsKeyword
+        Case "const" : Return SyntaxKind.ConstKeyword
+        Case "continue" : Return SyntaxKind.ContinueKeyword
+        Case "dim" : Return SyntaxKind.DimKeyword
+        Case "do" : Return SyntaxKind.DoKeyword
+        Case "each" : Return SyntaxKind.EachKeyword
+        Case "else" : Return SyntaxKind.ElseKeyword
+        Case "elseif" : Return SyntaxKind.ElseIfKeyword
+        Case "end if" : Return SyntaxKind.EndIfKeyword
+        Case "end function" : Return SyntaxKind.EndFunctionKeyword
+        Case "eqv" : Return SyntaxKind.EqvKeyword
+        Case "exit" : Return SyntaxKind.ExitKeyword
+        Case "false" : Return SyntaxKind.FalseKeyword
+        Case "for" : Return SyntaxKind.ForKeyword
+        Case "function" : Return SyntaxKind.FunctionKeyword
+        Case "goto" : Return SyntaxKind.GotoKeyword
+        Case "if" : Return SyntaxKind.IfKeyword
+        Case "imp" : Return SyntaxKind.ImpKeyword
+        Case "in" : Return SyntaxKind.InKeyword
+        Case "let" : Return SyntaxKind.LetKeyword
+        Case "loop" : Return SyntaxKind.LoopKeyword
+        Case "mod" : Return SyntaxKind.ModKeyword
+        Case "next" : Return SyntaxKind.NextKeyword
+        Case "not" : Return SyntaxKind.NotKeyword
         Case "or" : Return SyntaxKind.OrKeyword
         Case "orelse" : Return SyntaxKind.OrElseKeyword
+        Case "print" : Return SyntaxKind.PrintKeyword
+        Case "return" : Return SyntaxKind.ReturnKeyword
+        Case "step" : Return SyntaxKind.StepKeyword
+        Case "then" : Return SyntaxKind.ThenKeyword
+        Case "to" : Return SyntaxKind.ToKeyword
+        Case "true" : Return SyntaxKind.TrueKeyword
+        Case "until" : Return SyntaxKind.UntilKeyword
+        Case "wend" : Return SyntaxKind.WendKeyword
+        Case "while" : Return SyntaxKind.WhileKeyword
         Case "xor" : Return SyntaxKind.XorKeyword
-        Case "eqv" : Return SyntaxKind.EqvKeyword
-        Case "imp" : Return SyntaxKind.ImpKeyword
 
         Case Else
           Return SyntaxKind.IdentifierToken
@@ -139,57 +128,46 @@ Namespace Basic.CodeAnalysis.Syntax
 
       Select Case kind
 
-        Case SyntaxKind.GotoKeyword : Return "goto"
-
-        Case SyntaxKind.EndFunctionKeyword : Return "end function"
-        Case SyntaxKind.EndIfKeyword : Return "end if"
-
-        Case SyntaxKind.WhileKeyword : Return "while"
-        Case SyntaxKind.WendKeyword : Return "wend"
-        Case SyntaxKind.DoKeyword : Return "do"
-        Case SyntaxKind.LoopKeyword : Return "loop"
-        Case SyntaxKind.UntilKeyword : Return "until"
-
-        Case SyntaxKind.ContinueKeyword : Return "continue"
-        Case SyntaxKind.ExitKeyword : Return "exit"
-        Case SyntaxKind.ReturnKeyword : Return "return"
-
-        Case SyntaxKind.FunctionKeyword : Return "function"
-        Case SyntaxKind.AsKeyword : Return "as"
-
-        Case SyntaxKind.ForKeyword : Return "for"
-        Case SyntaxKind.ToKeyword : Return "to"
-        Case SyntaxKind.EachKeyword : Return "each"
-        Case SyntaxKind.InKeyword : Return "in"
-        Case SyntaxKind.StepKeyword : Return "step"
-        Case SyntaxKind.NextKeyword : Return "next"
-
-        'Case SyntaxKind.SelectKeyword : Return "select"
-        'Case SyntaxKind.CaseKeyword : Return "case"
-        'Case SyntaxKind.IsKeyword : Return "is"
-
-        Case SyntaxKind.IfKeyword : Return "if"
-        Case SyntaxKind.ThenKeyword : Return "then"
-        Case SyntaxKind.ElseIfKeyword : Return "elseif"
-        Case SyntaxKind.ElseKeyword : Return "else"
-        'Case SyntaxKind.EndIfCommand : Return "end If"
-
-        Case SyntaxKind.ConstKeyword : Return "const"
-        Case SyntaxKind.DimKeyword : Return "dim"
-        Case SyntaxKind.LetKeyword : Return "let"
-
-        Case SyntaxKind.TrueKeyword : Return "true"
-        Case SyntaxKind.FalseKeyword : Return "false"
-
-        Case SyntaxKind.ModKeyword : Return "mod"
-        Case SyntaxKind.NotKeyword : Return "not"
         Case SyntaxKind.AndKeyword : Return "and"
         Case SyntaxKind.AndAlsoKeyword : Return "andalso"
+        Case SyntaxKind.AsKeyword : Return "as"
+        Case SyntaxKind.ConstKeyword : Return "const"
+        Case SyntaxKind.ContinueKeyword : Return "continue"
+        Case SyntaxKind.DimKeyword : Return "dim"
+        Case SyntaxKind.DoKeyword : Return "do"
+        Case SyntaxKind.EachKeyword : Return "each"
+        Case SyntaxKind.ElseKeyword : Return "else"
+        Case SyntaxKind.ElseIfKeyword : Return "elseif"
+        Case SyntaxKind.EndFunctionKeyword : Return "end function"
+        Case SyntaxKind.EndIfKeyword : Return "end if"
+        Case SyntaxKind.EqvKeyword : Return "eqv"
+        Case SyntaxKind.ExitKeyword : Return "exit"
+        Case SyntaxKind.FalseKeyword : Return "false"
+        Case SyntaxKind.ForKeyword : Return "for"
+        Case SyntaxKind.FunctionKeyword : Return "function"
+        Case SyntaxKind.GotoKeyword : Return "goto"
+        Case SyntaxKind.IfKeyword : Return "if"
+        Case SyntaxKind.ImpKeyword : Return "imp"
+        Case SyntaxKind.InKeyword : Return "in"
+        Case SyntaxKind.LetKeyword : Return "let"
+        Case SyntaxKind.LoopKeyword : Return "loop"
+        Case SyntaxKind.ModKeyword : Return "mod"
+        Case SyntaxKind.NextKeyword : Return "next"
+        Case SyntaxKind.NotKeyword : Return "not"
         Case SyntaxKind.OrKeyword : Return "or"
         Case SyntaxKind.OrElseKeyword : Return "orelse"
+        Case SyntaxKind.PrintKeyword : Return "print"
+        Case SyntaxKind.ReturnKeyword : Return "return"
+        Case SyntaxKind.StepKeyword : Return "step"
+        Case SyntaxKind.ThenKeyword : Return "then"
+        Case SyntaxKind.ToKeyword : Return "to"
+        Case SyntaxKind.TrueKeyword : Return "true"
+        Case SyntaxKind.UntilKeyword : Return "until"
+        Case SyntaxKind.WendKeyword : Return "wend"
+        Case SyntaxKind.WhileKeyword : Return "while"
         Case SyntaxKind.XorKeyword : Return "xor"
-        Case SyntaxKind.EqvKeyword : Return "eqv"
-        Case SyntaxKind.ImpKeyword : Return "imp"
+
+        Case SyntaxKind.PoundToken : Return "#"
         Case SyntaxKind.PlusToken : Return "+"
         Case SyntaxKind.MinusToken : Return "-"
         Case SyntaxKind.StarToken : Return "*"
@@ -200,7 +178,6 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.CloseParenToken : Return ")"
         Case SyntaxKind.OpenBraceToken : Return "{"
         Case SyntaxKind.CloseBraceToken : Return "}"
-        'Case SyntaxKind.PipeToken : Return "|"
         Case SyntaxKind.EqualToken : Return "="
         Case SyntaxKind.LessThanToken : Return "<"
         Case SyntaxKind.PeriodToken : Return "."
@@ -208,7 +185,6 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.CommaToken : Return ","
         Case SyntaxKind.SemicolonToken : Return ";"
         Case SyntaxKind.QuestionToken : Return "?"
-        'Case SyntaxKind.DollarToken : Return "$"
         Case SyntaxKind.GreaterThanEqualToken : Return ">="
         Case SyntaxKind.LessThanEqualToken : Return "<="
         Case SyntaxKind.LessThanGreaterThanToken : Return "<>"

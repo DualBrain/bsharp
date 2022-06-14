@@ -390,8 +390,8 @@ Namespace Global.Basic.CodeAnalysis.Emit
 
       If node.Function Is Input Then
         ilProcessor.Emit(OpCodes.Call, _consoleReadLineReference)
-      ElseIf node.Function Is Print Then
-        ilProcessor.Emit(OpCodes.Call, _consoleWriteLineReference)
+        'ElseIf node.Function Is Print Then
+        '  ilProcessor.Emit(OpCodes.Call, _consoleWriteLineReference)
       Else
         Dim methodDefinition = _methods(node.Function)
         ilProcessor.Emit(OpCodes.Call, methodDefinition)
