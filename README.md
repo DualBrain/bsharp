@@ -1,4 +1,4 @@
-# BASIC (.NET)
+# B# (bsharp.net)
 
 I've had an idea for several years now to create what most people would consider an absolutely absurd project - but it's something that just hasn't exited my brain.  Additionally, over the years, ideas have been either *in my head* or as simple separate experiments to test a few ideas. All of that changes with this project.
 
