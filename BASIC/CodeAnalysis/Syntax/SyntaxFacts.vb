@@ -89,8 +89,9 @@ Namespace Basic.CodeAnalysis.Syntax
         Case "each" : Return SyntaxKind.EachKeyword
         Case "else" : Return SyntaxKind.ElseKeyword
         Case "elseif" : Return SyntaxKind.ElseIfKeyword
-        Case "end if" : Return SyntaxKind.EndIfKeyword
+        Case "end" : Return SyntaxKind.EndKeyword
         Case "end function" : Return SyntaxKind.EndFunctionKeyword
+        Case "end if" : Return SyntaxKind.EndIfKeyword
         Case "eqv" : Return SyntaxKind.EqvKeyword
         Case "exit" : Return SyntaxKind.ExitKeyword
         Case "false" : Return SyntaxKind.FalseKeyword
@@ -138,6 +139,7 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.EachKeyword : Return "each"
         Case SyntaxKind.ElseKeyword : Return "else"
         Case SyntaxKind.ElseIfKeyword : Return "elseif"
+        Case SyntaxKind.EndKeyword : Return "end"
         Case SyntaxKind.EndFunctionKeyword : Return "end function"
         Case SyntaxKind.EndIfKeyword : Return "end if"
         Case SyntaxKind.EqvKeyword : Return "eqv"

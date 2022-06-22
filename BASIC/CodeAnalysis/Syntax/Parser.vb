@@ -122,10 +122,12 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.ContinueKeyword : Return ParseContinueStatement()
         Case SyntaxKind.DimKeyword : Return ParseVariableDeclaration()
         Case SyntaxKind.DoKeyword : Return ParseDoStatement()
+        Case SyntaxKind.EndKeyword : Return ParseEndStatement()
         Case SyntaxKind.ExitKeyword : Return ParseExitStatement()
         Case SyntaxKind.ForKeyword : Return ParseForStatement()
         Case SyntaxKind.GotoKeyword : Return ParseGotoStatement()
         Case SyntaxKind.IfKeyword : Return ParseIfStatement()
+        Case SyntaxKind.Label : Return ParseLabelStatement()
         Case SyntaxKind.PrintKeyword : Return ParsePrintStatement()
         Case SyntaxKind.OpenBraceToken : Return ParseBlockStatement()
         Case SyntaxKind.ReturnKeyword : Return ParseReturnStatement()
@@ -197,11 +199,19 @@ Namespace Basic.CodeAnalysis.Syntax
 
     Private Function ParseGotoStatement() As GotoStatementSyntax
 
-      ' RETURN *expression*
+      ' GOTO NumberToken
+
+      ' GOTO IdentifierToken
 
       Dim gotoKeyword = MatchToken(SyntaxKind.GotoKeyword)
-      Dim identifierToken = MatchToken(SyntaxKind.IdentifierToken)
-      Return New GotoStatementSyntax(m_syntaxTree, gotoKeyword, identifierToken)
+
+      If Current.Kind = SyntaxKind.NumberToken Then
+        Dim numberToken = MatchToken(SyntaxKind.NumberToken)
+        Return New GotoStatementSyntax(m_syntaxTree, gotoKeyword, numberToken)
+      Else
+        Dim identifierToken = MatchToken(SyntaxKind.IdentifierToken)
+        Return New GotoStatementSyntax(m_syntaxTree, gotoKeyword, identifierToken)
+      End If
 
     End Function
 
@@ -309,6 +319,24 @@ Namespace Basic.CodeAnalysis.Syntax
       Dim sameLine = Not isEof AndAlso keywordLine = currentLine
       Dim expression = If(sameLine, ParseExpression(), Nothing)
       Return New ReturnStatementSyntax(m_syntaxTree, returnKeyword, expression)
+
+    End Function
+
+    Private Function ParseLabelStatement() As StatementSyntax
+
+      ' DoSomething:
+
+      Dim label = MatchToken(SyntaxKind.Label)
+      Return New LabelStatementSyntax(m_syntaxTree, label)
+
+    End Function
+
+    Private Function ParseEndStatement() As StatementSyntax
+
+      ' End
+
+      Dim endKeyword = MatchToken(SyntaxKind.EndKeyword)
+      Return New EndStatementSyntax(m_syntaxTree, endKeyword)
 
     End Function
 

@@ -7,19 +7,20 @@ Namespace Basic.CodeAnalysis.Binding
     Public Overridable Function RewriteStatement(node As BoundStatement) As BoundStatement
       Select Case node.Kind
         Case BoundNodeKind.BlockStatement : Return RewriteBlockStatement(DirectCast(node, BoundBlockStatement))
+        Case BoundNodeKind.ConditionalGotoStatement : Return RewriteConditionalGotoStatement(DirectCast(node, BoundConditionalGotoStatement))
+        Case BoundNodeKind.DoUntilStatement : Return RewriteDoUntilStatement(DirectCast(node, BoundDoUntilStatement))
+        Case BoundNodeKind.DoWhileStatement : Return RewriteDoWhileStatement(DirectCast(node, BoundDoWhileStatement))
+        Case BoundNodeKind.EndStatement : Return RewriteEndStatement(DirectCast(node, BoundEndStatement))
+        Case BoundNodeKind.ExpressionStatement : Return RewriteExpressionStatement(DirectCast(node, BoundExpressionStatement))
+        Case BoundNodeKind.ForStatement : Return RewriteForStatement(DirectCast(node, BoundForStatement))
+        Case BoundNodeKind.GotoStatement : Return RewriteGotoStatement(DirectCast(node, BoundGotoStatement))
+        Case BoundNodeKind.IfStatement : Return RewriteIfStatement(DirectCast(node, BoundIfStatement))
+        Case BoundNodeKind.LabelStatement : Return RewriteLabelStatement(DirectCast(node, BoundLabelStatement))
         Case BoundNodeKind.NopStatement : Return RewriteNopStatement(DirectCast(node, BoundNopStatement))
         Case BoundNodeKind.PrintStatement : Return RewritePrintStatement(DirectCast(node, BoundPrintStatement))
-        Case BoundNodeKind.VariableDeclaration : Return RewriteVariableDeclaration(DirectCast(node, BoundVariableDeclaration))
-        Case BoundNodeKind.IfStatement : Return RewriteIfStatement(DirectCast(node, BoundIfStatement))
-        Case BoundNodeKind.WhileStatement : Return RewriteWhileStatement(DirectCast(node, BoundWhileStatement))
-        Case BoundNodeKind.DoWhileStatement : Return RewriteDoWhileStatement(DirectCast(node, BoundDoWhileStatement))
-        Case BoundNodeKind.DoUntilStatement : Return RewriteDoUntilStatement(DirectCast(node, BoundDoUntilStatement))
-        Case BoundNodeKind.ForStatement : Return RewriteForStatement(DirectCast(node, BoundForStatement))
-        Case BoundNodeKind.LabelStatement : Return RewriteLabeltatement(DirectCast(node, BoundLabelStatement))
-        Case BoundNodeKind.GotoStatement : Return RewriteGotoStatement(DirectCast(node, BoundGotoStatement))
-        Case BoundNodeKind.ConditionalGotoStatement : Return RewriteConditionalGotoStatement(DirectCast(node, BoundConditionalGotoStatement))
         Case BoundNodeKind.ReturnStatement : Return RewriteReturnStatement(DirectCast(node, BoundReturnStatement))
-        Case BoundNodeKind.ExpressionStatement : Return RewriteExpressionStatement(DirectCast(node, BoundExpressionStatement))
+        Case BoundNodeKind.VariableDeclaration : Return RewriteVariableDeclaration(DirectCast(node, BoundVariableDeclaration))
+        Case BoundNodeKind.WhileStatement : Return RewriteWhileStatement(DirectCast(node, BoundWhileStatement))
         Case Else
           Throw New Exception($"Unexpected node: {node.Kind}")
       End Select
@@ -157,11 +158,15 @@ Namespace Basic.CodeAnalysis.Binding
       Return New BoundForStatement(node.Variable, lowerBound, upperBound, stepper, body, node.ExitLabel, node.ContinueLabel)
     End Function
 
-    Protected Overridable Function RewriteLabeltatement(node As BoundLabelStatement) As BoundStatement
+    Protected Overridable Function RewriteLabelStatement(node As BoundLabelStatement) As BoundStatement
       Return node
     End Function
 
     Protected Overridable Function RewriteGotoStatement(node As BoundGotoStatement) As BoundStatement
+      Return node
+    End Function
+
+    Protected Overridable Function RewriteEndStatement(node As BoundEndStatement) As BoundStatement
       Return node
     End Function
 

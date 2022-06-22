@@ -196,11 +196,15 @@ Namespace BASIC
 
       If Not result.Diagnostics.HasErrors Then
 
-        If result.Value IsNot Nothing Then
-          Console.ForegroundColor = ConsoleColor.White
-          Console.WriteLine(result.Value)
-          Console.ResetColor()
-        End If
+        ' The expression evaluator will return a 
+        ' result of some sort, the below code will
+        ' output this final "top level" result.
+        ' Now that we have `print`, shouldn't need.
+        'If result.Value IsNot Nothing Then
+        '  Console.ForegroundColor = ConsoleColor.White
+        '  Console.WriteLine(result.Value)
+        '  Console.ResetColor()
+        'End If
 
         m_previous = compilation
 

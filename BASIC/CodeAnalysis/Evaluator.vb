@@ -57,16 +57,6 @@ Namespace Basic.CodeAnalysis
       While index < body.Statements.Length
         Dim s = body.Statements(index)
         Select Case s.Kind
-          Case BoundNodeKind.PrintStatement
-            EvaluatePrintStatement(CType(s, BoundPrintStatement)) : index += 1
-          Case BoundNodeKind.NopStatement : index += 1
-          Case BoundNodeKind.VariableDeclaration
-            EvaluateVariableDeclaration(CType(s, BoundVariableDeclaration)) : index += 1
-          Case BoundNodeKind.ExpressionStatement
-            EvaluateExpressionStatement(CType(s, BoundExpressionStatement)) : index += 1
-          Case BoundNodeKind.GotoStatement
-            Dim gs = CType(s, BoundGotoStatement)
-            index = labelToIndex(gs.Label)
           Case BoundNodeKind.ConditionalGotoStatement
             Dim cgs = CType(s, BoundConditionalGotoStatement)
             Dim condition = CBool(EvaluateExpression(cgs.Condition))
@@ -75,11 +65,32 @@ Namespace Basic.CodeAnalysis
             Else
               index += 1
             End If
+          Case BoundNodeKind.EndStatement
+            index = body.Statements.Length
+          Case BoundNodeKind.ExpressionStatement : EvaluateExpressionStatement(CType(s, BoundExpressionStatement)) : index += 1
+          Case BoundNodeKind.GotoStatement
+            Dim gs = CType(s, BoundGotoStatement)
+
+            If labelToIndex.Keys.Contains(gs.Label) Then
+              index = labelToIndex(gs.Label)
+            Else
+              For Each entry In labelToIndex.Keys
+                If entry.Name = gs.Label.Name Then
+                  index = labelToIndex(entry)
+                  Exit For
+                End If
+              Next
+            End If
+            'index = labelToIndex(gs.Label)
+
           Case BoundNodeKind.LabelStatement : index += 1
+          Case BoundNodeKind.NopStatement : index += 1
+          Case BoundNodeKind.PrintStatement : EvaluatePrintStatement(CType(s, BoundPrintStatement)) : index += 1
           Case BoundNodeKind.ReturnStatement
             Dim rs = CType(s, BoundReturnStatement)
             m_lastValue = If(rs.Expression Is Nothing, Nothing, EvaluateExpression(rs.Expression))
             Return m_lastValue
+          Case BoundNodeKind.VariableDeclaration : EvaluateVariableDeclaration(CType(s, BoundVariableDeclaration)) : index += 1
           Case Else
             Throw New Exception($"Unexpected kind {s.Kind}")
         End Select

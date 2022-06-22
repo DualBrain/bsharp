@@ -282,11 +282,13 @@ Namespace Basic.CodeAnalysis.Binding
         Case SyntaxKind.ContinueStatement : Return BindContinueStatement(CType(syntax, ContinueStatementSyntax))
         Case SyntaxKind.DoUntilStatement : Return BindDoUntilStatement(CType(syntax, DoUntilStatementSyntax))
         Case SyntaxKind.DoWhileStatement : Return BindDoWhileStatement(CType(syntax, DoWhileStatementSyntax))
+        Case SyntaxKind.EndStatement : Return BindEndStatement(CType(syntax, EndStatementSyntax))
         Case SyntaxKind.ExitStatement : Return BindExitStatement(CType(syntax, ExitStatementSyntax))
         Case SyntaxKind.ExpressionStatement : Return BindExpressionStatement(CType(syntax, ExpressionStatementSyntax))
         Case SyntaxKind.ForStatement : Return BindForStatement(CType(syntax, ForStatementSyntax))
         Case SyntaxKind.GotoStatement : Return BindGotoStatement(CType(syntax, GotoStatementSyntax))
         Case SyntaxKind.IfStatement : Return BindIfStatement(CType(syntax, IfStatementSyntax))
+        Case SyntaxKind.LabelStatement : Return BindLabelStatement(CType(syntax, LabelStatementSyntax))
         Case SyntaxKind.PrintStatement : Return BindPrintStatement(CType(syntax, PrintStatementSyntax))
         Case SyntaxKind.ReturnStatement : Return BindReturnStatement(CType(syntax, ReturnStatementSyntax))
         Case SyntaxKind.SingleLineIfStatement : Return BindSingleLineIfStatement(CType(syntax, SingleLineIfStatementSyntax))
@@ -463,6 +465,10 @@ Namespace Basic.CodeAnalysis.Binding
       Return New BoundDoWhileStatement(statements, expression, atBeginning, exitLabel, continueLabel)
     End Function
 
+    Private Function BindEndStatement(syntax As EndStatementSyntax) As BoundStatement
+      Return New BoundEndStatement()
+    End Function
+
     Private Function BindExitStatement(syntax As ExitStatementSyntax) As BoundStatement
 
       If m_loopStack.Count = 0 Then
@@ -502,6 +508,12 @@ Namespace Basic.CodeAnalysis.Binding
     Private Function BindGotoStatement(syntax As GotoStatementSyntax) As BoundStatement
       Dim label = New BoundLabel(syntax.IdentifierToken.Text)
       Return New BoundGotoStatement(label)
+    End Function
+
+    Private Function BindLabelStatement(syntax As LabelStatementSyntax) As BoundStatement
+      Dim label = syntax.Label
+      Dim boundLabel = New BoundLabel(label.Text.Substring(0, label.Text.Length - 1))
+      Return New BoundLabelStatement(boundLabel)
     End Function
 
     Private Function BindIfStatement(syntax As IfStatementSyntax) As BoundStatement

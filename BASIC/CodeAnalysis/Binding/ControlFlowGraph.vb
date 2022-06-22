@@ -90,10 +90,16 @@ Namespace Basic.CodeAnalysis.Binding
             Case BoundNodeKind.LabelStatement
               StartBlock()
               m_statements.Add(statement)
-            Case BoundNodeKind.GotoStatement, BoundNodeKind.ConditionalGotoStatement, BoundNodeKind.ReturnStatement
+            Case BoundNodeKind.ConditionalGotoStatement,
+                 BoundNodeKind.GotoStatement,
+                 BoundNodeKind.ReturnStatement
               m_statements.Add(statement)
               StartBlock()
-            Case BoundNodeKind.NopStatement, BoundNodeKind.PrintStatement, BoundNodeKind.VariableDeclaration, BoundNodeKind.ExpressionStatement
+            Case BoundNodeKind.EndStatement,
+                 BoundNodeKind.ExpressionStatement,
+                 BoundNodeKind.NopStatement,
+                 BoundNodeKind.PrintStatement,
+                 BoundNodeKind.VariableDeclaration
               m_statements.Add(statement)
             Case Else
               Throw New Exception($"Unexpected statement: {statement.Kind}")
@@ -151,7 +157,19 @@ Namespace Basic.CodeAnalysis.Binding
             Select Case statement.Kind
               Case BoundNodeKind.GotoStatement
                 Dim gs = CType(statement, BoundGotoStatement)
-                Dim toBlock = m_blockFromLabel(gs.Label)
+
+                Dim toBlock As BasicBlock = Nothing
+                If m_blockFromLabel.Keys.Contains(gs.Label) Then
+                  toBlock = m_blockFromLabel(gs.Label)
+                Else
+                  For Each entry In m_blockFromLabel.Keys
+                    If entry.Name = gs.Label.Name Then
+                      toBlock = m_blockFromLabel(entry)
+                      Exit For
+                    End If
+                  Next
+                End If
+                'Dim toBlock = m_blockFromLabel(gs.Label)
                 Connect(current, toBlock)
               Case BoundNodeKind.ConditionalGotoStatement
                 Dim cgs = CType(statement, BoundConditionalGotoStatement)
@@ -164,11 +182,12 @@ Namespace Basic.CodeAnalysis.Binding
                 Connect(current, elseBlock, elseCondition)
               Case BoundNodeKind.ReturnStatement
                 Connect(current, m_end)
-              Case BoundNodeKind.NopStatement,
-                   BoundNodeKind.PrintStatement,
-                   BoundNodeKind.VariableDeclaration,
+              Case BoundNodeKind.EndStatement,
+                   BoundNodeKind.ExpressionStatement,
                    BoundNodeKind.LabelStatement,
-                   BoundNodeKind.ExpressionStatement
+                   BoundNodeKind.NopStatement,
+                   BoundNodeKind.PrintStatement,
+                   BoundNodeKind.VariableDeclaration
                 If isLastStatementInBlock Then
                   Connect(current, [next])
                 End If

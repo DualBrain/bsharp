@@ -9,6 +9,7 @@
     ConditionalGotoStatement
     DoUntilStatement
     DoWhileStatement
+    EndStatement
     ElseIfStatement
     ExpressionStatement
     ForStatement

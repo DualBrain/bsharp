@@ -284,13 +284,6 @@ Namespace Basic.CodeAnalysis.Syntax
 
     End Sub
 
-    'Private Sub ReadWhiteSpace()
-    '  While Char.IsWhiteSpace(Current)
-    '    m_position += 1
-    '  End While
-    '  m_kind = SyntaxKind.WhitespaceToken
-    'End Sub
-
     Private Sub ReadNumberToken()
 
       While Char.IsDigit(Current)
@@ -310,15 +303,6 @@ Namespace Basic.CodeAnalysis.Syntax
     End Sub
 
     Private Sub ReadIdentifierOrKeyword()
-      'While Char.IsLetter(Current)
-      '  m_position += 1
-      'End While
-      'If Current = "$"c Then
-      '  m_position += 1
-      'End If
-      'Dim length = m_position - m_start
-      'Dim text = m_text.ToString(m_start, length)
-      'm_kind = SyntaxFacts.GetKeywordKind(text)
 
       While Char.IsLetterOrDigit(Current) OrElse Current = "_"c OrElse Current = "$"c
         m_position += 1
@@ -355,7 +339,21 @@ Namespace Basic.CodeAnalysis.Syntax
 
       End If
 
-      m_kind = SyntaxFacts.GetKeywordKind(text)
+      ' Test to see if this is a Label
+      If Current = ":" AndAlso
+         Char.IsLetter(text(0)) AndAlso
+         Not text.Contains(" "c) AndAlso
+         Not text.Contains("$"c) Then
+        ' start of line
+        ' start with a-z character (yes)
+        ' no spaces or $ (yes)
+        ' no reserved words?
+        ' end with a colon (:) (yes)
+        m_kind = SyntaxKind.Label
+        m_position += 1 ' move past the colon (:)
+      Else
+        m_kind = SyntaxFacts.GetKeywordKind(text)
+      End If
 
     End Sub
 

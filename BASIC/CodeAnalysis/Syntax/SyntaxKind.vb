@@ -5,6 +5,8 @@
     BadToken
     EndOfFileToken
 
+    Label
+
     ' Trivia
     LineNumberTrivia
     SkippedTextTrivia
@@ -51,6 +53,7 @@
     EachKeyword
     ElseIfKeyword
     ElseKeyword
+    EndKeyword
     EndFunctionKeyword
     EndIfKeyword
     EqvKeyword
@@ -95,6 +98,7 @@
     ContinueStatement
     DoUntilStatement
     DoWhileStatement
+    EndStatement
     ElseIfStatement
     ElseStatement
     ExitStatement
@@ -103,6 +107,7 @@
     ForStatement
     GotoStatement
     IfStatement
+    LabelStatement
     MultiLineIfBlock
     PrintStatement
     ReturnStatement
