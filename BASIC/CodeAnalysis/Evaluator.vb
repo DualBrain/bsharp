@@ -101,6 +101,10 @@ Namespace Basic.CodeAnalysis
     End Function
 
     Private Sub EvaluatePrintStatement(s As BoundPrintStatement)
+
+      Dim screenWidth = 80
+      Dim zoneWidth = 14
+
       Dim cr = True
       For Each entry In s.Nodes
         If TypeOf entry Is BoundSymbol Then
@@ -108,16 +112,42 @@ Namespace Basic.CodeAnalysis
             Case ";"c
               cr = False
             Case ","
-              'TODO: Need to determine where the current character
-              '      position is and then determine how many spaces
-              '      need to be printed so that the cursor is at the
-              '      next 14 character offset.
-              Console.Write("              ") ' for now, 14 characters - see above.
+              Dim pos = Console.CursorLeft + 1
+              Dim cur = pos Mod zoneWidth
+              Console.Write(Space(cur))
               cr = False
             Case Else
               Throw New NotImplementedException
               cr = True
           End Select
+        ElseIf TypeOf entry Is BoundSpcFunction Then
+          Dim result = EvaluateExpression(CType(entry, BoundSpcFunction).Expression)
+          Dim value = CInt(result)
+          If value < 0 OrElse value > 255 Then
+            'error
+          ElseIf value > screenWidth Then
+            value = value Mod screenwidth
+          End If
+          Dim str = Space(value)
+          Console.Write(str)
+          cr = False
+        ElseIf TypeOf entry Is BoundTabFunction Then
+          Dim result = EvaluateExpression(CType(entry, BoundTabFunction).Expression)
+          Dim value = CInt(result)
+          If value < 0 OrElse value > 255 Then
+            ' error
+          End If
+          Dim pos = Console.CursorLeft + 1
+          Dim diff = 0
+          If pos < value Then
+            diff = value - pos
+          ElseIf pos > value Then
+            diff = screenWidth - pos
+            Console.WriteLine(Space(diff))
+            diff = value
+          End If
+          Dim str = Space(diff)
+          Console.Write(str)
         Else
           Dim value = EvaluateExpression(CType(entry, BoundExpression))
           Dim str = CStr(value)
@@ -277,14 +307,20 @@ Namespace Basic.CodeAnalysis
     Private Function EvaluateCallExpression(node As BoundCallExpression) As Object
       If node.[Function] Is BuiltinFunctions.Input Then
         Return Console.ReadLine()
-        'ElseIf node.[Function] Is BuiltinFunctions.Print Then
-        '  Dim message = CStr(EvaluateExpression(node.Arguments(0)))
-        '  Console.WriteLine(message)
-        '  Return Nothing
       ElseIf node.[Function] Is BuiltinFunctions.Rnd Then
         Dim max = CInt(EvaluateExpression(node.Arguments(0)))
         If m_random Is Nothing Then m_random = New Random
         Return m_random.[Next](max)
+        'ElseIf node.[Function] Is BuiltinFunctions.Spc Then
+        '  Dim number = CInt(EvaluateExpression(node.Arguments(0)))
+        '  If number < 0 OrElse number > 255 Then
+        '    ' error
+        '  End If
+        '  'TODO: Need to take into account the "printer"/"screen"
+        '  '      current width setting; if greater than the current
+        '  '      width, need to do number mod width.
+        '  Dim width = 80 ' for now, assuming the default width of 80.
+        '  Return Space(number Mod width)
       Else
         Dim locals = New Dictionary(Of VariableSymbol, Object)
         For i = 0 To node.Arguments.Length - 1

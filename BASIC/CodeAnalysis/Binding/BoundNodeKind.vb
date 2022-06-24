@@ -4,6 +4,10 @@
 
     Symbol
 
+    ' Functions
+    SpcFunction
+    TabFunction
+
     ' Statements
     BlockStatement
     ConditionalGotoStatement

@@ -110,7 +110,9 @@ Namespace Basic.CodeAnalysis.Syntax
         Case "orelse" : Return SyntaxKind.OrElseKeyword
         Case "print" : Return SyntaxKind.PrintKeyword
         Case "return" : Return SyntaxKind.ReturnKeyword
+        Case "spc" : Return SyntaxKind.SpcKeyword
         Case "step" : Return SyntaxKind.StepKeyword
+        Case "tab" : Return SyntaxKind.TabKeyword
         Case "then" : Return SyntaxKind.ThenKeyword
         Case "to" : Return SyntaxKind.ToKeyword
         Case "true" : Return SyntaxKind.TrueKeyword
@@ -160,7 +162,9 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.OrElseKeyword : Return "orelse"
         Case SyntaxKind.PrintKeyword : Return "print"
         Case SyntaxKind.ReturnKeyword : Return "return"
+        Case SyntaxKind.SpcKeyword : Return "spc"
         Case SyntaxKind.StepKeyword : Return "step"
+        Case SyntaxKind.TabKeyword : Return "tab"
         Case SyntaxKind.ThenKeyword : Return "then"
         Case SyntaxKind.ToKeyword : Return "to"
         Case SyntaxKind.TrueKeyword : Return "true"

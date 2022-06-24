@@ -586,6 +586,14 @@ Namespace Basic.CodeAnalysis.Binding
           nodes.Add(New BoundSymbol(";"c))
         ElseIf entry.Kind = SyntaxKind.CommaToken Then
           nodes.Add(New BoundSymbol(","c))
+        ElseIf entry.Kind = SyntaxKind.SpcFunction Then
+          Dim spc = CType(entry, SpcFunctionSyntax)
+          Dim expr = BindExpression(spc.Expression, TypeSymbol.Integer)
+          nodes.Add(New BoundSpcFunction(expr))
+        ElseIf entry.Kind = SyntaxKind.TabFunction Then
+          Dim tab = CType(entry, TabFunctionSyntax)
+          Dim expr = BindExpression(tab.Expression, TypeSymbol.Integer)
+          nodes.Add(New BoundTabFunction(expr))
         Else
           nodes.Add(BindExpression(CType(entry, ExpressionSyntax), TypeSymbol.Any))
         End If

@@ -74,7 +74,9 @@
     OrKeyword
     PrintKeyword
     ReturnKeyword
+    SpcKeyword
     StepKeyword
+    TabKeyword
     ThenKeyword
     ToKeyword
     TrueKeyword
@@ -92,6 +94,10 @@
     SingleLineElseClause
     WhileClause
     UntilClause
+
+    ' Functions
+    SpcFunction
+    TabFunction
 
     ' Statements
     BlockStatement

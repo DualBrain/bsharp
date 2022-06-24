@@ -155,7 +155,7 @@ Namespace Basic.CodeAnalysis.Syntax
         nodes.Add(commaToken)
       End If
 
-      Dim lastToken = SyntaxKind.BadToken
+      'Dim lastToken = SyntaxKind.BadToken
       While Current.Kind <> SyntaxKind.EndOfFileToken
 
         Dim currentLine = m_text.GetLineIndex(Current.Span.Start)
@@ -163,32 +163,38 @@ Namespace Basic.CodeAnalysis.Syntax
 
         Dim expression = ParseExpression()
         If expression IsNot Nothing Then
-          If lastToken = SyntaxKind.ExpressionStatement Then
-            Dim semiColonToken = New SyntaxToken(m_syntaxTree, SyntaxKind.SemicolonToken, expression.Span.Start, ";", Nothing, ImmutableArray(Of SyntaxTrivia).Empty, ImmutableArray(Of SyntaxTrivia).Empty)
-            nodes.Add(semiColonToken)
-          End If
+          'If lastToken = SyntaxKind.ExpressionStatement Then
+          '  Dim semiColonToken = New SyntaxToken(m_syntaxTree, SyntaxKind.SemicolonToken, expression.Span.Start, ";", Nothing, ImmutableArray(Of SyntaxTrivia).Empty, ImmutableArray(Of SyntaxTrivia).Empty)
+          '  nodes.Add(semiColonToken)
+          'End If
           nodes.Add(expression)
-          lastToken = SyntaxKind.ExpressionStatement
+          'lastToken = SyntaxKind.ExpressionStatement
         End If
 
-        ' NOTE: `PRINT "this""is""a""test"` will get converted
-        '       to `PRINT "this"; "is"; "a"; "test"`
-        '       I point this out because I seem to recall that
-        '       GW-BASIC is very laxed in whether or not a semi-
-        '       colon is required as a separator.
-        If Current.Kind = SyntaxKind.CommaToken Then
-          ' Multiple commas are allowed (and can serve a purpose)...
+        If Current.Kind = SyntaxKind.SpcKeyword Then
+          Dim spcKeyword = MatchToken(SyntaxKind.SpcKeyword)
+          Dim openParen = MatchToken(SyntaxKind.OpenParenToken)
+          Dim valueExpression = ParseExpression()
+          Dim closeParen = MatchToken(SyntaxKind.CloseParenToken)
+          Dim spcFunction = New SpcFunctionSyntax(m_syntaxTree, spcKeyword, openParen, valueExpression, closeParen)
+          nodes.Add(spcFunction)
+        ElseIf Current.Kind = SyntaxKind.TabKeyword Then
+          Dim tabKeyword = MatchToken(SyntaxKind.TabKeyword)
+          Dim openParen = MatchToken(SyntaxKind.OpenParenToken)
+          Dim valueExpression = ParseExpression()
+          Dim closeParen = MatchToken(SyntaxKind.CloseParenToken)
+          Dim tabFunction = New TabFunctionSyntax(m_syntaxTree, tabKeyword, openParen, valueExpression, closeParen)
+          nodes.Add(tabFunction)
+        ElseIf Current.Kind = SyntaxKind.CommaToken Then
           Dim commaToken = MatchToken(SyntaxKind.CommaToken)
           nodes.Add(commaToken)
-          lastToken = SyntaxKind.CommaToken
+          'lastToken = SyntaxKind.CommaToken
         ElseIf Current.Kind = SyntaxKind.SemicolonToken Then
-          ' If back-to-back semi-colons are encountered, they are 
-          ' automatically collapsed into a single on (by QBasic 1.1 IDE).
           Dim semiColonToken = MatchToken(SyntaxKind.SemicolonToken)
-          If lastToken <> SyntaxKind.SemicolonToken Then
-            nodes.Add(semiColonToken)
-          End If
-          lastToken = SyntaxKind.SemicolonToken
+          'If lastToken <> SyntaxKind.SemicolonToken Then
+          nodes.Add(semiColonToken)
+          'End If
+          'lastToken = SyntaxKind.SemicolonToken
         End If
 
       End While
