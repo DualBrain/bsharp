@@ -24,7 +24,22 @@ Namespace BASIC
     Private ReadOnly m_variables As New Dictionary(Of VariableSymbol, Object)
 
     Sub New()
+
+      MyBase.m_immediateCommands = New List(Of String) From {"cls",
+                                                             "edit",
+                                                             "list",
+                                                             "load",
+                                                             "new",
+                                                             "quit",
+                                                             "run",
+                                                             "system"}
+
+      Console.WriteLine("BASIC .NET (""B#"") ver 0.00.00")
+      Console.WriteLine("(C) Copyright 2010-2022 Cory Smith")
+      Console.WriteLine()
+
       LoadSubmissions()
+
     End Sub
 
     'Private NotInheritable Class RenderState
@@ -75,33 +90,28 @@ Namespace BASIC
 
     End Function
 
-    <MetaCommand("exit", "Exits the REPL")>
-    Protected Sub EvaluateExit()
-      Environment.Exit(0)
-    End Sub
-
     <MetaCommand("cls", "Clears the screen")>
-    Protected Sub EvaluateCls()
+    Protected Shared Sub EvaluateCls()
       Console.Clear()
     End Sub
 
-    <MetaCommand("new", "Clears all previous submissions")>
-    Protected Sub EvaluateReset()
-      m_previous = Nothing
-      m_variables.Clear()
-      ClearSubmissions()
+    Private m_edit As String = "10 PRINT ""HELLO WORLD!"""
+
+    <MetaCommand("edit", "Toggle 'edit' mode.")>
+    Protected Sub EvaluateEdit()
+      ' For now, do nothing...
+      m_edit = "10 PRINT ""HELLO WORLD!""
+20 DIM A = 10
+30 DIM B = 20
+40 DIM C = A + B
+50 PRINT C".ToLower
+
     End Sub
 
-    <MetaCommand("toggleparsetree", "Toggles the parse tree")>
-    Protected Sub EvaluateShowTree()
-      m_showTree = Not m_showTree
-      Console.WriteLine(If(m_showTree, "Showing parse trees.", "Now showing parse trees."))
-    End Sub
-
-    <MetaCommand("toggleboundtree", "Toggles the bound tree")>
-    Protected Sub EvaluateShowProgram()
-      m_showProgram = Not m_showProgram
-      Console.WriteLine(If(m_showProgram, "Showing bound tree.", "Now showing bound tree."))
+    <MetaCommand("list", "List the 'edit' text.")>
+    Protected Sub EvaluateList()
+      Dim text = m_edit
+      LoadDocument(text)
     End Sub
 
     <MetaCommand("load", "Loads a script file")>
@@ -120,7 +130,43 @@ Namespace BASIC
 
     End Sub
 
-    <MetaCommand("list", "Lists all symbols")>
+    <MetaCommand("new", "Clears all previous submissions")>
+    Protected Sub EvaluateReset()
+      m_edit = ""
+      m_previous = Nothing
+      m_variables.Clear()
+      ClearSubmissions()
+    End Sub
+
+    <MetaCommand("quit", "Exits the REPL")>
+    Protected Shared Sub EvaluateQuit()
+      Environment.Exit(0)
+    End Sub
+
+    <MetaCommand("run", "Interpret 'edit' text.")>
+    Protected Sub EvaluateRun()
+      Dim text = m_edit
+      EvaluateSubmission(text)
+    End Sub
+
+    <MetaCommand("system", "Exits the REPL")>
+    Protected Shared Sub EvaluateSystem()
+      Environment.Exit(0)
+    End Sub
+
+    <MetaCommand("toggleparsetree", "Toggles the parse tree")>
+    Protected Sub EvaluateShowTree()
+      m_showTree = Not m_showTree
+      Console.WriteLine(If(m_showTree, "Showing parse trees.", "Now showing parse trees."))
+    End Sub
+
+    <MetaCommand("toggleboundtree", "Toggles the bound tree")>
+    Protected Sub EvaluateShowProgram()
+      m_showProgram = Not m_showProgram
+      Console.WriteLine(If(m_showProgram, "Showing bound tree.", "Now showing bound tree."))
+    End Sub
+
+    <MetaCommand("ls", "Lists all symbols")>
     Protected Sub EvaluateLs()
 
       'If m_previous Is Nothing Then

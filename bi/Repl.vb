@@ -9,6 +9,7 @@ Namespace Basic
   Friend MustInherit Class Repl
 
     Private ReadOnly m_metaCommands As New List(Of MetaCommand)
+    Friend m_immediateCommands As List(Of String)
     Private ReadOnly m_submissionHistory As New List(Of String)
     Private m_submissionHistoryIndex As Integer
     Private m_done As Boolean = False
@@ -38,19 +39,31 @@ Namespace Basic
     End Sub
 
     Public Sub Run()
+
       Do
+
         Dim text = EditSubmission()
         If String.IsNullOrEmpty(text) Then
           Continue Do
         End If
-        If Not text.Contains(Environment.NewLine) AndAlso text.StartsWith("$") Then
+
+        Dim immediateCommand = False
+        If Not text.Contains(Environment.NewLine) Then
+          If text.StartsWith("$") Then immediateCommand = True
+          If m_immediateCommands.Contains(text.ToLower) Then immediateCommand = True
+        End If
+
+        If immediateCommand Then
           EvaluateMetaCommand(text)
         Else
           EvaluateSubmission(text)
         End If
+
         m_submissionHistory.Add(text)
         m_submissionHistoryIndex = 0
+
       Loop
+
     End Sub
 
     Private Delegate Function LineRenderHandler(lines As IReadOnlyList(Of String), lineIndex As Integer, state As Object) As Object
@@ -95,7 +108,8 @@ Namespace Basic
           Console.ForegroundColor = ConsoleColor.Green
 
           If lineCount = 0 Then
-            Console.Write("» ")
+            'Console.Write("» ")
+            Console.Write("> ")
           Else
             Console.Write("· ")
           End If
@@ -156,23 +170,42 @@ Namespace Basic
 
     End Class
 
+    Private ReadOnly m_document As New ObservableCollection(Of String) From {""}
+    Private ReadOnly m_view As New SubmissionView(AddressOf RenderLine, m_document)
+
+    Friend Sub LoadDocument(text As String)
+      m_document.Clear()
+      Dim historyItem = text
+      Dim lines = historyItem.Split(Environment.NewLine)
+      For Each line In lines
+        m_document.Add(line)
+      Next
+      m_view.CurrentLine = m_document.Count - 1
+      m_view.CurrentCharacter = m_document(m_view.CurrentLine).Length
+    End Sub
+
     Private Function EditSubmission() As String
 
       m_done = False
 
-      Dim document = New ObservableCollection(Of String) From {""}
-      Dim view = New SubmissionView(AddressOf RenderLine, document)
+      m_document.Clear()
+      m_document.Add("")
+      m_view.CurrentLine = 0
+      m_view.CurrentCharacter = m_document(m_view.CurrentLine).Length
+
+      'Dim document = New ObservableCollection(Of String) From {""}
+      'Dim view = New SubmissionView(AddressOf RenderLine, document)
 
       While Not m_done
         Dim key = Console.ReadKey(True)
-        HandleKey(key, document, view)
+        HandleKey(key, m_document, m_view)
       End While
 
-      view.CurrentLine = document.Count - 1
-      view.CurrentCharacter = document(view.CurrentLine).Length
+      m_view.CurrentLine = m_document.Count - 1
+      m_view.CurrentCharacter = m_document(m_view.CurrentLine).Length
       Console.WriteLine()
 
-      Return String.Join(Environment.NewLine, document)
+      Return String.Join(Environment.NewLine, m_document)
 
     End Function
 
@@ -354,7 +387,7 @@ Namespace Basic
 
       Dim args = New List(Of String)
       Dim inQuotes = False
-      Dim position = 1
+      Dim position = If(input.StartsWith("$"), 1, 0)
       Dim sb = New StringBuilder
       While position < input.Length
 
