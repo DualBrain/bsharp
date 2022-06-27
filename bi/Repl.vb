@@ -38,29 +38,144 @@ Namespace Basic
 
     End Sub
 
+    Friend m_fullScreenEditor As Boolean
+
     Public Sub Run()
 
       Do
 
-        Dim text = EditSubmission()
-        If String.IsNullOrEmpty(text) Then
-          Continue Do
-        End If
+        If m_fullScreenEditor Then
 
-        Dim immediateCommand = False
-        If Not text.Contains(Environment.NewLine) Then
-          If text.StartsWith("$") Then immediateCommand = True
-          If m_immediateCommands.Contains(text.ToLower) Then immediateCommand = True
-        End If
+          Console.Clear()
 
-        If immediateCommand Then
-          EvaluateMetaCommand(text)
+          Console.SetCursorPosition(0, Console.WindowHeight - 3)
+          Console.ForegroundColor = ConsoleColor.Magenta
+          Dim line = New String("─"c, Console.WindowWidth - 1)
+          Console.WriteLine(line)
+          Dim statusTop = Console.WindowHeight - 2
+          Console.SetCursorPosition(0, statusTop)
+          Console.Write("ESC:Exit  F1:Save  F2:Run  F3:Find  F4:Mark  F5:Paste")
+          Dim statusLeft = Console.WindowWidth - 20
+          Console.SetCursorPosition(statusLeft, statusTop)
+          Console.Write("Ln:    Col:     INS")
+          Console.SetCursorPosition(0, 0)
+          Console.ResetColor()
+
+          Dim maxLeft = Console.WindowWidth - 2
+          Dim maxTop = Console.WindowHeight - 4
+
+          Do
+            Dim key = Console.ReadKey(True)
+            If key.Modifiers = 0 Then
+              Select Case key.Key
+
+                Case ConsoleKey.Escape : Exit Do
+
+                Case ConsoleKey.Enter
+                  If Console.CursorTop = maxTop Then
+                    ' Need to shift document up one line.
+                  End If
+
+                Case ConsoleKey.Delete
+                  'TODO Remove character at cursor position (left) - 1;
+                  '     shifting anything on the line to the left.
+                  If Console.CursorLeft > 0 Then Console.CursorLeft -= 1
+                Case ConsoleKey.Tab
+                  'TODO: "Type" two spaces.
+                  Console.CursorLeft += 2
+                Case ConsoleKey.Backspace
+                  'TODO Remove character at cursor position;
+                  '     shifting anything on the line to the left.
+                  If Console.CursorLeft > 0 Then Console.CursorLeft -= 1
+
+                Case ConsoleKey.RightArrow
+                  If Console.CursorLeft < maxLeft Then Console.CursorLeft += 1
+                Case ConsoleKey.LeftArrow
+                  If Console.CursorLeft > 0 Then Console.CursorLeft -= 1
+                Case ConsoleKey.UpArrow
+                  If Console.CursorTop > 0 Then Console.CursorTop -= 1
+                Case ConsoleKey.DownArrow
+                  If Console.CursorTop < maxTop Then Console.CursorTop += 1
+
+                Case ConsoleKey.PageUp
+                  If Console.CursorTop > 0 Then
+                    Console.CursorTop = 0
+                  Else
+                    'TODO: Scroll document (if necessary).
+                  End If
+                Case ConsoleKey.PageDown
+                  If Console.CursorTop < maxTop Then
+                    Console.CursorTop = maxTop
+                  Else
+                    'TODO: Scroll document (if necessary).
+                  End If
+                Case ConsoleKey.Home
+                  Console.CursorLeft = 0
+                Case ConsoleKey.End
+                  Console.CursorLeft = maxLeft
+
+                Case ConsoleKey.F1 ' Save
+                Case ConsoleKey.F2 ' Run
+                Case ConsoleKey.F3 ' Find
+                Case ConsoleKey.F4 ' Mark
+                Case ConsoleKey.F5 ' Paste
+
+                Case Else
+
+                  If key.Key <> ConsoleKey.Backspace AndAlso key.KeyChar >= " "c Then
+                    Console.Write(key.KeyChar.ToString)
+                  End If
+
+              End Select
+            End If
+
+            Dim currentLeft = Console.CursorLeft
+            Dim currentTop = Console.CursorTop
+
+            Console.CursorVisible = False
+            Try
+              Console.ForegroundColor = ConsoleColor.Magenta
+              Console.SetCursorPosition(statusLeft + 4, statusTop)
+              Console.Write(currentTop + 1)
+              Console.SetCursorPosition(statusLeft + 12, statusTop)
+              Console.Write(currentLeft + 1)
+              Console.SetCursorPosition(statusLeft + 16, statusTop)
+              Console.Write(If(True, "INS", "OVR"))
+              Console.ResetColor()
+            Finally
+              Console.CursorVisible = True
+            End Try
+
+            Console.SetCursorPosition(currentLeft, currentTop)
+
+          Loop
+
+          m_fullScreenEditor = False
+          Console.Clear()
+
         Else
-          EvaluateSubmission(text)
-        End If
 
-        m_submissionHistory.Add(text)
-        m_submissionHistoryIndex = 0
+          Dim text = EditSubmission()
+          If String.IsNullOrEmpty(text) Then
+            Continue Do
+          End If
+
+          Dim immediateCommand = False
+          If Not text.Contains(Environment.NewLine) Then
+            If text.StartsWith("$") Then immediateCommand = True
+            If m_immediateCommands.Contains(text.ToLower) Then immediateCommand = True
+          End If
+
+          If immediateCommand Then
+            EvaluateMetaCommand(text)
+          Else
+            EvaluateSubmission(text)
+          End If
+
+          m_submissionHistory.Add(text)
+          m_submissionHistoryIndex = 0
+
+        End If
 
       Loop
 

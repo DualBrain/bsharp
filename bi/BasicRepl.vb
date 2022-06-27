@@ -104,14 +104,7 @@ Namespace BASIC
 
     <MetaCommand("edit", "Toggle 'edit' mode.")>
     Protected Sub EvaluateEdit()
-      ' For now, do nothing...
-      m_edit = "10 PRINT ""HELLO WORLD!""
-20 DIM A = 10
-30 DIM B = 20
-40 DIM C = A + B
-50 PRINT C
-".ToLower
-
+      m_fullScreenEditor = True
     End Sub
 
     <MetaCommand("list", "List the 'edit' text.")>
