@@ -190,7 +190,7 @@ Namespace BASIC
       'End If
       'Dim symbol = m_previous.GetSymbols.OfType(Of FunctionSymbol).SingleOrDefault(Function(f) f.Name = functionName)
       Dim compilation = If(m_previous, m_emptyCompilation)
-      Dim symbol = compilation.GetSymbols.OfType(Of FunctionSymbol).SingleOrDefault(Function(f) f.Name = functionName)
+      Dim symbol = compilation.GetSymbols.OfType(Of FunctionSymbol).SingleOrDefault(Function(f) f.Name = functionName.ToLower)
 
       If symbol Is Nothing Then
         Console.ForegroundColor = ConsoleColor.Red

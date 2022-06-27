@@ -155,7 +155,7 @@ Namespace Basic.CodeAnalysis.Syntax
         nodes.Add(commaToken)
       End If
 
-      'Dim lastToken = SyntaxKind.BadToken
+      Dim lastPosition = Current.Position
       While Current.Kind <> SyntaxKind.EndOfFileToken
 
         Dim currentLine = m_text.GetLineIndex(Current.Span.Start)
@@ -168,7 +168,6 @@ Namespace Basic.CodeAnalysis.Syntax
           '  nodes.Add(semiColonToken)
           'End If
           nodes.Add(expression)
-          'lastToken = SyntaxKind.ExpressionStatement
         End If
 
         If Current.Kind = SyntaxKind.SpcKeyword Then
@@ -188,13 +187,18 @@ Namespace Basic.CodeAnalysis.Syntax
         ElseIf Current.Kind = SyntaxKind.CommaToken Then
           Dim commaToken = MatchToken(SyntaxKind.CommaToken)
           nodes.Add(commaToken)
-          'lastToken = SyntaxKind.CommaToken
         ElseIf Current.Kind = SyntaxKind.SemicolonToken Then
           Dim semiColonToken = MatchToken(SyntaxKind.SemicolonToken)
           'If lastToken <> SyntaxKind.SemicolonToken Then
           nodes.Add(semiColonToken)
           'End If
-          'lastToken = SyntaxKind.SemicolonToken
+        End If
+
+        If Current.Position = lastPosition Then
+          ' stuck?
+          Exit While
+        Else
+          lastPosition = Current.Position
         End If
 
       End While

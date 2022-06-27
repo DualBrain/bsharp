@@ -26,6 +26,7 @@ Namespace Basic.CodeAnalysis.Binding
     End Function
 
     Private Function TryDeclareSymbol(Of TSymbol As Symbol)(symbol As TSymbol) As Boolean
+      'TODO: Handle overloading/optional parameters.
       If m_symbols Is Nothing Then
         m_symbols = New Dictionary(Of String, Symbol)
       ElseIf m_symbols.ContainsKey(symbol.Name) Then
@@ -35,9 +36,11 @@ Namespace Basic.CodeAnalysis.Binding
       Return True
     End Function
 
-    Public Function TryLookupSymbol(name As String) As Symbol 'Boolean
+    Public Function TryLookupSymbol(name As String) As Symbol
       Dim symbol As Symbols.Symbol = Nothing
-      If m_symbols IsNot Nothing AndAlso m_symbols.TryGetValue(name, symbol) Then
+      'TODO: Handle Function Operator Overloading (duplicate functions names with different parameters/types).
+      'TODO: Handle Optional Parameters.
+      If m_symbols IsNot Nothing AndAlso m_symbols.TryGetValue(name.ToLower, symbol) Then
         Return symbol
       End If
       Return Parent?.TryLookupSymbol(name)

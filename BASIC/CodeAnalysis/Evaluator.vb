@@ -114,7 +114,7 @@ Namespace Basic.CodeAnalysis
             Case ","
               Dim pos = Console.CursorLeft + 1
               Dim cur = pos Mod zoneWidth
-              Console.Write(Space(cur))
+              Console.Write(Microsoft.VisualBasic.Strings.Space(cur))
               cr = False
             Case Else
               Throw New NotImplementedException
@@ -126,9 +126,9 @@ Namespace Basic.CodeAnalysis
           If value < 0 OrElse value > 255 Then
             'error
           ElseIf value > screenWidth Then
-            value = value Mod screenwidth
+            value = value Mod screenWidth
           End If
-          Dim str = Space(value)
+          Dim str = Microsoft.VisualBasic.Strings.Space(value)
           Console.Write(str)
           cr = False
         ElseIf TypeOf entry Is BoundTabFunction Then
@@ -143,10 +143,10 @@ Namespace Basic.CodeAnalysis
             diff = value - pos
           ElseIf pos > value Then
             diff = screenWidth - pos
-            Console.WriteLine(Space(diff))
+            Console.WriteLine(Microsoft.VisualBasic.Strings.Space(diff))
             diff = value
           End If
-          Dim str = Space(diff)
+          Dim str = Microsoft.VisualBasic.Strings.Space(diff)
           Console.Write(str)
         Else
           Dim value = EvaluateExpression(CType(entry, BoundExpression))
@@ -305,22 +305,109 @@ Namespace Basic.CodeAnalysis
     End Function
 
     Private Function EvaluateCallExpression(node As BoundCallExpression) As Object
-      If node.[Function] Is BuiltinFunctions.Input Then
+      If node.Function Is BuiltinFunctions.Abs Then
+        Dim value = CDbl(EvaluateExpression(node.Arguments(0)))
+        Return Math.Abs(value)
+      ElseIf node.Function Is BuiltinFunctions.Asc Then
+        Dim value = CStr(EvaluateExpression(node.Arguments(0)))
+        Return Microsoft.VisualBasic.Strings.Asc(value)
+      ElseIf node.Function Is BuiltinFunctions.Atn Then
+        Dim value = CDbl(EvaluateExpression(node.Arguments(0)))
+        Return Math.Atan(value)
+      ElseIf node.Function Is BuiltinFunctions.Chr Then
+        Dim value = CInt(EvaluateExpression(node.Arguments(0)))
+        Return Microsoft.VisualBasic.Strings.Chr(value)
+      ElseIf node.Function Is BuiltinFunctions.Cos Then
+        Dim value = CDbl(EvaluateExpression(node.Arguments(0)))
+        Return Math.Cos(value)
+      ElseIf node.Function Is BuiltinFunctions.Hex Then
+        Dim value = CInt(EvaluateExpression(node.Arguments(0)))
+        Return Microsoft.VisualBasic.Hex(value)
+      ElseIf node.[Function] Is BuiltinFunctions.Input Then
         Return Console.ReadLine()
+      ElseIf node.Function Is BuiltinFunctions.Instr1 Then
+        Dim string1 = CStr(EvaluateExpression(node.Arguments(0)))
+        Dim string2 = CStr(EvaluateExpression(node.Arguments(1)))
+        Return Microsoft.VisualBasic.InStr(string1, string2)
+      ElseIf node.Function Is BuiltinFunctions.Instr2 Then
+        Dim position = CInt(EvaluateExpression(node.Arguments(0)))
+        Dim string1 = CStr(EvaluateExpression(node.Arguments(1)))
+        Dim string2 = CStr(EvaluateExpression(node.Arguments(2)))
+        Return Microsoft.VisualBasic.InStr(position, string1, string2)
+      ElseIf node.Function Is BuiltinFunctions.Int Then
+        Dim value = CDbl(EvaluateExpression(node.Arguments(0)))
+        Return Microsoft.VisualBasic.Int(value)
+      ElseIf node.Function Is BuiltinFunctions.LBound Then
+        Stop
+        Return Nothing
+      ElseIf node.Function Is BuiltinFunctions.LCase Then
+        Dim value = CStr(EvaluateExpression(node.Arguments(0)))
+        Return value?.ToLower
+      ElseIf node.Function Is BuiltinFunctions.Left Then
+        Dim value = CStr(EvaluateExpression(node.Arguments(0)))
+        Dim position = CInt(EvaluateExpression(node.Arguments(1)))
+        Return Microsoft.VisualBasic.Left(value, position)
+      ElseIf node.Function Is BuiltinFunctions.Len Then
+        Dim value = CStr(EvaluateExpression(node.Arguments(0)))
+        Return Microsoft.VisualBasic.Len(value)
+      ElseIf node.Function Is BuiltinFunctions.Log Then
+        Dim value = CDbl(EvaluateExpression(node.Arguments(0)))
+        Return Math.Log(value)
+      ElseIf node.Function Is BuiltinFunctions.Mid1 Then
+        Dim value = CStr(EvaluateExpression(node.Arguments(0)))
+        Dim start = CInt(EvaluateExpression(node.Arguments(1)))
+        Return Microsoft.VisualBasic.Mid(value, start)
+      ElseIf node.Function Is BuiltinFunctions.Mid2 Then
+        Dim value = CStr(EvaluateExpression(node.Arguments(0)))
+        Dim start = CInt(EvaluateExpression(node.Arguments(1)))
+        Dim length = CInt(EvaluateExpression(node.Arguments(2)))
+        Return Microsoft.VisualBasic.Mid(value, start, length)
+      ElseIf node.Function Is BuiltinFunctions.Oct Then
+        Dim value = CInt(EvaluateExpression(node.Arguments(0)))
+        Return Microsoft.VisualBasic.Oct(value)
+      ElseIf node.Function Is BuiltinFunctions.Right Then
+        Dim value = CStr(EvaluateExpression(node.Arguments(0)))
+        Dim position = CInt(EvaluateExpression(node.Arguments(1)))
+        Return Microsoft.VisualBasic.Right(value, position)
       ElseIf node.[Function] Is BuiltinFunctions.Rnd Then
         Dim max = CInt(EvaluateExpression(node.Arguments(0)))
         If m_random Is Nothing Then m_random = New Random
         Return m_random.[Next](max)
-        'ElseIf node.[Function] Is BuiltinFunctions.Spc Then
-        '  Dim number = CInt(EvaluateExpression(node.Arguments(0)))
-        '  If number < 0 OrElse number > 255 Then
-        '    ' error
-        '  End If
-        '  'TODO: Need to take into account the "printer"/"screen"
-        '  '      current width setting; if greater than the current
-        '  '      width, need to do number mod width.
-        '  Dim width = 80 ' for now, assuming the default width of 80.
-        '  Return Space(number Mod width)
+      ElseIf node.Function Is BuiltinFunctions.Sgn Then
+        Dim value = CDbl(EvaluateExpression(node.Arguments(0)))
+        Return Math.Sign(value)
+      ElseIf node.Function Is BuiltinFunctions.Sin Then
+        Dim value = CDbl(EvaluateExpression(node.Arguments(0)))
+        Return Math.Sin(value)
+      ElseIf node.Function Is BuiltinFunctions.Space Then
+        Dim length = CInt(EvaluateExpression(node.Arguments(0)))
+        Return New String(" "c, length)
+      ElseIf node.Function Is BuiltinFunctions.Sqr Then
+        Dim value = CDbl(EvaluateExpression(node.Arguments(0)))
+        Return Math.Sqrt(value)
+      ElseIf node.Function Is BuiltinFunctions.Str Then
+        Dim value = EvaluateExpression(node.Arguments(0))
+        Return Microsoft.VisualBasic.Str(value)
+      ElseIf node.Function Is BuiltinFunctions.StringFunction Then
+        Dim length = CInt(EvaluateExpression(node.Arguments(0)))
+        Dim thing = EvaluateExpression(node.Arguments(1))
+        If TypeOf thing Is String Then
+          Return New String(CStr(thing)(0), length)
+        Else
+          Return New String(ChrW(CInt(thing)), length)
+        End If
+      ElseIf node.Function Is BuiltinFunctions.Tan Then
+        Dim value = CDbl(EvaluateExpression(node.Arguments(0)))
+        Return Math.Tan(value)
+      ElseIf node.Function Is BuiltinFunctions.UBound Then
+        Stop
+        Return Nothing
+      ElseIf node.Function Is BuiltinFunctions.UCase Then
+        Dim value = CStr(EvaluateExpression(node.Arguments(0)))
+        Return value?.ToUpper
+      ElseIf node.Function Is BuiltinFunctions.Val Then
+        Dim value = CStr(EvaluateExpression(node.Arguments(0)))
+        Return Microsoft.VisualBasic.Val(value)
       Else
         Dim locals = New Dictionary(Of VariableSymbol, Object)
         For i = 0 To node.Arguments.Length - 1

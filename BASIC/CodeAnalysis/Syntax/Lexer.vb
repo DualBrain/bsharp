@@ -43,7 +43,7 @@ Namespace Basic.CodeAnalysis.Syntax
     Private ReadOnly Property Peek(offset As Integer) As Char
       Get
         Dim index = m_position + offset
-        If index >= m_text.Length Then Return Chr(0)
+        If index >= m_text.Length Then Return ChrW(0)
         Return m_text(index)
       End Get
     End Property
@@ -189,7 +189,7 @@ Namespace Basic.CodeAnalysis.Syntax
       m_value = Nothing
 
       Select Case Current
-        Case Chr(0) : m_kind = SyntaxKind.EndOfFileToken
+        Case ChrW(0) : m_kind = SyntaxKind.EndOfFileToken
         Case "#"c : m_kind = SyntaxKind.PoundToken : m_position += 1
         Case "+"c : m_kind = SyntaxKind.PlusToken : m_position += 1
         Case "-"c : m_kind = SyntaxKind.MinusToken : m_position += 1
@@ -311,7 +311,7 @@ Namespace Basic.CodeAnalysis.Syntax
       Dim length = m_position - m_start
       Dim text = m_text.ToString(m_start, length)
 
-      If text = "end" AndAlso Current = " "c Then
+      If text.ToLower = "end" AndAlso Current = " "c Then
 
         Dim currentPosition = m_position
 
@@ -329,7 +329,7 @@ Namespace Basic.CodeAnalysis.Syntax
         Dim l = m_position - st
         Dim possible = m_text.ToString(st, l)
 
-        Select Case possible
+        Select Case possible?.ToLower
           Case "function", "if"
             length = m_position - m_start
             text = m_text.ToString(m_start, length)

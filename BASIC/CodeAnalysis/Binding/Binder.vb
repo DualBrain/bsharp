@@ -220,6 +220,7 @@ Namespace Basic.CodeAnalysis.Binding
     Private Shared Function CreateRootScope() As BoundScope
       Dim result = New BoundScope(Nothing)
       For Each f In BuiltinFunctions.GetAll
+        'TODO: Handle overloading/optional parameters.
         result.TryDeclareFunction(f)
       Next
       Return result
