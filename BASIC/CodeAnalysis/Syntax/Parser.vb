@@ -810,7 +810,6 @@ Namespace Basic.CodeAnalysis.Syntax
     End Function
 
     Private Function ParseExpression() As ExpressionSyntax
-      'Return ParseAssignmentExpression()
       Return ParseBinaryExpression()
     End Function
 
