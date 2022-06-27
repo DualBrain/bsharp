@@ -20,6 +20,7 @@
     GotoStatement
     IfStatement
     LabelStatement
+    LetStatement
     NopStatement
     PrintStatement
     ReturnStatement

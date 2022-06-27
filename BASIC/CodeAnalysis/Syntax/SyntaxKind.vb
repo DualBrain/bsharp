@@ -114,11 +114,12 @@
     GotoStatement
     IfStatement
     LabelStatement
+    LetStatement
     MultiLineIfBlock
     PrintStatement
     ReturnStatement
     SingleLineIfStatement
-    VariableDeclaration
+    VariableDeclarationStatement
     WhileStatement
 
     ' Expressions

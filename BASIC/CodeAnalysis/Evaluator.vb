@@ -85,6 +85,7 @@ Namespace Basic.CodeAnalysis
 
           Case BoundNodeKind.LabelStatement : index += 1
           Case BoundNodeKind.NopStatement : index += 1
+          Case BoundNodeKind.LetStatement : EvaluateLetStatement(CType(s, BoundLetStatement)) : index += 1
           Case BoundNodeKind.PrintStatement : EvaluatePrintStatement(CType(s, BoundPrintStatement)) : index += 1
           Case BoundNodeKind.ReturnStatement
             Dim rs = CType(s, BoundReturnStatement)
@@ -99,6 +100,13 @@ Namespace Basic.CodeAnalysis
       Return m_lastValue
 
     End Function
+
+    Private Sub EvaluateLetStatement(node As BoundLetStatement)
+      Dim value = EvaluateExpression(node.Expression)
+      Debug.Assert(value IsNot Nothing)
+      m_lastValue = value
+      Assign(node.Variable, value)
+    End Sub
 
     Private Sub EvaluatePrintStatement(s As BoundPrintStatement)
 

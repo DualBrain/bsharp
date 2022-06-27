@@ -16,6 +16,7 @@ Namespace Basic.CodeAnalysis.Binding
         Case BoundNodeKind.GotoStatement : Return RewriteGotoStatement(DirectCast(node, BoundGotoStatement))
         Case BoundNodeKind.IfStatement : Return RewriteIfStatement(DirectCast(node, BoundIfStatement))
         Case BoundNodeKind.LabelStatement : Return RewriteLabelStatement(DirectCast(node, BoundLabelStatement))
+        Case BoundNodeKind.LetStatement : Return RewriteLetStatement(DirectCast(node, BoundLetStatement))
         Case BoundNodeKind.NopStatement : Return RewriteNopStatement(DirectCast(node, BoundNopStatement))
         Case BoundNodeKind.PrintStatement : Return RewritePrintStatement(DirectCast(node, BoundPrintStatement))
         Case BoundNodeKind.ReturnStatement : Return RewriteReturnStatement(DirectCast(node, BoundReturnStatement))
@@ -88,6 +89,10 @@ Namespace Basic.CodeAnalysis.Binding
     End Function
 
     Protected Overridable Function RewritePrintStatement(node As BoundPrintStatement) As BoundStatement
+      Return node
+    End Function
+
+    Protected Overridable Function RewriteLetStatement(node As BoundLetStatement) As BoundStatement
       Return node
     End Function
 

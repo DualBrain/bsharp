@@ -290,10 +290,11 @@ Namespace Basic.CodeAnalysis.Binding
         Case SyntaxKind.GotoStatement : Return BindGotoStatement(CType(syntax, GotoStatementSyntax))
         Case SyntaxKind.IfStatement : Return BindIfStatement(CType(syntax, IfStatementSyntax))
         Case SyntaxKind.LabelStatement : Return BindLabelStatement(CType(syntax, LabelStatementSyntax))
+        Case SyntaxKind.LetStatement : Return BindLetStatement(CType(syntax, LetStatementSyntax))
         Case SyntaxKind.PrintStatement : Return BindPrintStatement(CType(syntax, PrintStatementSyntax))
         Case SyntaxKind.ReturnStatement : Return BindReturnStatement(CType(syntax, ReturnStatementSyntax))
         Case SyntaxKind.SingleLineIfStatement : Return BindSingleLineIfStatement(CType(syntax, SingleLineIfStatementSyntax))
-        Case SyntaxKind.VariableDeclaration : Return BindVariableDeclaration(CType(syntax, VariableDeclarationSyntax))
+        Case SyntaxKind.VariableDeclarationStatement : Return BindVariableDeclaration(CType(syntax, VariableDeclarationSyntax))
         Case SyntaxKind.WhileStatement : Return BindWhileStatement(CType(syntax, WhileStatementSyntax))
         Case Else
           Throw New Exception($"Unexpected syntax {syntax.Kind}")
@@ -315,7 +316,12 @@ Namespace Basic.CodeAnalysis.Binding
       Dim name = syntax.IdentifierToken.Text
       Dim boundExpression = BindExpression(syntax.Expression)
 
-      Dim variable = BindVariableReference(syntax.IdentifierToken)
+      Dim variable = DetermineVariableReference(syntax.IdentifierToken)
+      If variable Is Nothing Then
+        ' Variable has not been declared, let's go ahead and do so.
+        variable = BindVariableDeclaration(syntax.IdentifierToken, False, boundExpression.Type)
+      End If
+      'Dim variable = BindVariableReference(syntax.IdentifierToken)
       If variable Is Nothing Then
         Return boundExpression
       End If
@@ -541,6 +547,39 @@ Namespace Basic.CodeAnalysis.Binding
 
     End Function
 
+    Private Function BindLetStatement(syntax As LetStatementSyntax) As BoundStatement
+
+      Dim stronglyTyped = False
+
+      Dim name = syntax.IdentifierToken.Text
+      Dim boundExpression = BindExpression(syntax.Expression)
+
+      Dim variable = DetermineVariableReference(syntax.IdentifierToken)
+      If variable Is Nothing Then
+        If stronglyTyped Then
+          ' Variable appears to not have been already declared, 
+          ' run through the normal process in order to generate
+          ' the appropriate error(s).
+          variable = BindVariableReference(syntax.IdentifierToken)
+        Else
+          ' Variable has not been declared, let's go ahead and do so.
+          variable = BindVariableDeclaration(syntax.IdentifierToken, False, boundExpression.Type)
+        End If
+      End If
+      If variable Is Nothing Then
+        Return Nothing
+      End If
+
+      If variable.IsReadOnly Then
+        Diagnostics.ReportCannotAssign(syntax.EqualToken.Location, name)
+      End If
+
+      Dim convertedExpression = BindConversion(syntax.Expression.Location, boundExpression, variable.Type)
+
+      Return New BoundLetStatement(variable, convertedExpression)
+
+    End Function
+
     Private Shared Function BindLiteralExpression(syntax As LiteralExpressionSyntax) As BoundExpression
       Dim value = If(syntax.Value, 0)
       Return New BoundLiteralExpression(value)
@@ -655,11 +694,11 @@ Namespace Basic.CodeAnalysis.Binding
     End Function
 
     Private Function BindVariableDeclaration(syntax As VariableDeclarationSyntax) As BoundStatement
-      Dim isReadOnly = (syntax.Keyword.Kind = SyntaxKind.ConstKeyword)
+      Dim isReadOnly = (syntax.KeywordToken.Kind = SyntaxKind.ConstKeyword)
       Dim type = BindAsClause(syntax.AsClause)
       Dim initializer = BindExpression(syntax.Initializer)
       Dim variableType = If(type, initializer.Type)
-      Dim variable = BindVariableDeclaration(syntax.Identifier, isReadOnly, variableType)
+      Dim variable = BindVariableDeclaration(syntax.IdentifierToken, isReadOnly, variableType)
       Dim convertedInitializer = BindConversion(syntax.Initializer.Location, initializer, variableType)
       Return New BoundVariableDeclaration(variable, convertedInitializer)
     End Function
@@ -685,6 +724,19 @@ Namespace Basic.CodeAnalysis.Binding
         Diagnostics.ReportSymbolAlreadyDeclared(identifier.Location, name)
       End If
       Return variable
+    End Function
+
+    Private Function DetermineVariableReference(identifierToken As SyntaxToken) As VariableSymbol
+
+      Dim name = identifierToken.Text
+      Dim s = m_scope.TryLookupSymbol(name)
+
+      If TypeOf s Is VariableSymbol Then
+        Return TryCast(s, VariableSymbol)
+      Else
+        Return Nothing
+      End If
+
     End Function
 
     Private Function BindVariableReference(identifierToken As SyntaxToken) As VariableSymbol

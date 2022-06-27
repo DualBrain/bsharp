@@ -186,8 +186,8 @@ Namespace Basic.CodeAnalysis
           Dim firstStatement = CType(node, BlockStatementSyntax).Statements.FirstOrDefault()
           ' Report just for non empty blocks.
           If firstStatement IsNot Nothing Then ReportUnreachableCode(firstStatement)
-        Case SyntaxKind.VariableDeclaration
-          ReportUnreachableCode(CType(node, VariableDeclarationSyntax).Keyword.Location)
+        Case SyntaxKind.VariableDeclarationStatement
+          ReportUnreachableCode(CType(node, VariableDeclarationSyntax).KeywordToken.Location)
         Case SyntaxKind.IfStatement
           ReportUnreachableCode(CType(node, IfStatementSyntax).IfKeyword.Location)
         Case SyntaxKind.WhileStatement

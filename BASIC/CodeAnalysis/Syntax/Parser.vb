@@ -117,6 +117,7 @@ Namespace Basic.CodeAnalysis.Syntax
     End Function
 
     Private Function ParseStatement() As StatementSyntax
+
       Select Case Current.Kind
         Case SyntaxKind.ConstKeyword : Return ParseVariableDeclaration()
         Case SyntaxKind.ContinueKeyword : Return ParseContinueStatement()
@@ -128,12 +129,28 @@ Namespace Basic.CodeAnalysis.Syntax
         Case SyntaxKind.GotoKeyword : Return ParseGotoStatement()
         Case SyntaxKind.IfKeyword : Return ParseIfStatement()
         Case SyntaxKind.Label : Return ParseLabelStatement()
+        Case SyntaxKind.LetKeyword : Return ParseLetStatement()
         Case SyntaxKind.PrintKeyword : Return ParsePrintStatement()
         Case SyntaxKind.OpenBraceToken : Return ParseBlockStatement()
         Case SyntaxKind.ReturnKeyword : Return ParseReturnStatement()
         Case SyntaxKind.WhileKeyword : Return ParseWhileStatement()
-        Case Else : Return ParseExpressionStatement()
+        Case Else
+          If Peek(0).Kind = SyntaxKind.IdentifierToken AndAlso
+             Peek(1).Kind = SyntaxKind.EqualToken Then
+
+            ' *identifier* = *expression*
+
+            Dim identifierToken = MatchToken(SyntaxKind.IdentifierToken)
+            Dim equalsToken = MatchToken(SyntaxKind.EqualToken)
+            Dim expression = ParseExpression()
+            Return New ExpressionStatementSyntax(m_syntaxTree, New AssignmentExpressionSyntax(m_syntaxTree, identifierToken, equalsToken, expression))
+
+          End If
+
+          Return ParseExpressionStatement()
+
       End Select
+
     End Function
 
     Private Function ParsePrintStatement() As PrintStatementSyntax
@@ -222,6 +239,18 @@ Namespace Basic.CodeAnalysis.Syntax
         Dim identifierToken = MatchToken(SyntaxKind.IdentifierToken)
         Return New GotoStatementSyntax(m_syntaxTree, gotoKeyword, identifierToken)
       End If
+
+    End Function
+
+    Private Function ParseLetStatement() As StatementSyntax
+
+      ' LET *identifier* = *expression*
+
+      Dim letKeywordToken = MatchToken(SyntaxKind.LetKeyword)
+      Dim identifierToken = NextToken()
+      Dim equalToken = MatchToken(SyntaxKind.EqualToken)
+      Dim expression = ParseExpression()
+      Return New LetStatementSyntax(m_syntaxTree, letKeywordToken, identifierToken, equalToken, expression)
 
     End Function
 
@@ -781,36 +810,8 @@ Namespace Basic.CodeAnalysis.Syntax
     End Function
 
     Private Function ParseExpression() As ExpressionSyntax
-      Return ParseAssignmentExpression()
-    End Function
-
-    Private Function ParseAssignmentExpression() As ExpressionSyntax
-
-      ' LET *identifier* = *expression*
-
-      ' or
-
-      ' *identifier* = *expression*
-
-      'TODO: Need to decide how to allow for LET being optional and it not conflicting with binary expressions.
-
-      'If SyntaxFacts.GetKeywordKind(Current.Text) = SyntaxKind.LetKeyword Then
-      '  Dim letKeyword = NextToken()
-      'End If
-
-      If Current.Kind = SyntaxKind.LetKeyword Then 'SyntaxFacts.GetKeywordKind(Current.Text) = SyntaxKind.LetKeyword Then
-        Dim letKeyword = MatchToken(SyntaxKind.LetKeyword)
-        'If Peek(0).Kind = SyntaxKind.IdentifierToken AndAlso
-        '   Peek(1).Kind = SyntaxKind.EqualToken Then
-        Dim identifierToken = NextToken()
-        Dim operatorToken = MatchToken(SyntaxKind.EqualToken)
-        Dim right = ParseAssignmentExpression()
-        Return New AssignmentExpressionSyntax(m_syntaxTree, letKeyword, identifierToken, operatorToken, right)
-        'End If
-      End If
-
+      'Return ParseAssignmentExpression()
       Return ParseBinaryExpression()
-
     End Function
 
     Private Function ParseBinaryExpression(Optional parentPrecedence As Integer = 0) As ExpressionSyntax

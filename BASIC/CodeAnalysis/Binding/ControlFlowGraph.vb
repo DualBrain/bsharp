@@ -97,6 +97,7 @@ Namespace Basic.CodeAnalysis.Binding
               StartBlock()
             Case BoundNodeKind.EndStatement,
                  BoundNodeKind.ExpressionStatement,
+                 BoundNodeKind.LetStatement,
                  BoundNodeKind.NopStatement,
                  BoundNodeKind.PrintStatement,
                  BoundNodeKind.VariableDeclaration
@@ -185,6 +186,7 @@ Namespace Basic.CodeAnalysis.Binding
               Case BoundNodeKind.EndStatement,
                    BoundNodeKind.ExpressionStatement,
                    BoundNodeKind.LabelStatement,
+                   BoundNodeKind.LetStatement,
                    BoundNodeKind.NopStatement,
                    BoundNodeKind.PrintStatement,
                    BoundNodeKind.VariableDeclaration
