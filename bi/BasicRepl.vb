@@ -100,7 +100,7 @@ Namespace BASIC
 30 DIM B = 20
 40 DIM C = A + B
 50 PRINT C
-".ToLower
+"
 
     <MetaCommand("edit", "Toggle 'edit' mode.")>
     Protected Sub EvaluateEdit()
