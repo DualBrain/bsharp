@@ -84,6 +84,16 @@ Namespace Basic
         Render()
       End Sub
 
+      Public Property CursorTop As Integer
+        Get
+          Return m_cursorTop
+        End Get
+        Set(value As Integer)
+          m_cursorTop = value
+          Render()
+        End Set
+      End Property
+
       Private Sub CollectionChanged(sender As Object, e As NotifyCollectionChangedEventArgs) Handles SubmissionDocument.CollectionChanged
         Render()
       End Sub
@@ -98,10 +108,10 @@ Namespace Basic
 
         For Each line In SubmissionDocument
 
-          If m_cursorTop + lineCount >= Console.WindowHeight Then
+          If m_cursorTop + lineCount > Console.WindowHeight Then '>= Console.WindowHeight Then
             Console.SetCursorPosition(0, Console.WindowHeight - 1)
             Console.WriteLine()
-            If m_cursorTop > 0 Then m_cursorTop -= 1
+            'If m_cursorTop > 0 Then m_cursorTop -= 1
           End If
 
           Console.SetCursorPosition(0, m_cursorTop + lineCount)
@@ -170,42 +180,36 @@ Namespace Basic
 
     End Class
 
-    Private ReadOnly m_document As New ObservableCollection(Of String) From {""}
-    Private ReadOnly m_view As New SubmissionView(AddressOf RenderLine, m_document)
-
     Friend Sub LoadDocument(text As String)
-      m_document.Clear()
+      Dim document = New ObservableCollection(Of String) From {""}
+      Dim view = New SubmissionView(AddressOf RenderLine, document)
+      document.Clear()
       Dim historyItem = text
       Dim lines = historyItem.Split(Environment.NewLine)
       For Each line In lines
-        m_document.Add(line)
+        document.Add(line)
       Next
-      m_view.CurrentLine = m_document.Count - 1
-      m_view.CurrentCharacter = m_document(m_view.CurrentLine).Length
+      view.CurrentLine = document.Count - 1
+      view.CurrentCharacter = document(view.CurrentLine).Length
     End Sub
 
     Private Function EditSubmission() As String
 
       m_done = False
 
-      m_document.Clear()
-      m_document.Add("")
-      m_view.CurrentLine = 0
-      m_view.CurrentCharacter = m_document(m_view.CurrentLine).Length
-
-      'Dim document = New ObservableCollection(Of String) From {""}
-      'Dim view = New SubmissionView(AddressOf RenderLine, document)
+      Dim document = New ObservableCollection(Of String) From {""}
+      Dim view = New SubmissionView(AddressOf RenderLine, document)
 
       While Not m_done
         Dim key = Console.ReadKey(True)
-        HandleKey(key, m_document, m_view)
+        HandleKey(key, document, view)
       End While
 
-      m_view.CurrentLine = m_document.Count - 1
-      m_view.CurrentCharacter = m_document(m_view.CurrentLine).Length
+      view.CurrentLine = document.Count - 1
+      view.CurrentCharacter = document(view.CurrentLine).Length
       Console.WriteLine()
 
-      Return String.Join(Environment.NewLine, m_document)
+      Return String.Join(Environment.NewLine, document)
 
     End Function
 

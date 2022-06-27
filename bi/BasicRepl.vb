@@ -95,7 +95,12 @@ Namespace BASIC
       Console.Clear()
     End Sub
 
-    Private m_edit As String = "10 PRINT ""HELLO WORLD!"""
+    Private m_edit As String = "10 PRINT ""HELLO WORLD!""
+20 DIM A = 10
+30 DIM B = 20
+40 DIM C = A + B
+50 PRINT C
+".ToLower
 
     <MetaCommand("edit", "Toggle 'edit' mode.")>
     Protected Sub EvaluateEdit()
@@ -104,7 +109,8 @@ Namespace BASIC
 20 DIM A = 10
 30 DIM B = 20
 40 DIM C = A + B
-50 PRINT C".ToLower
+50 PRINT C
+".ToLower
 
     End Sub
 
@@ -262,7 +268,7 @@ Namespace BASIC
 
     Private Shared Function GetSubmissionsDirectory() As String
       Dim localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
-      Dim submissionsDirectory = Path.Combine(localAppData, "BASIC", "Submissions")
+      Dim submissionsDirectory = Path.Combine(localAppData, "Bsharp", "Submissions")
       Return submissionsDirectory
     End Function
 

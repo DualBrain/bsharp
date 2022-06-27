@@ -105,11 +105,14 @@ Namespace Basic.IO
     <Extension>
     Public Sub WriteDiagnostics(writer As TextWriter, diagnostics As IEnumerable(Of Diagnostic))
 
+      Dim sepLine = False
+
       For Each diagnostic In diagnostics.Where(Function(diag) diag.Location.Text Is Nothing)
         Dim messageColor = If(diagnostic.IsWarning, DarkYellow, DarkRed)
         writer.SetForeground(messageColor)
         writer.WriteLine(diagnostic.Message)
         writer.ResetColor()
+        sepLine = True
       Next
 
       ' We have errors, so don't try to evaluate (execute).
@@ -155,10 +158,14 @@ Namespace Basic.IO
         writer.ResetColor()
         ' Write the rest of the line.
 
+        sepLine = True
+
       Next
 
-      ' An extra line at the end for clarity.
-      writer.WriteLine()
+      If sepLine Then
+        ' An extra line at the end for clarity.
+        writer.WriteLine()
+      End If
 
     End Sub
 
