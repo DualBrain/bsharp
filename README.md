@@ -40,4 +40,4 @@ For now the rough list contains:
 
 ## Status
 
-See [Roadmap](Roadmap).
+See [Roadmap](wiki/Roadmap).
