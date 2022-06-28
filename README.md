@@ -40,4 +40,4 @@ For now the rough list contains:
 
 ## Status
 
-See [Roadmap](wiki/Roadmap).
+See [Roadmap](https://github.com/DualBrain/bsharp/wiki/Roadmap).
