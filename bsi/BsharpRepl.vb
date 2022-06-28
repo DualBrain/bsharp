@@ -7,8 +7,6 @@ Imports Bsharp.CodeAnalysis.Symbols
 Imports Bsharp.CodeAnalysis.Syntax
 Imports Bsharp.CodeAnalysis.Authoring
 Imports Bsharp.IO
-'Imports System.Console
-'Imports System.ConsoleColor
 Imports System.IO
 
 Namespace Bsharp
@@ -41,18 +39,6 @@ Namespace Bsharp
       LoadSubmissions()
 
     End Sub
-
-    'Private NotInheritable Class RenderState
-
-    '  Public Sub New(text As SourceText, tree As SyntaxTree)
-    '    Me.Text = text
-    '    Me.SyntaxTree = tree
-    '  End Sub
-
-    '  Public ReadOnly Property Text As SourceText
-    '  Public ReadOnly Property SyntaxTree As SyntaxTree
-
-    'End Class
 
     Protected Overrides Function RenderLine(lines As IReadOnlyList(Of String), lineIndex As Integer, state As Object) As Object
 
@@ -94,13 +80,6 @@ Namespace Bsharp
     Protected Shared Sub EvaluateCls()
       Console.Clear()
     End Sub
-
-    Private m_edit As String = "10 PRINT ""HELLO WORLD!""
-20 DIM A = 10
-30 DIM B = 20
-40 DIM C = A + B
-50 PRINT C
-"
 
     <MetaCommand("edit", "Toggle 'edit' mode.")>
     Protected Sub EvaluateEdit()

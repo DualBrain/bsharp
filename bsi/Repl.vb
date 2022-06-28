@@ -14,6 +14,8 @@ Namespace Bsharp
     Private m_submissionHistoryIndex As Integer
     Private m_done As Boolean = False
 
+    Friend m_edit As String = ""
+
     Friend Sub New()
       InitializeMetaCommands()
     End Sub
@@ -54,79 +56,39 @@ Namespace Bsharp
           Console.WriteLine(line)
           Dim statusTop = Console.WindowHeight - 2
           Console.SetCursorPosition(0, statusTop)
-          Console.Write("ESC:Exit  F1:Save  F2:Run  F3:Find  F4:Mark  F5:Paste")
+          Console.Write("ESC:Exit  F1:Help  F2:      F3:      F4:      F5:Run")
           Dim statusLeft = Console.WindowWidth - 20
           Console.SetCursorPosition(statusLeft, statusTop)
           Console.Write("Ln:    Col:     INS")
-          Console.SetCursorPosition(0, 0)
           Console.ResetColor()
 
           Dim maxLeft = Console.WindowWidth - 2
           Dim maxTop = Console.WindowHeight - 4
 
+          Dim document = New ObservableCollection(Of String) 'From {""}
+          For Each line In Split(m_edit, vbCrLf)
+            document.Add(line)
+          Next
+          Dim view = New SubmissionView2(AddressOf RenderLine, document)
+
+          Console.SetCursorPosition(0, 0)
+
+          Dim run = False
+
           Do
+
             Dim key = Console.ReadKey(True)
+
+            Dim handled = False
             If key.Modifiers = 0 Then
               Select Case key.Key
-
-                Case ConsoleKey.Escape : Exit Do
-
-                Case ConsoleKey.Enter
-                  If Console.CursorTop = maxTop Then
-                    ' Need to shift document up one line.
-                  End If
-
-                Case ConsoleKey.Delete
-                  'TODO Remove character at cursor position (left) - 1;
-                  '     shifting anything on the line to the left.
-                  If Console.CursorLeft > 0 Then Console.CursorLeft -= 1
-                Case ConsoleKey.Tab
-                  'TODO: "Type" two spaces.
-                  Console.CursorLeft += 2
-                Case ConsoleKey.Backspace
-                  'TODO Remove character at cursor position;
-                  '     shifting anything on the line to the left.
-                  If Console.CursorLeft > 0 Then Console.CursorLeft -= 1
-
-                Case ConsoleKey.RightArrow
-                  If Console.CursorLeft < maxLeft Then Console.CursorLeft += 1
-                Case ConsoleKey.LeftArrow
-                  If Console.CursorLeft > 0 Then Console.CursorLeft -= 1
-                Case ConsoleKey.UpArrow
-                  If Console.CursorTop > 0 Then Console.CursorTop -= 1
-                Case ConsoleKey.DownArrow
-                  If Console.CursorTop < maxTop Then Console.CursorTop += 1
-
-                Case ConsoleKey.PageUp
-                  If Console.CursorTop > 0 Then
-                    Console.CursorTop = 0
-                  Else
-                    'TODO: Scroll document (if necessary).
-                  End If
-                Case ConsoleKey.PageDown
-                  If Console.CursorTop < maxTop Then
-                    Console.CursorTop = maxTop
-                  Else
-                    'TODO: Scroll document (if necessary).
-                  End If
-                Case ConsoleKey.Home
-                  Console.CursorLeft = 0
-                Case ConsoleKey.End
-                  Console.CursorLeft = maxLeft
-
-                Case ConsoleKey.F1 ' Save
-                Case ConsoleKey.F2 ' Run
-                Case ConsoleKey.F3 ' Find
-                Case ConsoleKey.F4 ' Mark
-                Case ConsoleKey.F5 ' Paste
-
+                Case ConsoleKey.Escape : handled = True : Exit Do
+                Case ConsoleKey.F5 : run = True : handled = True : Exit Do
                 Case Else
-
-                  If key.Key <> ConsoleKey.Backspace AndAlso key.KeyChar >= " "c Then
-                    Console.Write(key.KeyChar.ToString)
-                  End If
-
               End Select
+            End If
+            If Not handled Then
+              view.HandleKey(key, document)
             End If
 
             Dim currentLeft = Console.CursorLeft
@@ -150,8 +112,13 @@ Namespace Bsharp
 
           Loop
 
+          m_edit = String.Join(Environment.NewLine, document)
           m_fullScreenEditor = False
           Console.Clear()
+
+          If run Then
+            EvaluateSubmission(m_edit)
+          End If
 
         Else
 
@@ -182,6 +149,246 @@ Namespace Bsharp
     End Sub
 
     Private Delegate Function LineRenderHandler(lines As IReadOnlyList(Of String), lineIndex As Integer, state As Object) As Object
+
+    Private NotInheritable Class SubmissionView2
+
+      Private ReadOnly m_lineRenderer As LineRenderHandler
+      Private WithEvents SubmissionDocument As ObservableCollection(Of String)
+      'Private m_cursorTop As Integer
+      Private m_renderedLineCount As Integer
+      Private m_currentLine As Integer
+      Private m_currentCharacter As Integer
+
+      Private m_maxLeft As Integer
+      Private m_maxTop As Integer
+
+      Sub New(lineRenderer As LineRenderHandler, submissionDocument As ObservableCollection(Of String))
+        m_lineRenderer = lineRenderer
+        Me.SubmissionDocument = submissionDocument
+        'm_cursorTop = Console.CursorTop
+        m_maxLeft = Console.WindowWidth - 2
+        m_maxTop = Console.WindowHeight - 4
+        Render()
+      End Sub
+
+      Private Sub CollectionChanged(sender As Object, e As NotifyCollectionChangedEventArgs) Handles SubmissionDocument.CollectionChanged
+        Render()
+      End Sub
+
+      Private Sub Render()
+
+        'Console.SetCursorPosition(0, Me.m_cursorTop)
+        Console.CursorVisible = False
+
+        Dim lineCount = 0
+        Dim state = CObj(Nothing)
+
+        For Each line In SubmissionDocument
+
+          If lineCount > m_maxTop Then
+            Console.SetCursorPosition(0, Console.WindowHeight - 1)
+            Console.WriteLine()
+          End If
+
+          Console.SetCursorPosition(0, lineCount)
+          state = m_lineRenderer(SubmissionDocument, lineCount, state)
+          Console.Write(New String(" "c, Console.WindowWidth - line.Length - 2))
+          lineCount += 1
+
+        Next
+
+        Dim numberOfBlankLines = m_renderedLineCount - lineCount
+        If numberOfBlankLines > 0 Then
+          Dim blankLine = New String(" "c, Console.WindowWidth)
+          For i = 0 To numberOfBlankLines - 1
+            Console.SetCursorPosition(0, lineCount + i)
+            Console.WriteLine(blankLine)
+          Next
+        End If
+
+        m_renderedLineCount = lineCount
+
+        Console.CursorVisible = True
+        UpdateCursorPosition()
+
+      End Sub
+
+      Private Sub UpdateCursorPosition()
+        Console.CursorTop = m_currentLine
+        Console.CursorLeft = m_currentCharacter
+      End Sub
+
+      Public Property CurrentLine As Integer
+        Get
+          Return m_currentLine
+        End Get
+        Set
+          If m_currentLine <> Value Then
+            m_currentLine = Value
+            m_currentCharacter = Math.Min(SubmissionDocument(m_currentLine).Length, m_currentCharacter)
+            UpdateCursorPosition()
+          End If
+        End Set
+      End Property
+
+      Public Property CurrentCharacter As Integer
+        Get
+          Return m_currentCharacter
+        End Get
+        Set
+          If m_currentCharacter <> Value Then
+            m_currentCharacter = Value
+            UpdateCursorPosition()
+          End If
+        End Set
+      End Property
+
+      Public Sub HandleKey(key As ConsoleKeyInfo, document As ObservableCollection(Of String))
+        If key.Modifiers = 0 Then
+          Select Case key.Key
+            'Case ConsoleKey.Escape : HandleEscape(document)
+            Case ConsoleKey.Enter : HandleEnter(document)
+            Case ConsoleKey.LeftArrow : HandleLeftArrow(document)
+            Case ConsoleKey.RightArrow : HandleRightArrow(document)
+            Case ConsoleKey.UpArrow : HandleUpArrow(document)
+            Case ConsoleKey.DownArrow : HandleDownArrow(document)
+            Case ConsoleKey.Backspace : HandleBackspace(document)
+            Case ConsoleKey.Delete : HandleDelete(document)
+            Case ConsoleKey.Home : HandleHome(document)
+            Case ConsoleKey.End : HandleEnd(document)
+            Case ConsoleKey.Tab : HandleTab(document)
+            Case ConsoleKey.PageUp : HandlePageUp(document)
+            Case ConsoleKey.PageDown : HandlePageDown(document)
+            Case Else
+          End Select
+        ElseIf key.Modifiers = ConsoleModifiers.Control Then
+          Select Case key.Key
+            Case ConsoleKey.Enter
+              HandleControlEnter(document)
+            Case Else
+          End Select
+        End If
+        If key.Key <> ConsoleKey.Backspace AndAlso key.KeyChar >= " "c Then
+          HandleTyping(document, key.KeyChar.ToString)
+        End If
+      End Sub
+
+      'Private Sub HandleEscape(document As ObservableCollection(Of String))
+      '  document.Clear()
+      '  document.Add(String.Empty)
+      '  Me.CurrentLine = 0
+      '  Me.CurrentCharacter = 0
+      'End Sub
+
+      Private Sub HandleEnter(document As ObservableCollection(Of String))
+        InsertLine(document)
+      End Sub
+
+      Private Sub HandleControlEnter(document As ObservableCollection(Of String))
+        InsertLine(document)
+      End Sub
+
+      Private Sub HandleLeftArrow(document As ObservableCollection(Of String))
+        If Me.CurrentCharacter > 0 Then
+          Me.CurrentCharacter -= 1
+        End If
+      End Sub
+
+      Private Sub HandleRightArrow(document As ObservableCollection(Of String))
+        Dim line = document(Me.CurrentLine)
+        If Me.CurrentCharacter <= line.Length - 1 Then
+          Me.CurrentCharacter += 1
+        End If
+      End Sub
+
+      Private Sub HandleUpArrow(document As ObservableCollection(Of String))
+        If Me.CurrentLine > 0 Then
+          Me.CurrentLine -= 1
+        End If
+      End Sub
+
+      Private Sub HandleDownArrow(document As ObservableCollection(Of String))
+        If Me.CurrentLine < document.Count - 1 Then
+          Me.CurrentLine += 1
+        End If
+      End Sub
+
+      Private Sub HandleBackspace(document As ObservableCollection(Of String))
+        Dim start = Me.CurrentCharacter
+        If start = 0 Then
+          If Me.CurrentLine = 0 Then Return
+          Dim currentLine = document(Me.CurrentLine)
+          Dim previousLine = document(Me.CurrentLine - 1)
+          document.RemoveAt(Me.CurrentLine)
+          Me.CurrentLine -= 1
+          document(Me.CurrentLine) = previousLine & currentLine
+          Me.CurrentCharacter = previousLine.Length
+        Else
+          Dim lineIndex = Me.CurrentLine
+          Dim line = document(lineIndex)
+          Dim before = line.Substring(0, start - 1)
+          Dim after = line.Substring(start)
+          document(lineIndex) = before & after
+          Me.CurrentCharacter -= 1
+        End If
+      End Sub
+
+      Private Sub HandleDelete(document As ObservableCollection(Of String))
+        Dim lineIndex = Me.CurrentLine
+        Dim line = document(lineIndex)
+        Dim start = Me.CurrentCharacter
+        If start >= line.Length Then
+          If Me.CurrentLine = document.Count - 1 Then Return
+          Dim nextLine = document(Me.CurrentLine + 1)
+          document(Me.CurrentLine) &= nextLine
+          document.RemoveAt(Me.CurrentLine + 1)
+          Return
+        End If
+        Dim before = line.Substring(0, start)
+        Dim after = line.Substring(start + 1)
+        document(lineIndex) = before & after
+      End Sub
+
+      Private Sub HandleHome(document As ObservableCollection(Of String))
+        Me.CurrentCharacter = 0
+      End Sub
+
+      Private Sub HandleEnd(document As ObservableCollection(Of String))
+        Me.CurrentCharacter = document(Me.CurrentLine).Length
+      End Sub
+
+      Private Sub HandlePageUp(document As ObservableCollection(Of String))
+      End Sub
+
+      Private Sub HandlePageDown(document As ObservableCollection(Of String))
+      End Sub
+
+      Private Sub InsertLine(document As ObservableCollection(Of String))
+        Dim remainder = document(Me.CurrentLine).Substring(Me.CurrentCharacter)
+        document(Me.CurrentLine) = document(Me.CurrentLine).Substring(0, Me.CurrentCharacter)
+        Dim lineIndex = Me.CurrentLine + 1
+        document.Insert(lineIndex, remainder)
+        Me.CurrentCharacter = 0
+        Me.CurrentLine = lineIndex
+      End Sub
+
+      Private Sub HandleTab(document As ObservableCollection(Of String))
+        Const TAB_WIDTH As Integer = 2
+        Dim start = Me.CurrentCharacter
+        Dim remainingSpaces = TAB_WIDTH - start Mod TAB_WIDTH
+        Dim line = document(Me.CurrentLine)
+        document(Me.CurrentLine) = line.Insert(start, New String(" "c, remainingSpaces))
+        Me.CurrentCharacter += remainingSpaces
+      End Sub
+
+      Private Sub HandleTyping(document As ObservableCollection(Of String), text As String)
+        Dim lineIndex = Me.CurrentLine
+        Dim start = Me.CurrentCharacter
+        document(lineIndex) = document(lineIndex).Insert(start, text)
+        Me.CurrentCharacter += text.Length
+      End Sub
+
+    End Class
 
     Private NotInheritable Class SubmissionView
 
