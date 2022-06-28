@@ -66,8 +66,6 @@ return r", False)>
 return r", False)>
     <InlineData("let r = not false
 return r", True)>
-    <InlineData("let r = not false
-return r", True)>
     <InlineData("let r = true andalso true
 return r", True)>
     <InlineData("let r = false orelse false
