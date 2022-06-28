@@ -2,19 +2,28 @@
 
 [![.NET Desktop](https://github.com/DualBrain/bsharp/actions/workflows/dotnet-desktop.yml/badge.svg)](https://github.com/DualBrain/bsharp/actions/workflows/dotnet-desktop.yml)
 
+![B#](bsharp.png)
+
 I've had an idea for several years now to create what most people would consider an absolutely absurd project - but it's something that just hasn't exited my brain.  Additionally, over the years, ideas have been either *in my head* or as simple separate experiments to test a few ideas. All of that changes with this project.
 
-## Purpose?
+## Purpose
 
 The initial goal of the project is to recreate the *classic* BASIC experience but have this experience as a first-class citizen of .NET.  Once done, then move the project "forward" through time adding new features/capabilities without breaking this original *classic* experience.
 
 Additionally, this project will strive to remain true to the original spirit of BASIC; as defined by the original creators of the language:
 
-- (TODO - enter list here from a particular book after returning home.)
+1. It should be easy to learn for the beginner.
+2. It should be a general-purpose language, allowing the writing of any program.
+3. Advanced features have to be added so that, if there was a price, it was paid by the expert, not the novice.
+4. It should take full advantage of the fact that the user could interact with the computer.
+5. It should give error messages that are clear and friendly to the user.
+6. It should give fast response for small programs.
+7. No understanding of the hardware should be necessary.
+8. It should shield the user from the operating system.
 
 Finally, it has struck me as *odd* that given the power/capability of modern VB that such a project is written in a more evolved version of BASIC such as VB; the VB compiler, after all, is also written in VB... 
 
-## Plans?
+## Plan
 
 For now the rough list contains:
 
@@ -31,10 +40,4 @@ For now the rough list contains:
 
 ## Status
 
-The project is still very new and currently only has the lexer, parser, expression evaluator and a very few keywords implemented; in other words, not useful. However...
-
-- All math operations implemented.
-- Variable scope (for integer only) implemented.
-- Rough implementations of `If`/`Then`, `For/Next`, `While`/`Wend`, and `Select Case` completed.
-
-With that said, it's still not much more (visibly) than a "simple evaluator".
+See [Roadmap].
