@@ -36,7 +36,7 @@ Namespace Bsharp
       Console.WriteLine("(C) Copyright 2010-2022 Cory Smith")
       Console.WriteLine()
 
-      LoadSubmissions()
+      'LoadSubmissions()
 
     End Sub
 
@@ -44,14 +44,16 @@ Namespace Bsharp
 
       Dim tree As SyntaxTree
 
+      Dim text As String = Nothing
       If state Is Nothing Then
-        Dim text = String.Join(Environment.NewLine, lines)
+        text = String.Join(Environment.NewLine, lines)
         tree = SyntaxTree.Parse(text)
       Else
         tree = CType(state, SyntaxTree)
       End If
 
-      Dim lineSpan = tree.Text.Lines(lineIndex).Span
+      Dim line = tree.Text.Lines(lineIndex)
+      Dim lineSpan = line.Span
       Dim classifiedSpans = Classifier.Classify(tree, lineSpan)
 
       For Each classifiedSpan In classifiedSpans
@@ -64,8 +66,18 @@ Namespace Bsharp
           Case Classification.Number : Console.ForegroundColor = ConsoleColor.Cyan
           Case Classification.String : Console.ForegroundColor = ConsoleColor.Magenta
           Case Classification.Comment : Console.ForegroundColor = ConsoleColor.Green
-          Case Else : Console.ForegroundColor = ConsoleColor.White 'DarkGray
+          Case Else
+            Console.ForegroundColor = ConsoleColor.DarkGray
         End Select
+
+        If String.IsNullOrEmpty(classifiedText) Then
+          Dim length = classifiedSpan.Span.Length
+          If length = 0 Then
+            length = 1
+          End If
+          classifiedText = text?.Substring(classifiedSpan.Span.Start, length)
+          Console.ForegroundColor = ConsoleColor.Red
+        End If
 
         Console.Write(classifiedText)
         Console.ResetColor()
@@ -232,7 +244,7 @@ Namespace Bsharp
 
         m_previous = compilation
 
-        SaveSubmission(text)
+        'SaveSubmission(text)
 
       End If
 
