@@ -32,7 +32,7 @@ Namespace Bsharp
                                                              "run",
                                                              "system"}
 
-      Console.WriteLine("BASIC .NET (""B#"") ver 0.00.00")
+      Console.WriteLine("BASIC .NET (""B#"") ver 0.0.1-alpha.1")
       Console.WriteLine("(C) Copyright 2010-2022 Cory Smith")
       Console.WriteLine()
 

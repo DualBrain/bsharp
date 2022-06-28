@@ -8,6 +8,7 @@
     <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>bsharp_bsi.pfx</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>
+    <ApplicationIcon>b_sharp.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
