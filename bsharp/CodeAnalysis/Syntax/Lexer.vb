@@ -286,18 +286,29 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
     Private Sub ReadNumberToken()
 
-      While Char.IsDigit(Current)
+      Dim decimalCount = 0
+      While Char.IsDigit(Current) OrElse Current = "."c
+        If Current = "."c AndAlso decimalCount > 0 Then Exit While
         m_position += 1
       End While
       Dim length = m_position - m_start
       Dim text = m_text.ToString(m_start, length)
-      Dim value As Integer
-      If Not Integer.TryParse(text, value) Then
-        Dim location = New TextLocation(m_text, New TextSpan(m_start, length))
-        m_diagnostics.ReportInvalidNumber(location, text, TypeSymbol.Integer)
+      If text.Contains("."c) Then
+        Dim value As Single
+        If Not Single.TryParse(text, value) Then
+          Dim location = New TextLocation(m_text, New TextSpan(m_start, length))
+          m_diagnostics.ReportInvalidNumber(location, text, TypeSymbol.Single)
+        End If
+        m_value = value
+      Else
+        Dim value As Integer
+        If Not Integer.TryParse(text, value) Then
+          Dim location = New TextLocation(m_text, New TextSpan(m_start, length))
+          m_diagnostics.ReportInvalidNumber(location, text, TypeSymbol.Integer)
+        End If
+        m_value = value
       End If
 
-      m_value = value
       m_kind = SyntaxKind.NumberToken
 
     End Sub

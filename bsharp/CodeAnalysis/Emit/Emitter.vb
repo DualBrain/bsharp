@@ -56,7 +56,19 @@ Namespace Bsharp.CodeAnalysis.Emit
       Dim builtInTypes = New List(Of (typeSymbol As TypeSymbol, metadataName As String)) From {
         (TypeSymbol.Any, "System.Object"),
         (TypeSymbol.Boolean, "System.Boolean"),
-        (TypeSymbol.Integer, "System.Int32"),
+        (TypeSymbol.DateTime, "System.DateTime"),
+        (TypeSymbol.Char, "System.Char"),
+        (TypeSymbol.Decimal, "System.Decimal"),
+        (TypeSymbol.Double, "System.Double"),
+        (TypeSymbol.Single, "System.Single"),
+        (TypeSymbol.ULong64, "System.uInt64"),
+        (TypeSymbol.Long64, "System.Int64"),
+        (TypeSymbol.ULong, "System.UInt32"),
+        (TypeSymbol.Long, "System.Int32"),
+        (TypeSymbol.UInteger, "System.UInt16"),
+        (TypeSymbol.Integer, "System.Int16"),
+        (TypeSymbol.SByte, "System.SByte"),
+        (TypeSymbol.Byte, "System.Byte"),
         (TypeSymbol.String, "System.String"),
         (TypeSymbol.Nothing, "System.Void")
       }

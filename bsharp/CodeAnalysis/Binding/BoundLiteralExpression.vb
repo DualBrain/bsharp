@@ -6,11 +6,34 @@ Namespace Bsharp.CodeAnalysis.Binding
     Inherits BoundExpression
 
     Sub New(value As Object)
-      'Me.Value = value
-      If TypeOf value Is Boolean Then
-        Me.Type = TypeSymbol.Boolean
+      If TypeOf value Is Decimal Then
+        Me.Type = TypeSymbol.Decimal
+      ElseIf TypeOf value Is Double Then
+        Me.Type = TypeSymbol.Double
+      ElseIf TypeOf value Is Single Then
+        Me.Type = TypeSymbol.Single
+      ElseIf TypeOf value Is ULong Then
+        Me.Type = TypeSymbol.ULong64
+      ElseIf TypeOf value Is Long Then
+        Me.Type = TypeSymbol.Long64
+      ElseIf TypeOf value Is UInteger Then
+        Me.Type = TypeSymbol.ULong
       ElseIf TypeOf value Is Integer Then
+        Me.Type = TypeSymbol.Long
+      ElseIf TypeOf value Is UShort Then
+        Me.Type = TypeSymbol.UInteger
+      ElseIf TypeOf value Is Short Then
         Me.Type = TypeSymbol.Integer
+      ElseIf TypeOf value Is Char Then
+        Me.Type = TypeSymbol.Char
+      ElseIf TypeOf value Is SByte Then
+        Me.Type = TypeSymbol.SByte
+      ElseIf TypeOf value Is Byte Then
+        Me.Type = TypeSymbol.Byte
+      ElseIf TypeOf value Is Boolean Then
+        Me.Type = TypeSymbol.Boolean
+      ElseIf TypeOf value Is Date Then
+        Me.Type = TypeSymbol.DateTime
       ElseIf TypeOf value Is String Then
         Me.Type = TypeSymbol.String
       Else

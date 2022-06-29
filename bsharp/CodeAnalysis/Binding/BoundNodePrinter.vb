@@ -244,8 +244,22 @@ Namespace Bsharp.CodeAnalysis.Binding
       Dim value = node.Value.ToString()
       If node.Type Is TypeSymbol.Boolean Then
         writer.WriteKeyword(If(CBool(value), SyntaxKind.TrueKeyword, SyntaxKind.FalseKeyword))
-      ElseIf node.Type Is TypeSymbol.Integer Then
+      ElseIf node.Type Is TypeSymbol.Decimal OrElse
+             node.Type Is TypeSymbol.Double OrElse
+             node.Type Is TypeSymbol.Single OrElse
+             node.Type Is TypeSymbol.ULong64 OrElse
+             node.Type Is TypeSymbol.Long64 OrElse
+             node.Type Is TypeSymbol.ULong OrElse
+             node.Type Is TypeSymbol.Long OrElse
+             node.Type Is TypeSymbol.UInteger OrElse
+             node.Type Is TypeSymbol.Integer OrElse
+             node.Type Is TypeSymbol.SByte OrElse
+             node.Type Is TypeSymbol.Byte Then
         writer.WriteNumber(value)
+      ElseIf node.Type Is TypeSymbol.Char Then
+        'TODO: "A"c
+        value = """" & value.Replace("""", """""") & """"
+        writer.WriteString(value)
       ElseIf node.Type Is TypeSymbol.String Then
         value = """" & value.Replace("""", """""") & """"
         writer.WriteString(value)

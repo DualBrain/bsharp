@@ -803,16 +803,29 @@ Namespace Bsharp.CodeAnalysis.Binding
     End Function
 
     Private Shared Function LookupType(name As String) As TypeSymbol
-      Select Case name
+      Select Case name.ToLower
         Case "any" : Return TypeSymbol.Any
+        Case "object" : Return TypeSymbol.Object
+        Case "udt" : Return TypeSymbol.Udt
+        Case "datetime" : Return TypeSymbol.DateTime
         Case "boolean" : Return TypeSymbol.Boolean
+        Case "byte" : Return TypeSymbol.Byte
+        Case "SByte" : Return TypeSymbol.SByte
+        Case "char" : Return TypeSymbol.Char
+        Case "decimal" : Return TypeSymbol.Decimal
         Case "integer" : Return TypeSymbol.Integer
-        Case "string", "cstr", "cstr$" : Return TypeSymbol.String
+        Case "uinteger" : Return TypeSymbol.UInteger
+        Case "long" : Return TypeSymbol.Long
+        Case "ulong" : Return TypeSymbol.ULong
+        Case "long64" : Return TypeSymbol.Long64
+        Case "ulong64" : Return TypeSymbol.ULong64
+        Case "single" : Return TypeSymbol.Single
+        Case "double" : Return TypeSymbol.Double
+        Case "string" : Return TypeSymbol.String
         Case Else
           Return Nothing
       End Select
     End Function
-
   End Class
 
 End Namespace

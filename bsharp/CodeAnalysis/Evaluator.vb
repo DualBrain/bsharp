@@ -191,7 +191,12 @@ Namespace Bsharp.CodeAnalysis
           Console.Write(str)
         Else
           Dim value = EvaluateExpression(CType(entry, BoundExpression))
-          Dim str = CStr(value)
+          Dim str = ""
+          If TypeOf value Is BoundConstant Then
+            str = CStr(CType(value, BoundConstant).Value)
+          Else
+            str = CStr(value)
+          End If
           Console.Write(str)
           cr = True
         End If
@@ -288,61 +293,217 @@ Namespace Bsharp.CodeAnalysis
 
         Case BoundBinaryOperatorKind.Raise : Return CInt(left) ^ CInt(right)
 
-        Case BoundBinaryOperatorKind.Multiplication : Return CInt(left) * CInt(right)
-        Case BoundBinaryOperatorKind.Division : Return CInt(CInt(left) / CInt(right))
-        Case BoundBinaryOperatorKind.IntegerDivision : Return CInt(left) \ CInt(right)
-        Case BoundBinaryOperatorKind.ModOperation : Return CInt(left) Mod CInt(right)
+        Case BoundBinaryOperatorKind.Multiplication
+          Select Case TypeSymbol.TypeSymbolToType(node.Type)
+            Case TypeSymbol.Type.Decimal : Return New BoundConstant(CDec(left) * CDec(right))
+            Case TypeSymbol.Type.Double : Return New BoundConstant(CDbl(left) * CDbl(right))
+            Case TypeSymbol.Type.Single : Return New BoundConstant(CSng(left) * CSng(right))
+            Case TypeSymbol.Type.ULong64 : Return New BoundConstant(CULng(left) * CULng(right))
+            Case TypeSymbol.Type.Long64 : Return New BoundConstant(CLng(left) * CLng(right))
+            Case TypeSymbol.Type.ULong : Return New BoundConstant(CUInt(left) * CUInt(right))
+            Case TypeSymbol.Type.Long : Return New BoundConstant(CInt(left) * CInt(right))
+            Case TypeSymbol.Type.UInteger : Return New BoundConstant(CUShort(left) * CUShort(right))
+            Case TypeSymbol.Type.Integer : Return New BoundConstant(CShort(left) * CShort(right))
+            Case TypeSymbol.Type.SByte : Return New BoundConstant(CSByte(left) * CSByte(right))
+            Case TypeSymbol.Type.Byte : Return New BoundConstant(CByte(left) * CByte(right))
+          End Select
+
+        Case BoundBinaryOperatorKind.Division
+          Select Case TypeSymbol.TypeSymbolToType(node.Type)
+            Case TypeSymbol.Type.Decimal : Return New BoundConstant(CDec(CDec(left) / CDec(right)))
+            Case TypeSymbol.Type.Double : Return New BoundConstant(CDbl(CDbl(left) / CDbl(right)))
+            Case TypeSymbol.Type.Single : Return New BoundConstant(CSng(CSng(left) / CSng(right)))
+            Case TypeSymbol.Type.ULong64 : Return New BoundConstant(CULng(CULng(left) / CULng(right)))
+            Case TypeSymbol.Type.Long64 : Return New BoundConstant(CLng(CLng(left) / CLng(right)))
+            Case TypeSymbol.Type.ULong : Return New BoundConstant(CUInt(CUInt(left) / CUInt(right)))
+            Case TypeSymbol.Type.Long : Return New BoundConstant(CInt(CInt(left) / CInt(right)))
+            Case TypeSymbol.Type.UInteger : Return New BoundConstant(CUShort(CUShort(left) / CUShort(right)))
+            Case TypeSymbol.Type.Integer : Return New BoundConstant(CShort(CShort(left) / CShort(right)))
+            Case TypeSymbol.Type.SByte : Return New BoundConstant(CSByte(CSByte(left) / CSByte(right)))
+            Case TypeSymbol.Type.Byte : Return New BoundConstant(CByte(CByte(left) / CByte(right)))
+          End Select
+
+        Case BoundBinaryOperatorKind.IntegerDivision
+          Select Case TypeSymbol.TypeSymbolToType(node.Type)
+            Case TypeSymbol.Type.ULong64 : Return New BoundConstant(CULng(left) \ CULng(right))
+            Case TypeSymbol.Type.Long64 : Return New BoundConstant(CLng(left) \ CLng(right))
+            Case TypeSymbol.Type.ULong : Return New BoundConstant(CUInt(left) \ CUInt(right))
+            Case TypeSymbol.Type.Long : Return New BoundConstant(CInt(left) \ CInt(right))
+            Case TypeSymbol.Type.UInteger : Return New BoundConstant(CUShort(left) \ CUShort(right))
+            Case TypeSymbol.Type.Integer : Return New BoundConstant(CShort(left) \ CShort(right))
+            Case TypeSymbol.Type.SByte : Return New BoundConstant(CSByte(left) \ CSByte(right))
+            Case TypeSymbol.Type.Byte : Return New BoundConstant(CByte(left) \ CByte(right))
+          End Select
+
+        Case BoundBinaryOperatorKind.ModOperation
+          Select Case TypeSymbol.TypeSymbolToType(node.Type)
+            Case TypeSymbol.Type.Decimal : Return New BoundConstant(CDec(left) Mod CDec(right))
+            Case TypeSymbol.Type.Double : Return New BoundConstant(CDbl(left) Mod CDbl(right))
+            Case TypeSymbol.Type.Single : Return New BoundConstant(CSng(left) Mod CSng(right))
+            Case TypeSymbol.Type.ULong64 : Return New BoundConstant(CULng(left) Mod CULng(right))
+            Case TypeSymbol.Type.Long64 : Return New BoundConstant(CLng(left) Mod CLng(right))
+            Case TypeSymbol.Type.ULong : Return New BoundConstant(CUInt(left) Mod CUInt(right))
+            Case TypeSymbol.Type.Long : Return New BoundConstant(CInt(left) Mod CInt(right))
+            Case TypeSymbol.Type.UInteger : Return New BoundConstant(CUShort(left) Mod CUShort(right))
+            Case TypeSymbol.Type.Integer : Return New BoundConstant(CShort(left) Mod CShort(right))
+            Case TypeSymbol.Type.SByte : Return New BoundConstant(CSByte(left) Mod CSByte(right))
+            Case TypeSymbol.Type.Byte : Return New BoundConstant(CByte(left) Mod CByte(right))
+          End Select
+
         Case BoundBinaryOperatorKind.Addition
-          If node.Type Is TypeSymbol.String Then
-            Return CStr(left) + CStr(right)
-          ElseIf node.Type Is TypeSymbol.Integer Then
-            Return CInt(left) + CInt(right)
-          Else
-            Throw New Exception($"Unexpected binary operator {node.Op.Kind} type {node.Type}.")
-          End If
+          Select Case TypeSymbol.TypeSymbolToType(node.Type)
+            Case TypeSymbol.Type.Decimal : Return New BoundConstant(CDec(left) + CDec(right))
+            Case TypeSymbol.Type.Double : Return New BoundConstant(CDbl(left) + CDbl(right))
+            Case TypeSymbol.Type.Single : Return New BoundConstant(CSng(left) + CSng(right))
+            Case TypeSymbol.Type.ULong64 : Return New BoundConstant(CULng(left) + CULng(right))
+            Case TypeSymbol.Type.Long64 : Return New BoundConstant(CLng(left) + CLng(right))
+            Case TypeSymbol.Type.ULong : Return New BoundConstant(CUInt(left) + CUInt(right))
+            Case TypeSymbol.Type.Long : Return New BoundConstant(CInt(left) + CInt(right))
+            Case TypeSymbol.Type.UInteger : Return New BoundConstant(CUShort(left) + CUShort(right))
+            Case TypeSymbol.Type.Integer : Return New BoundConstant(CShort(left) + CShort(right))
+            Case TypeSymbol.Type.SByte : Return New BoundConstant(CSByte(left) + CSByte(right))
+            Case TypeSymbol.Type.Byte : Return New BoundConstant(CByte(left) + CByte(right))
+            Case TypeSymbol.Type.String : Return New BoundConstant(CStr(left) & CStr(right))
+          End Select
 
-        Case BoundBinaryOperatorKind.Subtraction : Return CInt(left) - CInt(right)
+        Case BoundBinaryOperatorKind.Subtraction
+          Select Case TypeSymbol.TypeSymbolToType(node.Type)
+            Case TypeSymbol.Type.Decimal : Return New BoundConstant(CDec(left) - CDec(right))
+            Case TypeSymbol.Type.Double : Return New BoundConstant(CDbl(left) - CDbl(right))
+            Case TypeSymbol.Type.Single : Return New BoundConstant(CSng(left) - CSng(right))
+            Case TypeSymbol.Type.ULong64 : Return New BoundConstant(CULng(left) - CULng(right))
+            Case TypeSymbol.Type.Long64 : Return New BoundConstant(CLng(left) - CLng(right))
+            Case TypeSymbol.Type.ULong : Return New BoundConstant(CUInt(left) - CUInt(right))
+            Case TypeSymbol.Type.Long : Return New BoundConstant(CInt(left) - CInt(right))
+            Case TypeSymbol.Type.UInteger : Return New BoundConstant(CUShort(left) - CUShort(right))
+            Case TypeSymbol.Type.Integer : Return New BoundConstant(CShort(left) - CShort(right))
+            Case TypeSymbol.Type.SByte : Return New BoundConstant(CSByte(left) - CSByte(right))
+            Case TypeSymbol.Type.Byte : Return New BoundConstant(CByte(left) - CByte(right))
+          End Select
 
-        Case BoundBinaryOperatorKind.Equal : Return Equals(left, right)
-        Case BoundBinaryOperatorKind.GreaterThan : Return CInt(left) > CInt(right)
-        Case BoundBinaryOperatorKind.GreaterThanEqual : Return CInt(left) >= CInt(right)
-        Case BoundBinaryOperatorKind.LessThan : Return CInt(left) < CInt(right)
-        Case BoundBinaryOperatorKind.LessThanEqual : Return CInt(left) <= CInt(right)
-        Case BoundBinaryOperatorKind.NotEqual : Return Not Equals(left, right)
+        Case BoundBinaryOperatorKind.Equal
+          Return Equals(left, right)
+        Case BoundBinaryOperatorKind.NotEqual
+          Return Not Equals(left, right)
 
-        Case BoundBinaryOperatorKind.LogicalAnd
-          If node.Type Is TypeSymbol.Boolean Then
-            Return CBool(left) And CBool(right)
-          ElseIf node.Type Is TypeSymbol.Integer Then
-            Return CInt(left) And CInt(right)
-          Else
-            Throw New Exception($"Unexpected binary operator {node.Op.Kind} type {node.Type}.")
-          End If
+        Case BoundBinaryOperatorKind.GreaterThan
+          Select Case TypeSymbol.TypeSymbolToType(node.Type)
+            Case TypeSymbol.Type.Decimal : Return New BoundConstant(CDec(left) > CDec(right))
+            Case TypeSymbol.Type.Double : Return New BoundConstant(CDbl(left) > CDbl(right))
+            Case TypeSymbol.Type.Single : Return New BoundConstant(CSng(left) > CSng(right))
+            Case TypeSymbol.Type.ULong64 : Return New BoundConstant(CULng(left) > CULng(right))
+            Case TypeSymbol.Type.Long64 : Return New BoundConstant(CLng(left) > CLng(right))
+            Case TypeSymbol.Type.ULong : Return New BoundConstant(CUInt(left) > CUInt(right))
+            Case TypeSymbol.Type.Long : Return New BoundConstant(CInt(left) > CInt(right))
+            Case TypeSymbol.Type.UInteger : Return New BoundConstant(CUShort(left) > CUShort(right))
+            Case TypeSymbol.Type.Integer : Return New BoundConstant(CShort(left) > CShort(right))
+            Case TypeSymbol.Type.SByte : Return New BoundConstant(CSByte(left) > CSByte(right))
+            Case TypeSymbol.Type.Byte : Return New BoundConstant(CByte(left) > CByte(right))
+            Case TypeSymbol.Type.String : Return New BoundConstant(CStr(left) > CStr(right))
+          End Select
 
-        Case BoundBinaryOperatorKind.BitwiseAnd
-          If node.Type Is TypeSymbol.Integer Then
-            Return CInt(left) And CInt(right)
-          Else
-            Return CBool(left) And CBool(right)
-          End If
-        Case BoundBinaryOperatorKind.LogicalAndAlso : Return CBool(left) AndAlso CBool(right)
-        Case BoundBinaryOperatorKind.LogicalOr : Return CBool(left) Or CBool(right)
-        Case BoundBinaryOperatorKind.BitwiseOr
-          If node.Type Is TypeSymbol.Integer Then
-            Return CInt(left) Or CInt(right)
-          Else
-            Return CBool(left) Or CBool(right)
-          End If
-        Case BoundBinaryOperatorKind.LogicalOrElse : Return CBool(left) OrElse CBool(right)
+        Case BoundBinaryOperatorKind.GreaterThanEqual
+          Select Case TypeSymbol.TypeSymbolToType(node.Type)
+            Case TypeSymbol.Type.Decimal : Return New BoundConstant(CDec(left) >= CDec(right))
+            Case TypeSymbol.Type.Double : Return New BoundConstant(CDbl(left) >= CDbl(right))
+            Case TypeSymbol.Type.Single : Return New BoundConstant(CSng(left) >= CSng(right))
+            Case TypeSymbol.Type.ULong64 : Return New BoundConstant(CULng(left) >= CULng(right))
+            Case TypeSymbol.Type.Long64 : Return New BoundConstant(CLng(left) >= CLng(right))
+            Case TypeSymbol.Type.ULong : Return New BoundConstant(CUInt(left) >= CUInt(right))
+            Case TypeSymbol.Type.Long : Return New BoundConstant(CInt(left) >= CInt(right))
+            Case TypeSymbol.Type.UInteger : Return New BoundConstant(CUShort(left) >= CUShort(right))
+            Case TypeSymbol.Type.Integer : Return New BoundConstant(CShort(left) >= CShort(right))
+            Case TypeSymbol.Type.SByte : Return New BoundConstant(CSByte(left) >= CSByte(right))
+            Case TypeSymbol.Type.Byte : Return New BoundConstant(CByte(left) >= CByte(right))
+            Case TypeSymbol.Type.String : Return New BoundConstant(CStr(left) >= CStr(right))
+          End Select
 
-        Case BoundBinaryOperatorKind.BitwiseXor : Return CInt(left) Xor CInt(right)
-        Case BoundBinaryOperatorKind.LogicalXor : Return CBool(left) Xor CBool(right)
+        Case BoundBinaryOperatorKind.LessThan
+          Select Case TypeSymbol.TypeSymbolToType(node.Type)
+            Case TypeSymbol.Type.Decimal : Return New BoundConstant(CDec(left) < CDec(right))
+            Case TypeSymbol.Type.Double : Return New BoundConstant(CDbl(left) < CDbl(right))
+            Case TypeSymbol.Type.Single : Return New BoundConstant(CSng(left) < CSng(right))
+            Case TypeSymbol.Type.ULong64 : Return New BoundConstant(CULng(left) < CULng(right))
+            Case TypeSymbol.Type.Long64 : Return New BoundConstant(CLng(left) < CLng(right))
+            Case TypeSymbol.Type.ULong : Return New BoundConstant(CUInt(left) < CUInt(right))
+            Case TypeSymbol.Type.Long : Return New BoundConstant(CInt(left) < CInt(right))
+            Case TypeSymbol.Type.UInteger : Return New BoundConstant(CUShort(left) < CUShort(right))
+            Case TypeSymbol.Type.Integer : Return New BoundConstant(CShort(left) < CShort(right))
+            Case TypeSymbol.Type.SByte : Return New BoundConstant(CSByte(left) < CSByte(right))
+            Case TypeSymbol.Type.Byte : Return New BoundConstant(CByte(left) < CByte(right))
+            Case TypeSymbol.Type.String : Return New BoundConstant(CStr(left) < CStr(right))
+          End Select
+
+        Case BoundBinaryOperatorKind.LessThanEqual
+          Select Case TypeSymbol.TypeSymbolToType(node.Type)
+            Case TypeSymbol.Type.Decimal : Return New BoundConstant(CDec(left) <= CDec(right))
+            Case TypeSymbol.Type.Double : Return New BoundConstant(CDbl(left) <= CDbl(right))
+            Case TypeSymbol.Type.Single : Return New BoundConstant(CSng(left) <= CSng(right))
+            Case TypeSymbol.Type.ULong64 : Return New BoundConstant(CULng(left) <= CULng(right))
+            Case TypeSymbol.Type.Long64 : Return New BoundConstant(CLng(left) <= CLng(right))
+            Case TypeSymbol.Type.ULong : Return New BoundConstant(CUInt(left) <= CUInt(right))
+            Case TypeSymbol.Type.Long : Return New BoundConstant(CInt(left) <= CInt(right))
+            Case TypeSymbol.Type.UInteger : Return New BoundConstant(CUShort(left) <= CUShort(right))
+            Case TypeSymbol.Type.Integer : Return New BoundConstant(CShort(left) <= CShort(right))
+            Case TypeSymbol.Type.SByte : Return New BoundConstant(CSByte(left) <= CSByte(right))
+            Case TypeSymbol.Type.Byte : Return New BoundConstant(CByte(left) <= CByte(right))
+            Case TypeSymbol.Type.String : Return New BoundConstant(CStr(left) <= CStr(right))
+          End Select
+
+        Case BoundBinaryOperatorKind.LogicalAnd, BoundBinaryOperatorKind.BitwiseAnd
+          Select Case TypeSymbol.TypeSymbolToType(node.Type)
+            Case TypeSymbol.Type.ULong64 : Return New BoundConstant(CULng(left) And CULng(right))
+            Case TypeSymbol.Type.Long64 : Return New BoundConstant(CLng(left) And CLng(right))
+            Case TypeSymbol.Type.ULong : Return New BoundConstant(CUInt(left) And CUInt(right))
+            Case TypeSymbol.Type.Long : Return New BoundConstant(CInt(left) And CInt(right))
+            Case TypeSymbol.Type.UInteger : Return New BoundConstant(CUShort(left) And CUShort(right))
+            Case TypeSymbol.Type.Integer : Return New BoundConstant(CShort(left) And CShort(right))
+            Case TypeSymbol.Type.SByte : Return New BoundConstant(CSByte(left) And CSByte(right))
+            Case TypeSymbol.Type.Byte : Return New BoundConstant(CByte(left) And CByte(right))
+            Case TypeSymbol.Type.Boolean : Return New BoundConstant(CBool(left) And CBool(right))
+          End Select
+
+        Case BoundBinaryOperatorKind.LogicalAndAlso
+          Return CBool(left) AndAlso CBool(right)
+
+        Case BoundBinaryOperatorKind.LogicalOr, BoundBinaryOperatorKind.BitwiseOr
+          Select Case TypeSymbol.TypeSymbolToType(node.Type)
+            Case TypeSymbol.Type.ULong64 : Return New BoundConstant(CULng(left) Or CULng(right))
+            Case TypeSymbol.Type.Long64 : Return New BoundConstant(CLng(left) Or CLng(right))
+            Case TypeSymbol.Type.ULong : Return New BoundConstant(CUInt(left) Or CUInt(right))
+            Case TypeSymbol.Type.Long : Return New BoundConstant(CInt(left) Or CInt(right))
+            Case TypeSymbol.Type.UInteger : Return New BoundConstant(CUShort(left) Or CUShort(right))
+            Case TypeSymbol.Type.Integer : Return New BoundConstant(CShort(left) Or CShort(right))
+            Case TypeSymbol.Type.SByte : Return New BoundConstant(CSByte(left) Or CSByte(right))
+            Case TypeSymbol.Type.Byte : Return New BoundConstant(CByte(left) Or CByte(right))
+            Case TypeSymbol.Type.Boolean : Return New BoundConstant(CBool(left) Or CBool(right))
+          End Select
+
+        Case BoundBinaryOperatorKind.LogicalOrElse
+          Return CBool(left) OrElse CBool(right)
+
+        Case BoundBinaryOperatorKind.LogicalXor, BoundBinaryOperatorKind.BitwiseXor
+          Select Case TypeSymbol.TypeSymbolToType(node.Type)
+            Case TypeSymbol.Type.ULong64 : Return New BoundConstant(CULng(left) Xor CULng(right))
+            Case TypeSymbol.Type.Long64 : Return New BoundConstant(CLng(left) Xor CLng(right))
+            Case TypeSymbol.Type.ULong : Return New BoundConstant(CUInt(left) Xor CUInt(right))
+            Case TypeSymbol.Type.Long : Return New BoundConstant(CInt(left) Xor CInt(right))
+            Case TypeSymbol.Type.UInteger : Return New BoundConstant(CUShort(left) Xor CUShort(right))
+            Case TypeSymbol.Type.Integer : Return New BoundConstant(CShort(left) Xor CShort(right))
+            Case TypeSymbol.Type.SByte : Return New BoundConstant(CSByte(left) Xor CSByte(right))
+            Case TypeSymbol.Type.Byte : Return New BoundConstant(CByte(left) Xor CByte(right))
+            Case TypeSymbol.Type.Boolean : Return New BoundConstant(CBool(left) Xor CBool(right))
+          End Select
+
         Case BoundBinaryOperatorKind.BitwiseEqv : Return CBool(left) = CBool(right)
         Case BoundBinaryOperatorKind.BitwiseImp : Return CBool(left) AndAlso Not CBool(right)
 
         Case Else
           Throw New Exception($"Unexpected binary operator {node.Op.Kind}")
       End Select
+
+      Throw New Exception($"Unexpected binary operator {node.Op.Kind} type {node.Type}.")
+
     End Function
 
     Private Function EvaluateCallExpression(node As BoundCallExpression) As Object
