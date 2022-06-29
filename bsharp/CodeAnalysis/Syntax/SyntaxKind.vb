@@ -46,6 +46,9 @@
     AndAlsoKeyword
     AndKeyword
     AsKeyword
+    BaseKeyword
+    ClearKeyword
+    ClsKeyword
     ConstKeyword
     ContinueKeyword
     DimKeyword
@@ -70,12 +73,15 @@
     ModKeyword
     NextKeyword
     NotKeyword
+    OptionKeyword
     OrElseKeyword
     OrKeyword
     PrintKeyword
     ReturnKeyword
     SpcKeyword
     StepKeyword
+    StopKeyword
+    SystemKeyword
     TabKeyword
     ThenKeyword
     ToKeyword
@@ -101,6 +107,8 @@
 
     ' Statements
     BlockStatement
+    ClearStatement
+    ClsStatement
     ContinueStatement
     DoUntilStatement
     DoWhileStatement
@@ -116,9 +124,12 @@
     LabelStatement
     LetStatement
     MultiLineIfBlock
+    OptionStatement
     PrintStatement
     ReturnStatement
     SingleLineIfStatement
+    StopStatement
+    SystemStatement
     VariableDeclarationStatement
     WhileStatement
 

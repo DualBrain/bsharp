@@ -95,11 +95,16 @@ Namespace Bsharp.CodeAnalysis.Binding
                  BoundNodeKind.ReturnStatement
               m_statements.Add(statement)
               StartBlock()
-            Case BoundNodeKind.EndStatement,
+            Case BoundNodeKind.ClearStatement,
+                 BoundNodeKind.ClsStatement,
+                 BoundNodeKind.EndStatement,
                  BoundNodeKind.ExpressionStatement,
                  BoundNodeKind.LetStatement,
                  BoundNodeKind.NopStatement,
+                 BoundNodeKind.OptionStatement,
                  BoundNodeKind.PrintStatement,
+                 BoundNodeKind.StopStatement,
+                 BoundNodeKind.SystemStatement,
                  BoundNodeKind.VariableDeclaration
               m_statements.Add(statement)
             Case Else
@@ -183,12 +188,17 @@ Namespace Bsharp.CodeAnalysis.Binding
                 Connect(current, elseBlock, elseCondition)
               Case BoundNodeKind.ReturnStatement
                 Connect(current, m_end)
-              Case BoundNodeKind.EndStatement,
+              Case BoundNodeKind.ClearStatement,
+                   BoundNodeKind.ClsStatement,
+                   BoundNodeKind.EndStatement,
                    BoundNodeKind.ExpressionStatement,
                    BoundNodeKind.LabelStatement,
                    BoundNodeKind.LetStatement,
                    BoundNodeKind.NopStatement,
+                   BoundNodeKind.OptionStatement,
                    BoundNodeKind.PrintStatement,
+                   BoundNodeKind.StopStatement,
+                   BoundNodeKind.SystemStatement,
                    BoundNodeKind.VariableDeclaration
                 If isLastStatementInBlock Then
                   Connect(current, [next])

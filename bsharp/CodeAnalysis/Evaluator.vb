@@ -57,6 +57,27 @@ Namespace Bsharp.CodeAnalysis
       While index < body.Statements.Length
         Dim s = body.Statements(index)
         Select Case s.Kind
+          Case BoundNodeKind.ClearStatement
+            index += 1
+          Case BoundNodeKind.ClsStatement
+            Dim cs = CType(s, BoundClsStatement)
+            Dim value = If(cs.Expression Is Nothing, 0, CInt(EvaluateExpression(cs.Expression)))
+            If value < 0 OrElse value > 2 Then
+              ' error condition
+              Console.WriteLine("CLS parameter out-of-range.")
+            Else
+              Select Case value
+                Case 0 ' Clears the screen of all text and graphics
+                  Console.Clear()
+                Case 1 ' Clears only the graphics viewport
+                  'TODO: Revisit after SCREEN, WIDTH, VIEW.
+                  Console.Clear()
+                Case 2 ' Clears only the text window
+                  'TODO: Revisit after SCREEN, WIDTH, VIEW.
+                  Console.Clear()
+              End Select
+            End If
+            index += 1
           Case BoundNodeKind.ConditionalGotoStatement
             Dim cgs = CType(s, BoundConditionalGotoStatement)
             Dim condition = CBool(EvaluateExpression(cgs.Condition))
@@ -86,11 +107,23 @@ Namespace Bsharp.CodeAnalysis
           Case BoundNodeKind.LabelStatement : index += 1
           Case BoundNodeKind.NopStatement : index += 1
           Case BoundNodeKind.LetStatement : EvaluateLetStatement(CType(s, BoundLetStatement)) : index += 1
+          Case BoundNodeKind.OptionStatement
+            'TODO: Need to handle with Arrays.
+            'TODO: Also need to track that no other invalid
+            '      statements have executed (pretty much all
+            '      other statements are *invalid* in this
+            '      context.)
+            index += 1
           Case BoundNodeKind.PrintStatement : EvaluatePrintStatement(CType(s, BoundPrintStatement)) : index += 1
           Case BoundNodeKind.ReturnStatement
             Dim rs = CType(s, BoundReturnStatement)
             m_lastValue = If(rs.Expression Is Nothing, Nothing, EvaluateExpression(rs.Expression))
             Return m_lastValue
+          Case BoundNodeKind.StopStatement
+            index = body.Statements.Length
+          Case BoundNodeKind.SystemStatement
+            index = body.Statements.Length
+            m_lastValue = UInt64.MaxValue
           Case BoundNodeKind.VariableDeclaration : EvaluateVariableDeclaration(CType(s, BoundVariableDeclaration)) : index += 1
           Case Else
             Throw New Exception($"Unexpected kind {s.Kind}")

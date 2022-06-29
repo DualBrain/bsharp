@@ -1,6 +1,4 @@
-﻿
-
-General steps to add something:
+﻿General steps to add a new keyword/statement/etc.:
 
 - Start with the SyntaxFacts.
   - Need a new SyntaxKind.
@@ -14,6 +12,9 @@ General steps to add something:
   - If a statement, BindStatement...
     - Create "Bind____Statement" method.
       - Handle the Binding (from Syntax); will will most likely mean creating a new Bound___Expression class.
+- Handle in BoundTreeRewriter...
+- Handle in ControlFlowGraph.BasicBlockBuilder.Build...
+- Handle in ControlFlowGraph.GraphBuilder.Build...
 - Now we need to update the Evaluator.
   - EvaluateStatement...
     - Evaluate___Statement

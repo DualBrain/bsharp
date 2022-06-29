@@ -23,14 +23,12 @@ Namespace Bsharp
 
     Sub New()
 
-      MyBase.m_immediateCommands = New List(Of String) From {"cls",
-                                                             "edit",
+      MyBase.m_immediateCommands = New List(Of String) From {"edit",
                                                              "list",
                                                              "load",
                                                              "new",
                                                              "quit",
-                                                             "run",
-                                                             "system"}
+                                                             "run"}
 
       Console.WriteLine("BASIC .NET (""B#"") ver 0.0.1-alpha.1")
       Console.WriteLine("(C) Copyright 2010-2022 Cory Smith")
@@ -60,14 +58,16 @@ Namespace Bsharp
 
         Dim classifiedText = tree.Text.ToString(classifiedSpan.Span)
 
+        'Console.BackgroundColor = ConsoleColor.DarkGray
         Select Case classifiedSpan.Classification
+          Case Classification.Text : Console.ForegroundColor = ConsoleColor.White ': Console.BackgroundColor = ConsoleColor.Green
           Case Classification.Keyword : Console.ForegroundColor = ConsoleColor.Blue
           Case Classification.Identifier : Console.ForegroundColor = ConsoleColor.DarkYellow
           Case Classification.Number : Console.ForegroundColor = ConsoleColor.Cyan
           Case Classification.String : Console.ForegroundColor = ConsoleColor.Magenta
           Case Classification.Comment : Console.ForegroundColor = ConsoleColor.Green
           Case Else
-            Console.ForegroundColor = ConsoleColor.DarkGray
+            Console.ForegroundColor = ConsoleColor.White
         End Select
 
         If String.IsNullOrEmpty(classifiedText) Then
@@ -88,10 +88,10 @@ Namespace Bsharp
 
     End Function
 
-    <MetaCommand("cls", "Clears the screen")>
-    Protected Shared Sub EvaluateCls()
-      Console.Clear()
-    End Sub
+    '<MetaCommand("cls", "Clears the screen")>
+    'Protected Shared Sub EvaluateCls()
+    '  Console.Clear()
+    'End Sub
 
     <MetaCommand("edit", "Toggle 'edit' mode.")>
     Protected Sub EvaluateEdit()
@@ -139,10 +139,10 @@ Namespace Bsharp
       EvaluateSubmission(text)
     End Sub
 
-    <MetaCommand("system", "Exits the REPL")>
-    Protected Shared Sub EvaluateSystem()
-      Environment.Exit(0)
-    End Sub
+    '<MetaCommand("system", "Exits the REPL")>
+    'Protected Shared Sub EvaluateSystem()
+    '  Environment.Exit(0)
+    'End Sub
 
     <MetaCommand("toggleparsetree", "Toggles the parse tree")>
     Protected Sub EvaluateShowTree()
@@ -231,6 +231,10 @@ Namespace Bsharp
       Console.Out.WriteDiagnostics(result.Diagnostics)
 
       If Not result.Diagnostics.HasErrors Then
+
+        If TypeOf result.Value Is UInt64 Then
+          Environment.Exit(0)
+        End If
 
         ' The expression evaluator will return a 
         ' result of some sort, the below code will

@@ -280,6 +280,8 @@ Namespace Bsharp.CodeAnalysis.Binding
     Private Function BindStatementInternal(syntax As StatementSyntax, Optional isGlobal As Boolean = False) As BoundStatement
       Select Case syntax.Kind
         Case SyntaxKind.BlockStatement : Return BindBlockStatement(CType(syntax, BlockStatementSyntax))
+        Case SyntaxKind.ClearStatement : Return BindClearStatement(CType(syntax, ClearStatementSyntax))
+        Case SyntaxKind.ClsStatement : Return BindClsStatement(CType(syntax, ClsStatementSyntax))
         Case SyntaxKind.ContinueStatement : Return BindContinueStatement(CType(syntax, ContinueStatementSyntax))
         Case SyntaxKind.DoUntilStatement : Return BindDoUntilStatement(CType(syntax, DoUntilStatementSyntax))
         Case SyntaxKind.DoWhileStatement : Return BindDoWhileStatement(CType(syntax, DoWhileStatementSyntax))
@@ -291,9 +293,12 @@ Namespace Bsharp.CodeAnalysis.Binding
         Case SyntaxKind.IfStatement : Return BindIfStatement(CType(syntax, IfStatementSyntax))
         Case SyntaxKind.LabelStatement : Return BindLabelStatement(CType(syntax, LabelStatementSyntax))
         Case SyntaxKind.LetStatement : Return BindLetStatement(CType(syntax, LetStatementSyntax))
+        Case SyntaxKind.OptionStatement : Return BindOptionStatement(CType(syntax, OptionStatementSyntax))
         Case SyntaxKind.PrintStatement : Return BindPrintStatement(CType(syntax, PrintStatementSyntax))
         Case SyntaxKind.ReturnStatement : Return BindReturnStatement(CType(syntax, ReturnStatementSyntax))
         Case SyntaxKind.SingleLineIfStatement : Return BindSingleLineIfStatement(CType(syntax, SingleLineIfStatementSyntax))
+        Case SyntaxKind.StopStatement : Return BindStopStatement(CType(syntax, StopStatementSyntax))
+        Case SyntaxKind.SystemStatement : Return BindSystemStatement(CType(syntax, SystemStatementSyntax))
         Case SyntaxKind.VariableDeclarationStatement : Return BindVariableDeclaration(CType(syntax, VariableDeclarationSyntax))
         Case SyntaxKind.WhileStatement : Return BindWhileStatement(CType(syntax, WhileStatementSyntax))
         Case Else
@@ -416,6 +421,17 @@ Namespace Bsharp.CodeAnalysis.Binding
 
       Return New BoundCallExpression(func, boundArguments.ToImmutable())
 
+    End Function
+
+    Private Function BindClearStatement(syntax As ClearStatementSyntax) As BoundStatement
+      Dim maxBytesExpression = If(syntax.MaxBytesExpression IsNot Nothing, BindExpression(syntax.MaxBytesExpression), Nothing)
+      Dim stackSpaceExpression = If(syntax.StackSpaceExpression IsNot Nothing, BindExpression(syntax.StackSpaceExpression), Nothing)
+      Return New BoundClearStatement(maxBytesExpression, stackSpaceExpression)
+    End Function
+
+    Private Function BindClsStatement(syntax As ClsStatementSyntax) As BoundStatement
+      Dim expression = If(syntax.Expression IsNot Nothing, BindExpression(syntax.Expression), Nothing)
+      Return New BoundClsStatement(expression)
     End Function
 
     Private Function BindContinueStatement(syntax As ContinueStatementSyntax) As BoundStatement
@@ -617,6 +633,11 @@ Namespace Bsharp.CodeAnalysis.Binding
       Return BindExpression(syntax.Expression)
     End Function
 
+    Private Function BindOptionStatement(syntax As OptionStatementSyntax) As BoundStatement
+      Dim numberToken = syntax.NumberToken
+      Return New BoundOptionStatement(CInt(numberToken.Text))
+    End Function
+
     Private Function BindPrintStatement(syntax As PrintStatementSyntax) As BoundStatement
 
       Dim nodes = New List(Of BoundNode)
@@ -691,6 +712,14 @@ Namespace Bsharp.CodeAnalysis.Binding
       Dim elseStatement = If(syntax.ElseClause IsNot Nothing, BindStatement(syntax.ElseClause.Statements), Nothing)
       Return New BoundIfStatement(condition, statements, elseStatement)
 
+    End Function
+
+    Private Function BindStopStatement(syntax As StopStatementSyntax) As BoundStatement
+      Return New BoundStopStatement()
+    End Function
+
+    Private Function BindSystemStatement(syntax As SystemStatementSyntax) As BoundStatement
+      Return New BoundSystemStatement()
     End Function
 
     Private Function BindVariableDeclaration(syntax As VariableDeclarationSyntax) As BoundStatement

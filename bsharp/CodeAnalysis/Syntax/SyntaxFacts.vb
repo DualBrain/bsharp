@@ -82,6 +82,9 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case "and" : Return SyntaxKind.AndKeyword
         Case "andalso" : Return SyntaxKind.AndAlsoKeyword
         Case "as" : Return SyntaxKind.AsKeyword
+        Case "base" : Return SyntaxKind.BaseKeyword
+        Case "clear" : Return SyntaxKind.ClearKeyword
+        Case "cls" : Return SyntaxKind.ClsKeyword
         Case "const" : Return SyntaxKind.ConstKeyword
         Case "continue" : Return SyntaxKind.ContinueKeyword
         Case "dim" : Return SyntaxKind.DimKeyword
@@ -106,12 +109,15 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case "mod" : Return SyntaxKind.ModKeyword
         Case "next" : Return SyntaxKind.NextKeyword
         Case "not" : Return SyntaxKind.NotKeyword
+        Case "option" : Return SyntaxKind.OptionKeyword
         Case "or" : Return SyntaxKind.OrKeyword
         Case "orelse" : Return SyntaxKind.OrElseKeyword
         Case "print" : Return SyntaxKind.PrintKeyword
         Case "return" : Return SyntaxKind.ReturnKeyword
         Case "spc" : Return SyntaxKind.SpcKeyword
         Case "step" : Return SyntaxKind.StepKeyword
+        Case "stop" : Return SyntaxKind.StopKeyword
+        Case "system" : Return SyntaxKind.SystemKeyword
         Case "tab" : Return SyntaxKind.TabKeyword
         Case "then" : Return SyntaxKind.ThenKeyword
         Case "to" : Return SyntaxKind.ToKeyword
@@ -134,6 +140,9 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case SyntaxKind.AndKeyword : Return "And"
         Case SyntaxKind.AndAlsoKeyword : Return "AndAlso"
         Case SyntaxKind.AsKeyword : Return "As"
+        Case SyntaxKind.BaseKeyword : Return "Base"
+        Case SyntaxKind.ClearKeyword : Return "Clear"
+        Case SyntaxKind.ClsKeyword : Return "Cls"
         Case SyntaxKind.ConstKeyword : Return "Const"
         Case SyntaxKind.ContinueKeyword : Return "Continue"
         Case SyntaxKind.DimKeyword : Return "Dim"
@@ -158,12 +167,15 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case SyntaxKind.ModKeyword : Return "Mod"
         Case SyntaxKind.NextKeyword : Return "Next"
         Case SyntaxKind.NotKeyword : Return "Not"
+        Case SyntaxKind.OptionKeyword : Return "Option"
         Case SyntaxKind.OrKeyword : Return "Or"
         Case SyntaxKind.OrElseKeyword : Return "OrElse"
         Case SyntaxKind.PrintKeyword : Return "Print"
         Case SyntaxKind.ReturnKeyword : Return "Return"
         Case SyntaxKind.SpcKeyword : Return "Spc"
         Case SyntaxKind.StepKeyword : Return "Step"
+        Case SyntaxKind.StopKeyword : Return "Stop"
+        Case SyntaxKind.SystemKeyword : Return "System"
         Case SyntaxKind.TabKeyword : Return "Tab"
         Case SyntaxKind.ThenKeyword : Return "Then"
         Case SyntaxKind.ToKeyword : Return "To"

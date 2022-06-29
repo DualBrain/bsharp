@@ -10,6 +10,8 @@
 
     ' Statements
     BlockStatement
+    ClearStatement
+    ClsStatement
     ConditionalGotoStatement
     DoUntilStatement
     DoWhileStatement
@@ -22,8 +24,11 @@
     LabelStatement
     LetStatement
     NopStatement
+    OptionStatement
     PrintStatement
     ReturnStatement
+    StopStatement
+    SystemStatement
     VariableDeclaration
     WhileStatement
 

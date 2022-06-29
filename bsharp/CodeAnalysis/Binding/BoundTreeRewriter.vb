@@ -7,6 +7,8 @@ Namespace Bsharp.CodeAnalysis.Binding
     Public Overridable Function RewriteStatement(node As BoundStatement) As BoundStatement
       Select Case node.Kind
         Case BoundNodeKind.BlockStatement : Return RewriteBlockStatement(DirectCast(node, BoundBlockStatement))
+        Case BoundNodeKind.ClearStatement : Return RewriteClearStatement(DirectCast(node, BoundClearStatement))
+        Case BoundNodeKind.ClsStatement : Return RewriteClsStatement(DirectCast(node, BoundClsStatement))
         Case BoundNodeKind.ConditionalGotoStatement : Return RewriteConditionalGotoStatement(DirectCast(node, BoundConditionalGotoStatement))
         Case BoundNodeKind.DoUntilStatement : Return RewriteDoUntilStatement(DirectCast(node, BoundDoUntilStatement))
         Case BoundNodeKind.DoWhileStatement : Return RewriteDoWhileStatement(DirectCast(node, BoundDoWhileStatement))
@@ -18,8 +20,11 @@ Namespace Bsharp.CodeAnalysis.Binding
         Case BoundNodeKind.LabelStatement : Return RewriteLabelStatement(DirectCast(node, BoundLabelStatement))
         Case BoundNodeKind.LetStatement : Return RewriteLetStatement(DirectCast(node, BoundLetStatement))
         Case BoundNodeKind.NopStatement : Return RewriteNopStatement(DirectCast(node, BoundNopStatement))
+        Case BoundNodeKind.OptionStatement : Return RewriteOptionStatement(DirectCast(node, BoundOptionStatement))
         Case BoundNodeKind.PrintStatement : Return RewritePrintStatement(DirectCast(node, BoundPrintStatement))
         Case BoundNodeKind.ReturnStatement : Return RewriteReturnStatement(DirectCast(node, BoundReturnStatement))
+        Case BoundNodeKind.StopStatement : Return RewriteStopStatement(DirectCast(node, BoundStopStatement))
+        Case BoundNodeKind.SystemStatement : Return RewriteSystemStatement(DirectCast(node, BoundSystemStatement))
         Case BoundNodeKind.VariableDeclaration : Return RewriteVariableDeclaration(DirectCast(node, BoundVariableDeclaration))
         Case BoundNodeKind.WhileStatement : Return RewriteWhileStatement(DirectCast(node, BoundWhileStatement))
         Case Else
@@ -86,6 +91,26 @@ Namespace Bsharp.CodeAnalysis.Binding
         Return node
       End If
       Return New BoundBlockStatement(builder.MoveToImmutable)
+    End Function
+
+    Protected Overridable Function RewriteClearStatement(node As BoundClearStatement) As BoundStatement
+      Return node
+    End Function
+
+    Protected Overridable Function RewriteClsStatement(node As BoundClsStatement) As BoundStatement
+      Return node
+    End Function
+
+    Protected Overridable Function RewriteStopStatement(node As BoundStopStatement) As BoundStatement
+      Return node
+    End Function
+
+    Protected Overridable Function RewriteSystemStatement(node As BoundSystemStatement) As BoundStatement
+      Return node
+    End Function
+
+    Protected Overridable Function RewriteOptionStatement(node As BoundOptionStatement) As BoundStatement
+      Return node
     End Function
 
     Protected Overridable Function RewritePrintStatement(node As BoundPrintStatement) As BoundStatement

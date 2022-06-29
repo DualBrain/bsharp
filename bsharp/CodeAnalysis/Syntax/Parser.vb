@@ -119,6 +119,8 @@ Namespace Bsharp.CodeAnalysis.Syntax
     Private Function ParseStatement() As StatementSyntax
 
       Select Case Current.Kind
+        Case SyntaxKind.ClearKeyword : Return ParseClearStatement()
+        Case SyntaxKind.ClsKeyword : Return ParseClsStatement()
         Case SyntaxKind.ConstKeyword : Return ParseVariableDeclaration()
         Case SyntaxKind.ContinueKeyword : Return ParseContinueStatement()
         Case SyntaxKind.DimKeyword : Return ParseVariableDeclaration()
@@ -132,7 +134,10 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case SyntaxKind.LetKeyword : Return ParseLetStatement()
         Case SyntaxKind.PrintKeyword : Return ParsePrintStatement()
         Case SyntaxKind.OpenBraceToken : Return ParseBlockStatement()
+        Case SyntaxKind.OptionKeyword : Return ParseOptionStatement()
         Case SyntaxKind.ReturnKeyword : Return ParseReturnStatement()
+        Case SyntaxKind.StopKeyword : Return ParseStopStatement()
+        Case SyntaxKind.SystemKeyword : Return ParseSystemStatement()
         Case SyntaxKind.WhileKeyword : Return ParseWhileStatement()
         Case Else
           If Peek(0).Kind = SyntaxKind.IdentifierToken AndAlso
@@ -150,6 +155,75 @@ Namespace Bsharp.CodeAnalysis.Syntax
           Return ParseExpressionStatement()
 
       End Select
+
+    End Function
+
+    Private Function ParseClearStatement() As StatementSyntax
+
+      ' CLEAR[,[expression1][,expression2]]
+
+      Dim clearKeyword = MatchToken(SyntaxKind.ClearKeyword)
+      Dim maxBytesCommaToken As SyntaxToken = Nothing
+      Dim stackSpaceCommaToken As SyntaxToken = Nothing
+      Dim maxBytesExpression As ExpressionSyntax = Nothing
+      Dim stackSpaceExpression As ExpressionSyntax = Nothing
+      If Current.Kind = SyntaxKind.CommaToken Then
+        maxBytesCommaToken = MatchToken(SyntaxKind.CommaToken)
+      End If
+      If maxBytesCommaToken IsNot Nothing Then
+        If IsPossibleExpression() Then
+          maxBytesExpression = ParseExpression()
+        End If
+        If Current.Kind = SyntaxKind.CommaToken Then
+          stackSpaceCommaToken = MatchToken(SyntaxKind.CommaToken)
+          stackSpaceExpression = ParseExpression()
+        End If
+      End If
+      Return New ClearStatementSyntax(m_syntaxTree, clearKeyword, maxBytesCommaToken, maxBytesExpression, stackSpaceCommaToken, stackSpaceExpression)
+
+    End Function
+
+    Private Function IsPossibleExpression() As Boolean
+      ' 1
+      ' 1 + 1
+      ' 1 + a
+      ' a
+      ' a + a
+      ' a + 1
+      ' (a)
+      ' (1)
+      ' int(value)
+      Return Current.Kind = SyntaxKind.NumberToken OrElse
+             Current.Kind = SyntaxKind.IdentifierToken OrElse
+             Current.Kind = SyntaxKind.OpenParenToken OrElse
+             Current.Kind.Is_Keyword
+    End Function
+
+    Private Function ParseClsStatement() As StatementSyntax
+
+      ' CLS [*expression*]
+
+      Dim clsKeyword = MatchToken(SyntaxKind.ClsKeyword)
+      Dim expression As ExpressionSyntax = Nothing
+      If IsPossibleExpression() Then
+        expression = ParseExpression()
+      End If
+      Return New ClsStatementSyntax(m_syntaxTree, clsKeyword, expression)
+
+    End Function
+
+    Private Function ParseOptionStatement() As StatementSyntax
+
+      ' OPTION BASE {0|1}
+
+      Dim optionKeyword = MatchToken(SyntaxKind.OptionKeyword)
+      Dim baseKeyword = MatchToken(SyntaxKind.BaseKeyword)
+      If Not (Current.Kind = SyntaxKind.NumberToken AndAlso
+              (Current.Text = "0" OrElse Current.Text = "1")) Then
+        m_diagnostics.ReportUnexpectedToken(Current.Location, Current.Kind, SyntaxKind.NumberToken)
+      End If
+      Dim numberToken = MatchToken(SyntaxKind.NumberToken)
+      Return New OptionStatementSyntax(m_syntaxTree, optionKeyword, baseKeyword, numberToken)
 
     End Function
 
@@ -543,6 +617,24 @@ Namespace Bsharp.CodeAnalysis.Syntax
                                         array,
                                         statements,
                                         nextKeyword)
+    End Function
+
+    Private Function ParseStopStatement() As StatementSyntax
+
+      ' STOP
+
+      Dim stopKeyword = MatchToken(SyntaxKind.StopKeyword)
+      Return New StopStatementSyntax(m_syntaxTree, stopKeyword)
+
+    End Function
+
+    Private Function ParseSystemStatement() As StatementSyntax
+
+      ' SYSTEM
+
+      Dim systemKeyword = MatchToken(SyntaxKind.SystemKeyword)
+      Return New SystemStatementSyntax(m_syntaxTree, systemKeyword)
+
     End Function
 
     Private Function ParseWhileStatement() As StatementSyntax
