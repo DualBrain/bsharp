@@ -50,10 +50,57 @@ Namespace Bsharp.CodeAnalysis.Binding
 
       Dim globalStatements = syntaxTrees.SelectMany(Function(st) st.Root.Members).OfType(Of GlobalStatementSyntax)
 
+      ' Determine if any GOTO or GOSUB statements target a numeric value (Line Number).
+      Dim targetLineNumbers As New List(Of Integer)
+      For Each statement In globalStatements
+        If TypeOf statement.Statement Is GotoStatementSyntax Then
+          Dim g = CType(statement.Statement, GotoStatementSyntax)
+          If IsNumeric(g.IdentifierToken.Text) Then
+            ' Target is a line number?
+            Dim value = CInt(g.IdentifierToken.Text)
+            If Not targetLineNumbers.Contains(value) Then
+              targetLineNumbers.Add(value)
+            End If
+          End If
+          'ElseIf TypeOf statement.Statement Is GosubStatementSyntax Then
+          '  Dim g = CType(statement.Statement, GosubStatementSyntax)
+          '  If IsNumeric(g.IdentifierToken.Text) Then
+          '    ' Target is a line number?
+          '    Dim value = CInt(g.IdentifierToken.Text)
+          '    If Not targetLineNumbers.Contains(value) Then
+          '      targetLineNumbers.Add(value)
+          '    End If
+          '  End If
+        End If
+      Next
+
       Dim statements = ImmutableArray.CreateBuilder(Of BoundStatement)
       For Each globalStatement In globalStatements
+
+        'TODO: Need to figure out a way to significantly improve the following code.
+        For Each child In globalStatement.Statement.GetChildren
+          If child.Kind.Is_Keyword Then
+            Dim token = TryCast(child, SyntaxToken)
+            If token IsNot Nothing Then
+              For Each trivia In token.LeadingTrivia
+                If trivia.Kind = SyntaxKind.LineNumberTrivia Then
+                  Dim value = CInt(trivia.Text)
+                  If targetLineNumbers.Contains(value) Then
+                    ' matching target
+                    'TODO: Need to transform the LineNumberTrivia into a numbered Label.
+                    Dim label = New SyntaxToken(globalStatement.SyntaxTree, SyntaxKind.LabelStatement, token.Position, $"GotoLabel{value}:", Nothing, ImmutableArray(Of SyntaxTrivia).Empty, ImmutableArray(Of SyntaxTrivia).Empty)
+                    Dim stmt = New LabelStatementSyntax(globalStatement.SyntaxTree, label)
+                    statements.Add(binder.BindGlobalStatement(stmt))
+                  End If
+                End If
+              Next
+            End If
+          End If
+        Next
+
         Dim statement = binder.BindGlobalStatement(globalStatement.Statement)
         statements.Add(statement)
+
       Next
 
       ' Check global statements.
@@ -529,7 +576,11 @@ Namespace Bsharp.CodeAnalysis.Binding
     End Function
 
     Private Function BindGotoStatement(syntax As GotoStatementSyntax) As BoundStatement
-      Dim label = New BoundLabel(syntax.IdentifierToken.Text)
+      Dim value = syntax.IdentifierToken.Text
+      If IsNumeric(value) Then
+        value = $"GotoLabel{value}"
+      End If
+      Dim label = New BoundLabel(value)
       Return New BoundGotoStatement(label)
     End Function
 
