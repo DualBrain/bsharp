@@ -27,7 +27,7 @@ Namespace Bsharp.CodeAnalysis.Binding
       Dim leftConstant = left.ConstantValue
       Dim rightConstant = right.ConstantValue
 
-      ' Special case && and || because there are cases where only need one side needs to be known.
+      ' Special case `And` and `Or` because there are cases where only need one side needs to be known.
 
       If op.Kind = BoundBinaryOperatorKind.LogicalAnd Then
         If (leftConstant IsNot Nothing AndAlso Not CBool(leftConstant.Value)) OrElse
