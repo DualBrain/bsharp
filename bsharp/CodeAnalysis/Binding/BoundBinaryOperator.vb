@@ -290,7 +290,7 @@ Namespace Bsharp.CodeAnalysis.Binding
         Dim leftIndex = 0
         For leftIndex = 0 To list.Count - 1
           Dim leftSide = list(leftIndex)
-          m_operators.Add(New BoundBinaryOperator(token, operation, TypeSymbol.Boolean))
+          m_operators.Add(New BoundBinaryOperator(token, operation, leftSide, TypeSymbol.Boolean))
           For rightIndex = leftIndex + 1 To list.Count - 1
             Dim rightSide = list(rightIndex)
             m_operators.Add(New BoundBinaryOperator(token, operation, leftSide, rightSide, TypeSymbol.Boolean))
@@ -321,7 +321,7 @@ Namespace Bsharp.CodeAnalysis.Binding
         Dim leftIndex = 0
         For leftIndex = 0 To list.Count - 1
           Dim leftSide = list(leftIndex)
-          m_operators.Add(New BoundBinaryOperator(token, operation, TypeSymbol.Boolean))
+          m_operators.Add(New BoundBinaryOperator(token, operation, leftSide, TypeSymbol.Boolean))
           For rightIndex = leftIndex + 1 To list.Count - 1
             Dim rightSide = list(rightIndex)
             m_operators.Add(New BoundBinaryOperator(token, operation, leftSide, rightSide, TypeSymbol.Boolean))
@@ -409,7 +409,9 @@ Namespace Bsharp.CodeAnalysis.Binding
 
     Public Shared Function Bind(SyntaxKind As SyntaxKind, leftType As TypeSymbol, rightType As TypeSymbol) As BoundBinaryOperator
 
-      Initialize()
+      If m_operators.Count = 0 Then
+        Initialize()
+      End If
 
       For Each op In m_operators
         If op.SyntaxKind = SyntaxKind AndAlso op.LeftType Is leftType AndAlso op.RightType Is rightType Then

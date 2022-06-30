@@ -511,13 +511,13 @@ Namespace Bsharp.CodeAnalysis.Binding
 
     Private Function BindForStatement(syntax As ForStatementSyntax) As BoundStatement
 
-      Dim lowerBound = BindExpression(syntax.StartValue, TypeSymbol.Integer)
-      Dim upperBound = BindExpression(syntax.EndValue, TypeSymbol.Integer)
-      Dim stepper = If(syntax.Increment Is Nothing, Nothing, BindExpression(syntax.Increment, TypeSymbol.Integer))
+      Dim lowerBound = BindExpression(syntax.StartValue, TypeSymbol.Long)
+      Dim upperBound = BindExpression(syntax.EndValue, TypeSymbol.Long)
+      Dim stepper = If(syntax.Increment Is Nothing, Nothing, BindExpression(syntax.Increment, TypeSymbol.Long))
 
       m_scope = New BoundScope(m_scope)
 
-      Dim variable = BindVariableDeclaration(syntax.Identifier, True, TypeSymbol.Integer)
+      Dim variable = BindVariableDeclaration(syntax.Identifier, True, TypeSymbol.Long)
       Dim exitLabel As BoundLabel = Nothing
       Dim continueLabel As BoundLabel = Nothing
       Dim body = BindLoopBody(syntax.Statements, exitLabel, continueLabel)

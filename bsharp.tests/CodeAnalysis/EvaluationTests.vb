@@ -27,7 +27,7 @@ return r", 9)>
     <InlineData("let r = 4 * 2
 return r", 8)>
     <InlineData("let r = 9 / 3
-return r", 3)>
+return r", CDbl(3))>
     <InlineData("let r = (10)
 return r", 10)>
     <InlineData("let r = 12 = 3
@@ -112,8 +112,8 @@ return r", 3)>
 return a", 10)>
     <InlineData("let r = string(true)
 return r", "True")>
-    <InlineData("let r = string(1)
-return r", "1")>
+    <InlineData("let r = str$(1)
+return r", " 1")>
     <InlineData("let r = boolean(""true"")
 return r", True)>
     <InlineData("let r = integer(""1"")
@@ -278,7 +278,7 @@ end if", 5)>
         end if"
 
       Dim diagnostics = "
-        Cannot convert type 'integer' to 'boolean'."
+        Cannot convert type 'Long' to 'Boolean'."
 
       AssertDiagnostics(text, diagnostics)
 
@@ -444,7 +444,7 @@ end if"
 
       Dim text = "[+]true"
 
-      Dim diagnostics = "Unary operator '+' is not defined for type 'boolean'."
+      Dim diagnostics = "Unary operator '+' is not defined for type 'Boolean'."
 
       AssertDiagnostics(text, diagnostics)
 
@@ -535,7 +535,7 @@ end if"
 
       Dim diagnostics = "
         Variable 'x' is read-only and cannot be assigned to.
-        Cannot convert type 'boolean' to 'integer'."
+        Cannot convert type 'Boolean' to 'Long'."
 
       AssertDiagnostics(text, diagnostics)
 
@@ -565,7 +565,7 @@ end if"
         end function"
 
       Dim diagnostics = "
-        An expression of type 'integer' is expected."
+        An expression of type 'Integer' is expected."
 
       AssertDiagnostics(text, diagnostics)
 
@@ -632,7 +632,7 @@ end if"
     Public Sub Evaluator_Expression_Must_Have_Value()
 
       Dim text = "
-        function test(n as integer)
+        function test(n as long)
           return
         end function
         dim value = [test(100)]"
@@ -697,7 +697,7 @@ end if"
         result = test([value])"
 
       Dim diagnostics = "
-        Cannot convert type 'string' to 'integer'. An explicit conversion exists (are you missing a cast?)"
+        Cannot convert type 'String' to 'Integer'. An explicit conversion exists (are you missing a cast?)"
 
       AssertDiagnostics(text, diagnostics)
 
