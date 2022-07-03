@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "bsc": {
+      "commandName": "Project",
+      "commandLineArgs": "..\\..\\..\\..\\samples\\hello.bas"
+    }
+  }
+}

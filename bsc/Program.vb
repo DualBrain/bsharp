@@ -16,7 +16,7 @@ Module Program
 
     Dim options = New OptionSet From
     {
-      "usage: msc <source-paths> [options]",
+      "usage: bsc <source-paths> [options]",
       {"r=", "The {path} of an assembly to reference", Sub(v) referencePaths.Add(v)},
       {"o=", "The output {path} of an assembly to create", Sub(v) outputPath = v},
       {"m=", "The {name} of the assembly to create", Sub(v) moduleName = v},
