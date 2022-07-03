@@ -114,7 +114,32 @@ Namespace Bsharp.CodeAnalysis.Binding
     End Function
 
     Protected Overridable Function RewritePrintStatement(node As BoundPrintStatement) As BoundStatement
+
+      'TODO: need to lower the parameter(s) of
+      '      the print statement into individual, 
+      '      simplistic `print [expression][;]`
+      '      statements.
+
+      ' PRINT "1+1 ="; spc(1); 1+1
+      ' 
+      ' becomes
+      '
+      ' PRINT "1+1=";
+      ' PRINT spc(1);
+      ' PRINT 1+1
+
+      ' This will allow for a simpler conversion (compile)
+      ' when it comes time to write IL as it allows for..
+
+      ' System.Console.Write("1+1=")
+      ' System.Console.Write(spc(1))
+      ' System.Console.WriteLine(1+1)
+
+      ' Not the most efficient, but it should work and, in the end,
+      ' we are talking about a PRINT statement afterall.
+
       Return node
+
     End Function
 
     Protected Overridable Function RewriteLetStatement(node As BoundLetStatement) As BoundStatement

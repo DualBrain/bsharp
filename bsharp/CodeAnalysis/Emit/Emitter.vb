@@ -61,7 +61,7 @@ Namespace Bsharp.CodeAnalysis.Emit
         (TypeSymbol.Decimal, "System.Decimal"),
         (TypeSymbol.Double, "System.Double"),
         (TypeSymbol.Single, "System.Single"),
-        (TypeSymbol.ULong64, "System.uInt64"),
+        (TypeSymbol.ULong64, "System.UInt64"),
         (TypeSymbol.Long64, "System.Int64"),
         (TypeSymbol.ULong, "System.UInt32"),
         (TypeSymbol.Long, "System.Int32"),
@@ -172,107 +172,17 @@ Namespace Bsharp.CodeAnalysis.Emit
 
     Private Sub EmitStatement(ilProcessor As ILProcessor, node As BoundStatement)
       Select Case node.Kind
-        Case BoundNodeKind.NopStatement : EmitNopStatement(ilProcessor, CType(node, BoundNopStatement))
-        Case BoundNodeKind.VariableDeclaration : EmitVariableDeclaration(ilProcessor, CType(node, BoundVariableDeclaration))
-        Case BoundNodeKind.LabelStatement : EmitLabelStatement(ilProcessor, CType(node, BoundLabelStatement))
-        Case BoundNodeKind.GotoStatement : EmitGotoStatement(ilProcessor, CType(node, BoundGotoStatement))
         Case BoundNodeKind.ConditionalGotoStatement : EmitConditionalGotoStatement(ilProcessor, CType(node, BoundConditionalGotoStatement))
-        Case BoundNodeKind.ReturnStatement : EmitReturnStatement(ilProcessor, CType(node, BoundReturnStatement))
+        Case BoundNodeKind.GotoStatement : EmitGotoStatement(ilProcessor, CType(node, BoundGotoStatement))
         Case BoundNodeKind.ExpressionStatement : EmitExpressionStatement(ilProcessor, CType(node, BoundExpressionStatement))
+        Case BoundNodeKind.LabelStatement : EmitLabelStatement(ilProcessor, CType(node, BoundLabelStatement))
+        Case BoundNodeKind.NopStatement : EmitNopStatement(ilProcessor, CType(node, BoundNopStatement))
+        Case BoundNodeKind.PrintStatement : EmitPrintStatement(ilProcessor, CType(node, BoundPrintStatement))
+        Case BoundNodeKind.ReturnStatement : EmitReturnStatement(ilProcessor, CType(node, BoundReturnStatement))
+        Case BoundNodeKind.VariableDeclaration : EmitVariableDeclaration(ilProcessor, CType(node, BoundVariableDeclaration))
         Case Else
           Throw New Exception($"Unexpected node kind {node.Kind}")
       End Select
-    End Sub
-
-    Private Sub EmitNopStatement(ilProcessor As ILProcessor, node As BoundNopStatement)
-      If node Is Nothing Then
-      End If
-      ilProcessor.Emit(OpCodes.Nop)
-    End Sub
-
-    Private Sub EmitVariableDeclaration(ilProcessor As ILProcessor, node As BoundVariableDeclaration)
-      Dim typeReference = _knownTypes(node.Variable.Type)
-      Dim variableDefinition = New VariableDefinition(typeReference)
-      _locals.Add(node.Variable, variableDefinition)
-      ilProcessor.Body.Variables.Add(variableDefinition)
-      EmitExpression(ilProcessor, node.Initializer)
-      ilProcessor.Emit(OpCodes.Stloc, variableDefinition)
-    End Sub
-
-    Private Sub EmitLabelStatement(ilProcessor As ILProcessor, node As BoundLabelStatement)
-      _labels.Add(node.Label, ilProcessor.Body.Instructions.Count)
-    End Sub
-
-    Private Sub EmitGotoStatement(ilProcessor As ILProcessor, node As BoundGotoStatement)
-      _fixups.Add((ilProcessor.Body.Instructions.Count, node.Label))
-      ilProcessor.Emit(OpCodes.Br, Instruction.Create(OpCodes.Nop))
-    End Sub
-
-    Private Sub EmitConditionalGotoStatement(ilProcessor As ILProcessor, node As BoundConditionalGotoStatement)
-      EmitExpression(ilProcessor, node.Condition)
-      Dim opCode = If(node.JumpIfTrue, OpCodes.Brtrue, OpCodes.Brfalse)
-      _fixups.Add((ilProcessor.Body.Instructions.Count, node.Label))
-      ilProcessor.Emit(opCode, Instruction.Create(OpCodes.Nop))
-    End Sub
-
-    Private Sub EmitReturnStatement(ilProcessor As ILProcessor, node As BoundReturnStatement)
-      If node.Expression IsNot Nothing Then EmitExpression(ilProcessor, node.Expression)
-      ilProcessor.Emit(OpCodes.Ret)
-    End Sub
-
-    Private Sub EmitExpressionStatement(ilProcessor As ILProcessor, node As BoundExpressionStatement)
-      EmitExpression(ilProcessor, node.Expression)
-      If node.Expression.Type IsNot TypeSymbol.Nothing Then
-        ilProcessor.Emit(OpCodes.Pop)
-      End If
-    End Sub
-
-    Private Sub EmitExpression(ilProcessor As ILProcessor, node As BoundExpression)
-
-      If node.ConstantValue IsNot Nothing Then
-        EmitConstantExpression(ilProcessor, node)
-        Return
-      End If
-
-      Select Case node.Kind
-        Case BoundNodeKind.VariableExpression : EmitVariableExpression(ilProcessor, CType(node, BoundVariableExpression))
-        Case BoundNodeKind.AssignmentExpression : EmitAssignmentExpression(ilProcessor, CType(node, BoundAssignmentExpression))
-        Case BoundNodeKind.UnaryExpression : EmitUnaryExpression(ilProcessor, CType(node, BoundUnaryExpression))
-        Case BoundNodeKind.BinaryExpression : EmitBinaryExpression(ilProcessor, CType(node, BoundBinaryExpression))
-        Case BoundNodeKind.CallExpression : EmitCallExpression(ilProcessor, CType(node, BoundCallExpression))
-        Case BoundNodeKind.ConversionExpression : EmitConversionExpression(ilProcessor, CType(node, BoundConversionExpression))
-        Case Else
-          Throw New Exception($"Unexpected node kind {node.Kind}")
-      End Select
-    End Sub
-
-    Private Sub EmitConstantExpression(ilProcessor As ILProcessor, node As BoundExpression)
-
-      Debug.Assert(node.ConstantValue IsNot Nothing)
-
-      If node.Type Is TypeSymbol.Boolean Then
-        Dim value = CBool(node.ConstantValue.Value)
-        Dim instruction = If(value, OpCodes.Ldc_I4_1, OpCodes.Ldc_I4_0)
-        ilProcessor.Emit(instruction)
-      ElseIf node.Type Is TypeSymbol.Integer Then
-        Dim value = CInt(node.ConstantValue.Value)
-        ilProcessor.Emit(OpCodes.Ldc_I4, value)
-      ElseIf node.Type Is TypeSymbol.String Then
-        Dim value = CStr(node.ConstantValue.Value)
-        ilProcessor.Emit(OpCodes.Ldstr, value)
-      Else
-        Throw New Exception($"Unexpected constant expression type: {node.Type}")
-      End If
-    End Sub
-
-    Private Sub EmitVariableExpression(ilProcessor As ILProcessor, node As BoundVariableExpression)
-      If TypeOf node.Variable Is ParameterSymbol Then
-        Dim parameter = CType(node.Variable, ParameterSymbol)
-        ilProcessor.Emit(OpCodes.Ldarg, parameter.Ordinal)
-      Else
-        Dim variableDefinition = _locals(node.Variable)
-        ilProcessor.Emit(OpCodes.Ldloc, variableDefinition)
-      End If
     End Sub
 
     Private Sub EmitAssignmentExpression(ilProcessor As ILProcessor, node As BoundAssignmentExpression)
@@ -280,22 +190,6 @@ Namespace Bsharp.CodeAnalysis.Emit
       EmitExpression(ilProcessor, node.Expression)
       ilProcessor.Emit(OpCodes.Dup)
       ilProcessor.Emit(OpCodes.Stloc, variableDefinition)
-    End Sub
-
-    Private Sub EmitUnaryExpression(ilProcessor As ILProcessor, node As BoundUnaryExpression)
-      EmitExpression(ilProcessor, node.Operand)
-      If node.Op.Kind = BoundUnaryOperatorKind.Identity Then
-        ' Done.
-      ElseIf node.Op.Kind = BoundUnaryOperatorKind.LogicalNegation Then
-        ilProcessor.Emit(OpCodes.Ldc_I4_0)
-        ilProcessor.Emit(OpCodes.Ceq)
-      ElseIf node.Op.Kind = BoundUnaryOperatorKind.Negation Then
-        ilProcessor.Emit(OpCodes.Neg)
-      ElseIf node.Op.Kind = BoundUnaryOperatorKind.BitwiseComplement Then
-        ilProcessor.Emit(OpCodes.Not)
-      Else
-        Throw New Exception($"Unexpected unary operator {SyntaxFacts.GetText(node.Op.SyntaxKind)}({node.Operand.Type})")
-      End If
     End Sub
 
     Private Sub EmitBinaryExpression(ilProcessor As ILProcessor, node As BoundBinaryExpression)
@@ -411,19 +305,30 @@ Namespace Bsharp.CodeAnalysis.Emit
 
     End Sub
 
-    Private Sub EmitRandomField()
-      _randomFieldDefinition = New FieldDefinition("$rnd", Ccl.FieldAttributes.Static Or
-                                                           Ccl.FieldAttributes.Private, _randomReference)
-      _typeDefinition.Fields.Add(_randomFieldDefinition)
-      Dim staticConstructor = New Ccl.MethodDefinition(".cctor", Ccl.MethodAttributes.Static Or
-                                                                 Ccl.MethodAttributes.Private Or
-                                                                 Ccl.MethodAttributes.SpecialName Or
-                                                                 Ccl.MethodAttributes.RTSpecialName, _knownTypes(TypeSymbol.Nothing))
-      _typeDefinition.Methods.Insert(0, staticConstructor)
-      Dim ilProcessor = staticConstructor.Body.GetILProcessor
-      ilProcessor.Emit(OpCodes.Newobj, _randomCtorReference)
-      ilProcessor.Emit(OpCodes.Stsfld, _randomFieldDefinition)
-      ilProcessor.Emit(OpCodes.Ret)
+    Private Sub EmitConditionalGotoStatement(ilProcessor As ILProcessor, node As BoundConditionalGotoStatement)
+      EmitExpression(ilProcessor, node.Condition)
+      Dim opCode = If(node.JumpIfTrue, OpCodes.Brtrue, OpCodes.Brfalse)
+      _fixups.Add((ilProcessor.Body.Instructions.Count, node.Label))
+      ilProcessor.Emit(opCode, Instruction.Create(OpCodes.Nop))
+    End Sub
+
+    Private Sub EmitConstantExpression(ilProcessor As ILProcessor, node As BoundExpression)
+
+      Debug.Assert(node.ConstantValue IsNot Nothing)
+
+      If node.Type Is TypeSymbol.Boolean Then
+        Dim value = CBool(node.ConstantValue.Value)
+        Dim instruction = If(value, OpCodes.Ldc_I4_1, OpCodes.Ldc_I4_0)
+        ilProcessor.Emit(instruction)
+      ElseIf node.Type Is TypeSymbol.Integer Then
+        Dim value = CInt(node.ConstantValue.Value)
+        ilProcessor.Emit(OpCodes.Ldc_I4, value)
+      ElseIf node.Type Is TypeSymbol.String Then
+        Dim value = CStr(node.ConstantValue.Value)
+        ilProcessor.Emit(OpCodes.Ldstr, value)
+      Else
+        Throw New Exception($"Unexpected constant expression type: {node.Type}")
+      End If
     End Sub
 
     Private Sub EmitConversionExpression(ilProcessor As ILProcessor, node As BoundConversionExpression)
@@ -444,63 +349,72 @@ Namespace Bsharp.CodeAnalysis.Emit
       End If
     End Sub
 
-#Region "Converted from 'inline' functions."
+    Private Sub EmitExpression(ilProcessor As ILProcessor, node As BoundExpression)
 
-    Private Function Emit_ResolveType(assemblies As List(Of AssemblyDefinition),
-                                      internalName As String,
-                                      metadataName As String) As TypeReference
-      Dim foundTypes = assemblies.SelectMany(Function(a) a.Modules).
-                                  SelectMany(Function(m) m.Types).
-                                  Where(Function(t) t.FullName = metadataName).ToArray
-      If foundTypes.Length = 1 Then
-        Dim typeReference = _assemblyDefinition.MainModule.ImportReference(foundTypes(0))
-        Return typeReference
-      ElseIf foundTypes.Length = 0 Then
-        _diagnostics.ReportRequiredTypeNotFound(internalName, metadataName)
-      Else
-        _diagnostics.ReportRequiredTypeAmbiguous(internalName, metadataName, foundTypes)
+      If node.ConstantValue IsNot Nothing Then
+        EmitConstantExpression(ilProcessor, node)
+        Return
       End If
-      Return Nothing
-    End Function
 
-    Private Function Emit_ResolveMethod(assemblies As List(Of AssemblyDefinition),
-                                        typeName As String,
-                                        methodName As String,
-                                        parameterTypeNames As String()) As MethodReference
-      Dim foundTypes = assemblies.SelectMany(Function(a) a.Modules).
-                                  SelectMany(Function(m) m.Types).
-                                  Where(Function(t) t.FullName = typeName).ToArray
-      If foundTypes.Length = 1 Then
-        Dim foundType = foundTypes(0)
-        Dim methods = foundType.Methods.Where(Function(m) m.Name = methodName)
+      Select Case node.Kind
+        Case BoundNodeKind.VariableExpression : EmitVariableExpression(ilProcessor, CType(node, BoundVariableExpression))
+        Case BoundNodeKind.AssignmentExpression : EmitAssignmentExpression(ilProcessor, CType(node, BoundAssignmentExpression))
+        Case BoundNodeKind.UnaryExpression : EmitUnaryExpression(ilProcessor, CType(node, BoundUnaryExpression))
+        Case BoundNodeKind.BinaryExpression : EmitBinaryExpression(ilProcessor, CType(node, BoundBinaryExpression))
+        Case BoundNodeKind.CallExpression : EmitCallExpression(ilProcessor, CType(node, BoundCallExpression))
+        Case BoundNodeKind.ConversionExpression : EmitConversionExpression(ilProcessor, CType(node, BoundConversionExpression))
+        Case Else
+          Throw New Exception($"Unexpected node kind {node.Kind}")
+      End Select
+    End Sub
 
-        For Each method In methods
-          If method.Parameters.Count <> parameterTypeNames.Length Then
-            Continue For
-          End If
-          Dim allParametersMatch = True
-          For i = 0 To parameterTypeNames.Length - 1
-            If method.Parameters(i).ParameterType.FullName <> parameterTypeNames(i) Then
-              allParametersMatch = False
-              Exit For
-            End If
-          Next
-          If Not allParametersMatch Then
-            Continue For
-          End If
-          Return _assemblyDefinition.MainModule.ImportReference(method)
-        Next
-        _diagnostics.ReportRequiredMethodNotFound(typeName, methodName, parameterTypeNames)
-        Return Nothing
-      ElseIf foundTypes.Length = 0 Then
-        _diagnostics.ReportRequiredTypeNotFound(Nothing, typeName)
-      Else
-        _diagnostics.ReportRequiredTypeAmbiguous(Nothing, typeName, foundTypes)
+    Private Sub EmitExpressionStatement(ilProcessor As ILProcessor, node As BoundExpressionStatement)
+      EmitExpression(ilProcessor, node.Expression)
+      If node.Expression.Type IsNot TypeSymbol.Nothing Then
+        ilProcessor.Emit(OpCodes.Pop)
       End If
-      Return Nothing
-    End Function
+    End Sub
 
-#End Region
+    Private Sub EmitGotoStatement(ilProcessor As ILProcessor, node As BoundGotoStatement)
+      _fixups.Add((ilProcessor.Body.Instructions.Count, node.Label))
+      ilProcessor.Emit(OpCodes.Br, Instruction.Create(OpCodes.Nop))
+    End Sub
+
+    Private Sub EmitLabelStatement(ilProcessor As ILProcessor, node As BoundLabelStatement)
+      _labels.Add(node.Label, ilProcessor.Body.Instructions.Count)
+    End Sub
+
+    Private Sub EmitNopStatement(ilProcessor As ILProcessor, node As BoundNopStatement)
+      If node Is Nothing Then
+      End If
+      ilProcessor.Emit(OpCodes.Nop)
+    End Sub
+
+    Private Sub EmitPrintStatement(ilProcessor As ILProcessor, node As BoundPrintStatement)
+      If node Is Nothing Then
+      End If
+      ilProcessor.Emit(OpCodes.Nop)
+    End Sub
+
+    Private Sub EmitRandomField()
+      _randomFieldDefinition = New FieldDefinition("$rnd", Ccl.FieldAttributes.Static Or
+                                                           Ccl.FieldAttributes.Private, _randomReference)
+      _typeDefinition.Fields.Add(_randomFieldDefinition)
+      Dim staticConstructor = New Ccl.MethodDefinition(".cctor", Ccl.MethodAttributes.Static Or
+                                                                 Ccl.MethodAttributes.Private Or
+                                                                 Ccl.MethodAttributes.SpecialName Or
+                                                                 Ccl.MethodAttributes.RTSpecialName, _knownTypes(TypeSymbol.Nothing))
+      _typeDefinition.Methods.Insert(0, staticConstructor)
+      Dim ilProcessor = staticConstructor.Body.GetILProcessor
+      ilProcessor.Emit(OpCodes.Newobj, _randomCtorReference)
+      ilProcessor.Emit(OpCodes.Stsfld, _randomFieldDefinition)
+      ilProcessor.Emit(OpCodes.Ret)
+    End Sub
+
+    Private Sub EmitReturnStatement(ilProcessor As ILProcessor, node As BoundReturnStatement)
+      If node.Expression IsNot Nothing Then EmitExpression(ilProcessor, node.Expression)
+      ilProcessor.Emit(OpCodes.Ret)
+    End Sub
 
     Private Sub EmitStringConcatExpression(_ilProcessor As ILProcessor, node As BoundBinaryExpression)
 
@@ -610,6 +524,99 @@ Namespace Bsharp.CodeAnalysis.Emit
       End If
 
     End Function
+
+    Private Sub EmitUnaryExpression(ilProcessor As ILProcessor, node As BoundUnaryExpression)
+      EmitExpression(ilProcessor, node.Operand)
+      If node.Op.Kind = BoundUnaryOperatorKind.Identity Then
+        ' Done.
+      ElseIf node.Op.Kind = BoundUnaryOperatorKind.LogicalNegation Then
+        ilProcessor.Emit(OpCodes.Ldc_I4_0)
+        ilProcessor.Emit(OpCodes.Ceq)
+      ElseIf node.Op.Kind = BoundUnaryOperatorKind.Negation Then
+        ilProcessor.Emit(OpCodes.Neg)
+      ElseIf node.Op.Kind = BoundUnaryOperatorKind.BitwiseComplement Then
+        ilProcessor.Emit(OpCodes.Not)
+      Else
+        Throw New Exception($"Unexpected unary operator {SyntaxFacts.GetText(node.Op.SyntaxKind)}({node.Operand.Type})")
+      End If
+    End Sub
+
+    Private Sub EmitVariableDeclaration(ilProcessor As ILProcessor, node As BoundVariableDeclaration)
+      Dim typeReference = _knownTypes(node.Variable.Type)
+      Dim variableDefinition = New VariableDefinition(typeReference)
+      _locals.Add(node.Variable, variableDefinition)
+      ilProcessor.Body.Variables.Add(variableDefinition)
+      EmitExpression(ilProcessor, node.Initializer)
+      ilProcessor.Emit(OpCodes.Stloc, variableDefinition)
+    End Sub
+
+    Private Sub EmitVariableExpression(ilProcessor As ILProcessor, node As BoundVariableExpression)
+      If TypeOf node.Variable Is ParameterSymbol Then
+        Dim parameter = CType(node.Variable, ParameterSymbol)
+        ilProcessor.Emit(OpCodes.Ldarg, parameter.Ordinal)
+      Else
+        Dim variableDefinition = _locals(node.Variable)
+        ilProcessor.Emit(OpCodes.Ldloc, variableDefinition)
+      End If
+    End Sub
+
+#Region "Converted from 'inline' functions."
+
+    Private Function Emit_ResolveType(assemblies As List(Of AssemblyDefinition),
+                                      internalName As String,
+                                      metadataName As String) As TypeReference
+      Dim foundTypes = assemblies.SelectMany(Function(a) a.Modules).
+                                  SelectMany(Function(m) m.Types).
+                                  Where(Function(t) t.FullName = metadataName).ToArray
+      If foundTypes.Length = 1 Then
+        Dim typeReference = _assemblyDefinition.MainModule.ImportReference(foundTypes(0))
+        Return typeReference
+      ElseIf foundTypes.Length = 0 Then
+        _diagnostics.ReportRequiredTypeNotFound(internalName, metadataName)
+      Else
+        _diagnostics.ReportRequiredTypeAmbiguous(internalName, metadataName, foundTypes)
+      End If
+      Return Nothing
+    End Function
+
+    Private Function Emit_ResolveMethod(assemblies As List(Of AssemblyDefinition),
+                                        typeName As String,
+                                        methodName As String,
+                                        parameterTypeNames As String()) As MethodReference
+      Dim foundTypes = assemblies.SelectMany(Function(a) a.Modules).
+                                  SelectMany(Function(m) m.Types).
+                                  Where(Function(t) t.FullName = typeName).ToArray
+      If foundTypes.Length = 1 Then
+        Dim foundType = foundTypes(0)
+        Dim methods = foundType.Methods.Where(Function(m) m.Name = methodName)
+
+        For Each method In methods
+          If method.Parameters.Count <> parameterTypeNames.Length Then
+            Continue For
+          End If
+          Dim allParametersMatch = True
+          For i = 0 To parameterTypeNames.Length - 1
+            If method.Parameters(i).ParameterType.FullName <> parameterTypeNames(i) Then
+              allParametersMatch = False
+              Exit For
+            End If
+          Next
+          If Not allParametersMatch Then
+            Continue For
+          End If
+          Return _assemblyDefinition.MainModule.ImportReference(method)
+        Next
+        _diagnostics.ReportRequiredMethodNotFound(typeName, methodName, parameterTypeNames)
+        Return Nothing
+      ElseIf foundTypes.Length = 0 Then
+        _diagnostics.ReportRequiredTypeNotFound(Nothing, typeName)
+      Else
+        _diagnostics.ReportRequiredTypeAmbiguous(Nothing, typeName, foundTypes)
+      End If
+      Return Nothing
+    End Function
+
+#End Region
 
   End Class
 

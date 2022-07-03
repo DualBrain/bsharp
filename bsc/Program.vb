@@ -57,6 +57,13 @@ Module Program
       End If
     Next
 
+    If Debugger.IsAttached Then
+      'TODO: For testing, hardcoding the mscorlib reference.
+      If Not referencePaths.Any Then
+        referencePaths.Add("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.8\mscorlib.dll")
+      End If
+    End If
+
     If hasErrors Then Return 1
 
     Dim c = Compilation.Create(syntaxTrees.ToArray)
