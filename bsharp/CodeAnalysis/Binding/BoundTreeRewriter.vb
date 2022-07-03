@@ -120,25 +120,134 @@ Namespace Bsharp.CodeAnalysis.Binding
       '      simplistic `print [expression][;]`
       '      statements.
 
-      ' PRINT "1+1 ="; spc(1); 1+1
+      ' PRINT "1+1 ="; Spc(1); 1+1; Tab(20); " <--- calculator", "X"
       ' 
       ' becomes
       '
-      ' PRINT "1+1=";
-      ' PRINT spc(1);
-      ' PRINT 1+1
+      ' HandlePrint "1+1="
+      ' HandleSpc 1
+      ' HandlePrint 1+1
+      ' HandleTab 20
+      ' HandlePrint " <--- calculator"
+      ' HandleComma
+      ' HandlePrint "X"
+      ' HandlePrintLine
 
       ' This will allow for a simpler conversion (compile)
       ' when it comes time to write IL as it allows for..
 
       ' System.Console.Write("1+1=")
-      ' System.Console.Write(spc(1))
-      ' System.Console.WriteLine(1+1)
+      ' BSharp.Runtime.HandleSpc(1)
+      ' System.Console.Write(1+1)
+      ' BSharp.Runtime.HandleTab(20)
+      ' System.Console.Write(" <--- calculator")
+      ' BSharp.Runtime.HandleComma()
+      ' System.Console.Write("X")
+      ' System.Console.WriteLine()
 
       ' Not the most efficient, but it should work and, in the end,
       ' we are talking about a PRINT statement afterall.
 
-      Return node
+      'Return node
+
+      Dim builder As ImmutableArray(Of BoundStatement).Builder = Nothing
+      Dim cr = False
+      For Each entry In node.Nodes
+        If TypeOf entry Is BoundSymbol Then
+          Select Case CType(entry, BoundSymbol).Value
+            Case ";"c
+              cr = False
+            Case ","
+              ' Convert to a HandleComma statement.
+              builder.Add(New BoundHandleCommaStatement())
+              cr = False
+            Case Else
+              cr = True
+          End Select
+        ElseIf TypeOf entry Is BoundSpcFunction Then
+          builder.Add(New BoundHandleSpcStatement(CType(entry, BoundSpcFunction).Expression))
+          cr = False
+        ElseIf TypeOf entry Is BoundTabFunction Then
+          builder.Add(New BoundHandleTabStatement(CType(entry, BoundTabFunction).Expression))
+          cr = False
+        Else
+          Dim value = BoundHandlePrintStatement(CType(entry, BoundExpression))
+          cr = True
+        End If
+      Next
+      If cr Then
+        builder.Add(New BoundHandlePrintLineStatement())
+      End If
+      If builder Is Nothing Then
+        Return node
+      End If
+      Return New BoundBlockStatement(builder.MoveToImmutable)
+
+      'Dim screenWidth = 80
+      'Dim zoneWidth = 14
+
+      'Dim cr = True
+      'For Each entry In node.Nodes
+      '  If TypeOf entry Is BoundSymbol Then
+      '    Select Case CType(entry, BoundSymbol).Value
+      '      Case ";"c
+      '        cr = False
+      '      Case ","
+      '        ' Convert to a HandleComma statement.
+      '        Dim pos = Console.CursorLeft + 1
+      '        Dim cur = pos Mod zoneWidth
+      '        Console.Write(Microsoft.VisualBasic.Strings.Space(cur))
+      '        cr = False
+      '      Case Else
+      '        Throw New NotImplementedException
+      '        cr = True
+      '    End Select
+      '  ElseIf TypeOf entry Is BoundSpcFunction Then
+      '    ' Convert to a HandleSpc(*number*) statement.
+      '    Dim result = EvaluateExpression(CType(entry, BoundSpcFunction).Expression)
+      '    Dim value = CInt(result)
+      '    If value < 0 OrElse value > 255 Then
+      '      'error
+      '    ElseIf value > screenWidth Then
+      '      value = value Mod screenWidth
+      '    End If
+      '    Dim str = Microsoft.VisualBasic.Strings.Space(value)
+      '    Console.Write(str)
+      '    cr = False
+      '  ElseIf TypeOf entry Is BoundTabFunction Then
+      '    ' Convert to a HandleTab(*number*) statement.
+      '    Dim result = EvaluateExpression(CType(entry, BoundTabFunction).Expression)
+      '    Dim value = CInt(result)
+      '    If value < 0 OrElse value > 255 Then
+      '      ' error
+      '    End If
+      '    Dim pos = Console.CursorLeft + 1
+      '    Dim diff = 0
+      '    If pos < value Then
+      '      diff = value - pos
+      '    ElseIf pos > value Then
+      '      diff = screenWidth - pos
+      '      Console.WriteLine(Microsoft.VisualBasic.Strings.Space(diff))
+      '      diff = value
+      '    End If
+      '    Dim str = Microsoft.VisualBasic.Strings.Space(diff)
+      '    Console.Write(str)
+      '  Else
+      '    Dim value = EvaluateExpression(CType(entry, BoundExpression))
+      '    Dim str = ""
+      '    If TypeOf value Is BoundConstant Then
+      '      str = CStr(CType(value, BoundConstant).Value)
+      '    Else
+      '      str = CStr(value)
+      '    End If
+      '    Console.Write(str)
+      '    cr = True
+      '  End If
+      'Next
+      'If cr Then
+      '  ' PRINT ' To handle CR
+      '  Console.WriteLine()
+      'End If
 
     End Function
 
