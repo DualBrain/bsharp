@@ -19,6 +19,7 @@ Namespace Bsharp.CodeAnalysis.Emit
     Private ReadOnly _knownTypes As New Dictionary(Of TypeSymbol, Ccl.TypeReference)
     Private ReadOnly _objectEqualsReference As MethodReference
     Private ReadOnly _consoleReadLineReference As MethodReference
+    Private ReadOnly _consoleWriteReference As MethodReference
     Private ReadOnly _consoleWriteLineReference As MethodReference
     Private ReadOnly _stringConcat2Reference As MethodReference
     Private ReadOnly _stringConcat3Reference As MethodReference
@@ -84,7 +85,9 @@ Namespace Bsharp.CodeAnalysis.Emit
 
       _objectEqualsReference = Emit_ResolveMethod(assemblies, "System.Object", "Equals", {"System.Object", "System.Object"})
       _consoleReadLineReference = Emit_ResolveMethod(assemblies, "System.Console", "ReadLine", Array.Empty(Of String))
-      _consoleWriteLineReference = Emit_ResolveMethod(assemblies, "System.Console", "WriteLine", {"System.Object"})
+      _consoleWriteReference = Emit_ResolveMethod(assemblies, "System.Console", "Write", {"System.Object"})
+      '_consoleWriteLineReference = Emit_ResolveMethod(assemblies, "System.Console", "WriteLine", {"System.Object"})
+      _consoleWriteLineReference = Emit_ResolveMethod(assemblies, "System.Console", "WriteLine", Array.Empty(Of String))
       _stringConcat2Reference = Emit_ResolveMethod(assemblies, "System.String", "Concat", {"System.String", "System.String"})
       _stringConcat3Reference = Emit_ResolveMethod(assemblies, "System.String", "Concat", {"System.String", "System.String", "System.String"})
       _stringConcat4Reference = Emit_ResolveMethod(assemblies, "System.String", "Concat", {"System.String", "System.String", "System.String", "System.String"})
@@ -175,9 +178,14 @@ Namespace Bsharp.CodeAnalysis.Emit
         Case BoundNodeKind.ConditionalGotoStatement : EmitConditionalGotoStatement(ilProcessor, CType(node, BoundConditionalGotoStatement))
         Case BoundNodeKind.GotoStatement : EmitGotoStatement(ilProcessor, CType(node, BoundGotoStatement))
         Case BoundNodeKind.ExpressionStatement : EmitExpressionStatement(ilProcessor, CType(node, BoundExpressionStatement))
+        Case BoundNodeKind.HandleCommaStatement : EmitHandleCommaStatement(ilProcessor, CType(node, BoundHandleCommaStatement))
+        Case BoundNodeKind.HandlePrintLineStatement : EmitHandlePrintLineStatement(ilProcessor, CType(node, BoundHandlePrintLineStatement))
+        Case BoundNodeKind.HandlePrintStatement : EmitHandlePrintStatement(ilProcessor, CType(node, BoundHandlePrintStatement))
+        Case BoundNodeKind.HandleSpcStatement : EmitHandleSpcStatement(ilProcessor, CType(node, BoundHandleSpcStatement))
+        Case BoundNodeKind.HandleTabStatement : EmitHandleTabStatement(ilProcessor, CType(node, BoundHandleTabStatement))
         Case BoundNodeKind.LabelStatement : EmitLabelStatement(ilProcessor, CType(node, BoundLabelStatement))
         Case BoundNodeKind.NopStatement : EmitNopStatement(ilProcessor, CType(node, BoundNopStatement))
-        Case BoundNodeKind.PrintStatement : EmitPrintStatement(ilProcessor, CType(node, BoundPrintStatement))
+        'Case BoundNodeKind.PrintStatement : EmitPrintStatement(ilProcessor, CType(node, BoundPrintStatement))
         Case BoundNodeKind.ReturnStatement : EmitReturnStatement(ilProcessor, CType(node, BoundReturnStatement))
         Case BoundNodeKind.VariableDeclaration : EmitVariableDeclaration(ilProcessor, CType(node, BoundVariableDeclaration))
         Case Else
@@ -380,6 +388,35 @@ Namespace Bsharp.CodeAnalysis.Emit
       ilProcessor.Emit(OpCodes.Br, Instruction.Create(OpCodes.Nop))
     End Sub
 
+    Private Sub EmitHandleCommaStatement(ilProcessor As ILProcessor, node As BoundHandleCommaStatement)
+      If node Is Nothing Then
+      End If
+      ilProcessor.Emit(OpCodes.Nop)
+    End Sub
+
+    Private Sub EmitHandlePrintLineStatement(ilProcessor As ILProcessor, node As BoundHandlePrintLineStatement)
+      If node Is Nothing Then
+      End If
+      ilProcessor.Emit(OpCodes.Call, _consoleWriteLineReference)
+    End Sub
+
+    Private Sub EmitHandlePrintStatement(ilProcessor As ILProcessor, node As BoundHandlePrintStatement)
+      EmitExpression(ilProcessor, node.Expression)
+      ilProcessor.Emit(OpCodes.Call, _consoleWriteReference)
+    End Sub
+
+    Private Sub EmitHandleSpcStatement(ilProcessor As ILProcessor, node As BoundHandleSpcStatement)
+      If node Is Nothing Then
+      End If
+      ilProcessor.Emit(OpCodes.Nop)
+    End Sub
+
+    Private Sub EmitHandleTabStatement(ilProcessor As ILProcessor, node As BoundHandleTabStatement)
+      If node Is Nothing Then
+      End If
+      ilProcessor.Emit(OpCodes.Nop)
+    End Sub
+
     Private Sub EmitLabelStatement(ilProcessor As ILProcessor, node As BoundLabelStatement)
       _labels.Add(node.Label, ilProcessor.Body.Instructions.Count)
     End Sub
@@ -390,11 +427,11 @@ Namespace Bsharp.CodeAnalysis.Emit
       ilProcessor.Emit(OpCodes.Nop)
     End Sub
 
-    Private Sub EmitPrintStatement(ilProcessor As ILProcessor, node As BoundPrintStatement)
-      If node Is Nothing Then
-      End If
-      ilProcessor.Emit(OpCodes.Nop)
-    End Sub
+    'Private Sub EmitPrintStatement(ilProcessor As ILProcessor, node As BoundPrintStatement)
+    '  If node Is Nothing Then
+    '  End If
+    '  ilProcessor.Emit(OpCodes.Nop)
+    'End Sub
 
     Private Sub EmitRandomField()
       _randomFieldDefinition = New FieldDefinition("$rnd", Ccl.FieldAttributes.Static Or

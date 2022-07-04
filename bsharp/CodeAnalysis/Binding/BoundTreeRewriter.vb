@@ -150,7 +150,8 @@ Namespace Bsharp.CodeAnalysis.Binding
 
       'Return node
 
-      Dim builder As ImmutableArray(Of BoundStatement).Builder = Nothing
+      'Dim builder As ImmutableArray(Of BoundStatement).Builder = Nothing
+      Dim builder = ImmutableArray.CreateBuilder(Of BoundStatement)()
       Dim cr = False
       For Each entry In node.Nodes
         If TypeOf entry Is BoundSymbol Then
@@ -165,13 +166,16 @@ Namespace Bsharp.CodeAnalysis.Binding
               cr = True
           End Select
         ElseIf TypeOf entry Is BoundSpcFunction Then
-          builder.Add(New BoundHandleSpcStatement(CType(entry, BoundSpcFunction).Expression))
+          Dim expression = RewriteExpression(CType(entry, BoundSpcFunction).Expression)
+          builder.Add(New BoundHandleSpcStatement(expression))
           cr = False
         ElseIf TypeOf entry Is BoundTabFunction Then
-          builder.Add(New BoundHandleTabStatement(CType(entry, BoundTabFunction).Expression))
+          Dim expression = RewriteExpression(CType(entry, BoundSpcFunction).Expression)
+          builder.Add(New BoundHandleTabStatement(expression))
           cr = False
         Else
-          Dim value = BoundHandlePrintStatement(CType(entry, BoundExpression))
+          Dim expression = RewriteExpression(CType(entry, BoundExpression))
+          builder.Add(New BoundHandlePrintStatement(expression))
           cr = True
         End If
       Next
@@ -181,7 +185,7 @@ Namespace Bsharp.CodeAnalysis.Binding
       If builder Is Nothing Then
         Return node
       End If
-      Return New BoundBlockStatement(builder.MoveToImmutable)
+      Return New BoundBlockStatement(builder.ToImmutable)
 
       'Dim screenWidth = 80
       'Dim zoneWidth = 14

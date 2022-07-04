@@ -41,7 +41,11 @@
     LiteralExpression
     VariableExpression
     UnaryExpression
-
+    HandlePrintLineStatement
+    HandlePrintStatement
+    HandleTabStatement
+    HandleSpcStatement
+    HandleCommaStatement
   End Enum
 
 End Namespace

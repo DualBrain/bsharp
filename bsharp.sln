@@ -7,9 +7,11 @@ Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "bsi", "bsi\bsi.vbproj", "{7
 EndProject
 Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "bsharp", "bsharp\bsharp.vbproj", "{C8154C07-B532-47EC-9323-E4330DC28DA2}"
 EndProject
-Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "bsharp.Tests", "bsharp.tests\bsharp.tests.vbproj", "{5B7583A8-8376-416C-9E25-A03184427C1E}"
+Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "bsharp.tests", "bsharp.tests\bsharp.tests.vbproj", "{5B7583A8-8376-416C-9E25-A03184427C1E}"
 EndProject
 Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "bsc", "bsc\bsc.vbproj", "{23F2000D-F97D-439D-9393-84FAF08B6D79}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "bsi2", "bsi2\bsi2.vbproj", "{2B1C9FAF-826A-4042-9CCA-A375A10F341A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{23F2000D-F97D-439D-9393-84FAF08B6D79}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{23F2000D-F97D-439D-9393-84FAF08B6D79}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{23F2000D-F97D-439D-9393-84FAF08B6D79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B1C9FAF-826A-4042-9CCA-A375A10F341A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B1C9FAF-826A-4042-9CCA-A375A10F341A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B1C9FAF-826A-4042-9CCA-A375A10F341A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B1C9FAF-826A-4042-9CCA-A375A10F341A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

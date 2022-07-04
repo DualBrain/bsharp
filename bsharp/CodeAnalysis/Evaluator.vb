@@ -104,6 +104,12 @@ Namespace Bsharp.CodeAnalysis
             End If
             'index = labelToIndex(gs.Label)
 
+          Case BoundNodeKind.HandleCommaStatement : EvaluateHandleCommaStatement(CType(s, BoundHandleCommaStatement)) : index += 1
+          Case BoundNodeKind.HandlePrintLineStatement : EvaluateHandlePrintLineStatement(CType(s, BoundHandlePrintLineStatement)) : index += 1
+          Case BoundNodeKind.HandlePrintStatement : EvaluateHandlePrintStatement(CType(s, BoundHandlePrintStatement)) : index += 1
+          Case BoundNodeKind.HandleSpcStatement : EvaluateHandleSpcStatement(CType(s, BoundHandleSpcStatement)) : index += 1
+          Case BoundNodeKind.HandleTabStatement : EvaluateHandleTabStatement(CType(s, BoundHandleTabStatement)) : index += 1
+
           Case BoundNodeKind.LabelStatement : index += 1
           Case BoundNodeKind.NopStatement : index += 1
           Case BoundNodeKind.LetStatement : EvaluateLetStatement(CType(s, BoundLetStatement)) : index += 1
@@ -114,7 +120,8 @@ Namespace Bsharp.CodeAnalysis
             '      other statements are *invalid* in this
             '      context.)
             index += 1
-          Case BoundNodeKind.PrintStatement : EvaluatePrintStatement(CType(s, BoundPrintStatement)) : index += 1
+          'Case BoundNodeKind.PrintStatement
+          '  EvaluatePrintStatement(CType(s, BoundPrintStatement)) : index += 1
           Case BoundNodeKind.ReturnStatement
             Dim rs = CType(s, BoundReturnStatement)
             m_lastValue = If(rs.Expression Is Nothing, Nothing, EvaluateExpression(rs.Expression))
@@ -141,70 +148,128 @@ Namespace Bsharp.CodeAnalysis
       Assign(node.Variable, value)
     End Sub
 
-    Private Sub EvaluatePrintStatement(s As BoundPrintStatement)
-
+    Private Sub EvaluateHandleCommaStatement(node As BoundHandleCommaStatement)
       Dim screenWidth = 80
       Dim zoneWidth = 14
-
-      Dim cr = True
-      For Each entry In s.Nodes
-        If TypeOf entry Is BoundSymbol Then
-          Select Case CType(entry, BoundSymbol).Value
-            Case ";"c
-              cr = False
-            Case ","
-              Dim pos = Console.CursorLeft + 1
-              Dim cur = pos Mod zoneWidth
-              Console.Write(Microsoft.VisualBasic.Strings.Space(cur))
-              cr = False
-            Case Else
-              Throw New NotImplementedException
-              cr = True
-          End Select
-        ElseIf TypeOf entry Is BoundSpcFunction Then
-          Dim result = EvaluateExpression(CType(entry, BoundSpcFunction).Expression)
-          Dim value = CInt(result)
-          If value < 0 OrElse value > 255 Then
-            'error
-          ElseIf value > screenWidth Then
-            value = value Mod screenWidth
-          End If
-          Dim str = Microsoft.VisualBasic.Strings.Space(value)
-          Console.Write(str)
-          cr = False
-        ElseIf TypeOf entry Is BoundTabFunction Then
-          Dim result = EvaluateExpression(CType(entry, BoundTabFunction).Expression)
-          Dim value = CInt(result)
-          If value < 0 OrElse value > 255 Then
-            ' error
-          End If
-          Dim pos = Console.CursorLeft + 1
-          Dim diff = 0
-          If pos < value Then
-            diff = value - pos
-          ElseIf pos > value Then
-            diff = screenWidth - pos
-            Console.WriteLine(Microsoft.VisualBasic.Strings.Space(diff))
-            diff = value
-          End If
-          Dim str = Microsoft.VisualBasic.Strings.Space(diff)
-          Console.Write(str)
-        Else
-          Dim value = EvaluateExpression(CType(entry, BoundExpression))
-          Dim str = ""
-          If TypeOf value Is BoundConstant Then
-            str = CStr(CType(value, BoundConstant).Value)
-          Else
-            str = CStr(value)
-          End If
-          Console.Write(str)
-          cr = True
-        End If
-      Next
-      If cr Then
-        Console.WriteLine()
-      End If
+      Dim pos = Console.CursorLeft + 1
+      Dim cur = pos Mod zoneWidth
+      Console.Write(Microsoft.VisualBasic.Strings.Space(cur))
     End Sub
+
+    Private Sub EvaluateHandlePrintLineStatement(node As BoundHandlePrintLineStatement)
+      Console.WriteLine()
+    End Sub
+
+    Private Sub EvaluateHandlePrintStatement(node As BoundHandlePrintStatement)
+      Dim value = EvaluateExpression(node.Expression)
+      Dim str = ""
+      If TypeOf value Is BoundConstant Then
+        str = CStr(CType(value, BoundConstant).Value)
+      Else
+        str = CStr(value)
+      End If
+      Console.Write(str)
+    End Sub
+
+    Private Sub EvaluateHandleSpcStatement(node As BoundHandleSpcStatement)
+      Dim screenWidth = 80
+      Dim zoneWidth = 14
+      Dim result = EvaluateExpression(node.Expression)
+      Dim value = CInt(result)
+      If value < 0 OrElse value > 255 Then
+        'error
+      ElseIf value > screenWidth Then
+        value = value Mod screenWidth
+      End If
+      Dim str = Microsoft.VisualBasic.Strings.Space(value)
+      Console.Write(str)
+    End Sub
+
+    Private Sub EvaluateHandleTabStatement(node As BoundHandleTabStatement)
+      Dim screenWidth = 80
+      Dim zoneWidth = 14
+      Dim result = EvaluateExpression(node.Expression)
+      Dim value = CInt(result)
+      If value < 0 OrElse value > 255 Then
+        ' error
+      End If
+      Dim pos = Console.CursorLeft + 1
+      Dim diff = 0
+      If pos < value Then
+        diff = value - pos
+      ElseIf pos > value Then
+        diff = screenWidth - pos
+        Console.WriteLine(Microsoft.VisualBasic.Strings.Space(diff))
+        diff = value
+      End If
+      Dim str = Microsoft.VisualBasic.Strings.Space(diff)
+      Console.Write(str)
+    End Sub
+
+    'Private Sub EvaluatePrintStatement(s As BoundPrintStatement)
+
+    '  Dim screenWidth = 80
+    '  Dim zoneWidth = 14
+
+    '  Dim cr = True
+    '  For Each entry In s.Nodes
+    '    If TypeOf entry Is BoundSymbol Then
+    '      Select Case CType(entry, BoundSymbol).Value
+    '        Case ";"c
+    '          cr = False
+    '        Case ","
+    '          Dim pos = Console.CursorLeft + 1
+    '          Dim cur = pos Mod zoneWidth
+    '          Console.Write(Microsoft.VisualBasic.Strings.Space(cur))
+    '          cr = False
+    '        Case Else
+    '          Throw New NotImplementedException
+    '          cr = True
+    '      End Select
+    '    ElseIf TypeOf entry Is BoundSpcFunction Then
+    '      Dim result = EvaluateExpression(CType(entry, BoundSpcFunction).Expression)
+    '      Dim value = CInt(result)
+    '      If value < 0 OrElse value > 255 Then
+    '        'error
+    '      ElseIf value > screenWidth Then
+    '        value = value Mod screenWidth
+    '      End If
+    '      Dim str = Microsoft.VisualBasic.Strings.Space(value)
+    '      Console.Write(str)
+    '      cr = False
+    '    ElseIf TypeOf entry Is BoundTabFunction Then
+    '      Dim result = EvaluateExpression(CType(entry, BoundTabFunction).Expression)
+    '      Dim value = CInt(result)
+    '      If value < 0 OrElse value > 255 Then
+    '        ' error
+    '      End If
+    '      Dim pos = Console.CursorLeft + 1
+    '      Dim diff = 0
+    '      If pos < value Then
+    '        diff = value - pos
+    '      ElseIf pos > value Then
+    '        diff = screenWidth - pos
+    '        Console.WriteLine(Microsoft.VisualBasic.Strings.Space(diff))
+    '        diff = value
+    '      End If
+    '      Dim str = Microsoft.VisualBasic.Strings.Space(diff)
+    '      Console.Write(str)
+    '    Else
+    '      Dim value = EvaluateExpression(CType(entry, BoundExpression))
+    '      Dim str = ""
+    '      If TypeOf value Is BoundConstant Then
+    '        str = CStr(CType(value, BoundConstant).Value)
+    '      Else
+    '        str = CStr(value)
+    '      End If
+    '      Console.Write(str)
+    '      cr = True
+    '    End If
+    '  Next
+    '  If cr Then
+    '    Console.WriteLine()
+    '  End If
+    'End Sub
 
     Private Sub EvaluateVariableDeclaration(node As BoundVariableDeclaration)
       Dim value = EvaluateExpression(node.Initializer)

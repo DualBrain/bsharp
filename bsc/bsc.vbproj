@@ -2,11 +2,13 @@
 
   <PropertyGroup>
 	<IsTool>true</IsTool>
-	<OutputType>Exe</OutputType>
-	<IsPackable>false</IsPackable>
-	<ProjectName>BASIC</ProjectName>
-	<RootNamespace>Basic</RootNamespace>
-    <TargetFramework>net6.0</TargetFramework>
+ 	<OutputType>Exe</OutputType>
+	<RootNamespace></RootNamespace>
+	<TargetFramework>net6.0</TargetFramework>
+	<OptionStrict>On</OptionStrict>
+	<SignAssembly>false</SignAssembly>
+	<DelaySign>false</DelaySign>
+	<ProjectName>bsc</ProjectName>
   </PropertyGroup>
 
   <ItemGroup>
