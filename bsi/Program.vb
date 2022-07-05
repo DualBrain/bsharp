@@ -1,4 +1,4 @@
-﻿Friend Module Program
+Friend Module Program
 
   Friend Sub Main()
 

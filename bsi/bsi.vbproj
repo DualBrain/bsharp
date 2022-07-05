@@ -1,8 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<IsTool>true</IsTool>
-	<OutputType>Exe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace></RootNamespace>
     <TargetFramework>net6.0</TargetFramework>
     <OptionStrict>On</OptionStrict>
@@ -10,7 +9,7 @@
     <AssemblyOriginatorKeyFile>bsharp_bsi.pfx</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>
     <ApplicationIcon>b_sharp.ico</ApplicationIcon>
-	<ProjectName>bsi</ProjectName>
+    <ProjectName>bsi</ProjectName>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
