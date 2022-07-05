@@ -1,1 +1,2 @@
-10 print "Hello"; " "; "World!"
+10 print ".";
+20 goto 10

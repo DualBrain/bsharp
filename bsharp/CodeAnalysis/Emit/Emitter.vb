@@ -165,7 +165,19 @@ Namespace Bsharp.CodeAnalysis.Emit
       Next
       For Each fixup In _fixups
         Dim targetLabel = fixup.Target
-        Dim targetInstructionIndex = _labels(targetLabel)
+
+        Dim targetInstructionIndex As Integer '= _labels(targetLabel)
+        If _labels.Keys.Contains(targetLabel) Then
+          targetInstructionIndex = _labels(targetLabel)
+        Else
+          For Each entry In _labels.Keys
+            If entry.Name = targetLabel.Name Then
+              targetInstructionIndex = _labels(entry)
+              Exit For
+            End If
+          Next
+        End If
+
         Dim targetInstruction = ilProcessor.Body.Instructions(targetInstructionIndex)
         Dim instructionToFixup = ilProcessor.Body.Instructions(fixup.InstructionIndex)
         instructionToFixup.Operand = targetInstruction
@@ -328,7 +340,13 @@ Namespace Bsharp.CodeAnalysis.Emit
         Dim value = CBool(node.ConstantValue.Value)
         Dim instruction = If(value, OpCodes.Ldc_I4_1, OpCodes.Ldc_I4_0)
         ilProcessor.Emit(instruction)
+      ElseIf node.Type Is TypeSymbol.Long64 Then
+        Dim value = CLng(node.ConstantValue.Value)
+        ilProcessor.Emit(OpCodes.Ldc_I4, value)
       ElseIf node.Type Is TypeSymbol.Integer Then
+        Dim value = CShort(node.ConstantValue.Value)
+        ilProcessor.Emit(OpCodes.Ldc_I4, value)
+      ElseIf node.Type Is TypeSymbol.Long Then
         Dim value = CInt(node.ConstantValue.Value)
         ilProcessor.Emit(OpCodes.Ldc_I4, value)
       ElseIf node.Type Is TypeSymbol.String Then
