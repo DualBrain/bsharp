@@ -136,6 +136,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case SyntaxKind.PrintKeyword : Return ParsePrintStatement()
         Case SyntaxKind.OpenBraceToken : Return ParseBlockStatement()
         Case SyntaxKind.OptionKeyword : Return ParseOptionStatement()
+        Case SyntaxKind.RemKeyword : Return ParseRemStatement()
         Case SyntaxKind.ReturnKeyword : Return ParseReturnStatement()
         Case SyntaxKind.StopKeyword : Return ParseStopStatement()
         Case SyntaxKind.SystemKeyword : Return ParseSystemStatement()
@@ -244,6 +245,33 @@ Namespace Bsharp.CodeAnalysis.Syntax
       Dim equalToken = MatchToken(SyntaxKind.EqualToken)
       Dim expression = ParseExpression()
       Return New MidStatementSyntax(m_syntaxTree, midKeyword, openParen, identifierToken, positionCommaToken, position, lengthCommaToken, length, closeParen, equalToken, expression)
+    End Function
+
+    Private Function ParseRemStatement() As RemStatementSyntax
+
+      Dim remKeyword = MatchToken(SyntaxKind.RemKeyword)
+      Dim remLine = m_text.GetLineIndex(remKeyword.Span.Start)
+
+      Dim comment As String = ""
+
+      While Current.Kind <> SyntaxKind.EndOfFileToken
+
+        Dim currentLine = m_text.GetLineIndex(Current.Span.Start)
+        If currentLine <> remLine Then Exit While
+
+        Dim token = NextToken()
+        For Each entry In token.LeadingTrivia
+          comment &= entry.Text
+        Next
+        comment &= token.Text
+        For Each entry In token.TrailingTrivia
+          comment &= entry.Text
+        Next
+
+      End While
+
+      Return New RemStatementSyntax(m_syntaxTree, remKeyword, comment)
+
     End Function
 
     Private Function ParsePrintStatement() As PrintStatementSyntax

@@ -44,6 +44,7 @@ Namespace Bsharp.CodeAnalysis.Binding
         Case BoundNodeKind.MidStatement : WriteMidStatement(CType(node, BoundMidStatement), writer)
         Case BoundNodeKind.NopStatement : WriteNopStatement(CType(node, BoundNopStatement), writer)
         'Case BoundNodeKind.PrintStatement : WritePrintStatement(CType(node, BoundPrintStatement), writer)
+        Case BoundNodeKind.RemStatement : WriteRemStatement(CType(node, BoundRemStatement), writer)
         Case BoundNodeKind.ReturnStatement : WriteReturnStatement(CType(node, BoundReturnStatement), writer)
         Case BoundNodeKind.UnaryExpression : WriteUnaryExpression(CType(node, BoundUnaryExpression), writer)
         Case BoundNodeKind.VariableDeclaration : WriteVariableDeclaration(CType(node, BoundVariableDeclaration), writer)
@@ -280,6 +281,12 @@ Namespace Bsharp.CodeAnalysis.Binding
       writer.WriteKeyword(If(node.JumpIfTrue, "if", "unless"))
       writer.WriteSpace()
       node.Condition.WriteTo(writer)
+      writer.WriteLine()
+    End Sub
+
+    Private Sub WriteRemStatement(node As BoundRemStatement, writer As IndentedTextWriter)
+      writer.WriteKeyword(SyntaxKind.RemKeyword)
+      ' Consider showing the comment?
       writer.WriteLine()
     End Sub
 

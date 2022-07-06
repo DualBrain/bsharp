@@ -114,6 +114,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case "or" : Return SyntaxKind.OrKeyword
         Case "orelse" : Return SyntaxKind.OrElseKeyword
         Case "print" : Return SyntaxKind.PrintKeyword
+        Case "rem" : Return SyntaxKind.RemKeyword
         Case "return" : Return SyntaxKind.ReturnKeyword
         Case "spc" : Return SyntaxKind.SpcKeyword
         Case "step" : Return SyntaxKind.StepKeyword
@@ -173,6 +174,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case SyntaxKind.OrKeyword : Return "Or"
         Case SyntaxKind.OrElseKeyword : Return "OrElse"
         Case SyntaxKind.PrintKeyword : Return "Print"
+        Case SyntaxKind.RemKeyword : Return "Rem"
         Case SyntaxKind.ReturnKeyword : Return "Return"
         Case SyntaxKind.SpcKeyword : Return "Spc"
         Case SyntaxKind.StepKeyword : Return "Step"

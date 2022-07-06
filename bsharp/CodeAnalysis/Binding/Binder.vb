@@ -343,6 +343,7 @@ Namespace Bsharp.CodeAnalysis.Binding
         Case SyntaxKind.MidStatement : Return BindMidStatement(CType(syntax, MidStatementSyntax))
         Case SyntaxKind.OptionStatement : Return BindOptionStatement(CType(syntax, OptionStatementSyntax))
         Case SyntaxKind.PrintStatement : Return BindPrintStatement(CType(syntax, PrintStatementSyntax))
+        Case SyntaxKind.RemStatement : Return BindRemStatement(CType(syntax, RemStatementSyntax))
         Case SyntaxKind.ReturnStatement : Return BindReturnStatement(CType(syntax, ReturnStatementSyntax))
         Case SyntaxKind.SingleLineIfStatement : Return BindSingleLineIfStatement(CType(syntax, SingleLineIfStatementSyntax))
         Case SyntaxKind.StopStatement : Return BindStopStatement(CType(syntax, StopStatementSyntax))
@@ -699,6 +700,10 @@ Namespace Bsharp.CodeAnalysis.Binding
     Private Function BindOptionStatement(syntax As OptionStatementSyntax) As BoundStatement
       Dim numberToken = syntax.NumberToken
       Return New BoundOptionStatement(CInt(numberToken.Text))
+    End Function
+
+    Private Function BindRemStatement(syntax As RemStatementSyntax) As BoundStatement
+      Return New BoundRemStatement()
     End Function
 
     Private Function BindPrintStatement(syntax As PrintStatementSyntax) As BoundStatement

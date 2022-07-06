@@ -123,6 +123,7 @@ Namespace Bsharp.CodeAnalysis
             index += 1
           'Case BoundNodeKind.PrintStatement
           '  EvaluatePrintStatement(CType(s, BoundPrintStatement)) : index += 1
+          Case BoundNodeKind.RemStatement : index += 1
           Case BoundNodeKind.ReturnStatement
             Dim rs = CType(s, BoundReturnStatement)
             m_lastValue = If(rs.Expression Is Nothing, Nothing, EvaluateExpression(rs.Expression))

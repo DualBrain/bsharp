@@ -197,6 +197,7 @@ Namespace Bsharp.CodeAnalysis.Emit
         Case BoundNodeKind.HandleTabStatement : EmitHandleTabStatement(ilProcessor, CType(node, BoundHandleTabStatement))
         Case BoundNodeKind.LabelStatement : EmitLabelStatement(ilProcessor, CType(node, BoundLabelStatement))
         Case BoundNodeKind.NopStatement : EmitNopStatement(ilProcessor, CType(node, BoundNopStatement))
+        Case BoundNodeKind.RemStatement : EmitRemStatement(ilProcessor, CType(node, BoundRemStatement))
         'Case BoundNodeKind.PrintStatement : EmitPrintStatement(ilProcessor, CType(node, BoundPrintStatement))
         Case BoundNodeKind.ReturnStatement : EmitReturnStatement(ilProcessor, CType(node, BoundReturnStatement))
         Case BoundNodeKind.VariableDeclaration : EmitVariableDeclaration(ilProcessor, CType(node, BoundVariableDeclaration))
@@ -440,6 +441,12 @@ Namespace Bsharp.CodeAnalysis.Emit
     End Sub
 
     Private Sub EmitNopStatement(ilProcessor As ILProcessor, node As BoundNopStatement)
+      If node Is Nothing Then
+      End If
+      ilProcessor.Emit(OpCodes.Nop)
+    End Sub
+
+    Private Sub EmitRemStatement(ilProcessor As ILProcessor, node As BoundRemStatement)
       If node Is Nothing Then
       End If
       ilProcessor.Emit(OpCodes.Nop)

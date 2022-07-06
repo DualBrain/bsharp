@@ -78,6 +78,7 @@
     OrElseKeyword
     OrKeyword
     PrintKeyword
+    RemKeyword
     ReturnKeyword
     SpcKeyword
     StepKeyword
@@ -128,6 +129,7 @@
     MultiLineIfBlock
     OptionStatement
     PrintStatement
+    RemStatement
     ReturnStatement
     SingleLineIfStatement
     StopStatement

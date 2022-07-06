@@ -27,6 +27,7 @@
     NopStatement
     OptionStatement
     PrintStatement
+    RemStatement
     ReturnStatement
     StopStatement
     SystemStatement

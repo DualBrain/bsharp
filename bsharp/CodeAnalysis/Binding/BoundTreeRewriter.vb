@@ -23,6 +23,7 @@ Namespace Bsharp.CodeAnalysis.Binding
         Case BoundNodeKind.NopStatement : Return RewriteNopStatement(DirectCast(node, BoundNopStatement))
         Case BoundNodeKind.OptionStatement : Return RewriteOptionStatement(DirectCast(node, BoundOptionStatement))
         Case BoundNodeKind.PrintStatement : Return RewritePrintStatement(DirectCast(node, BoundPrintStatement))
+        Case BoundNodeKind.RemStatement : Return RewriteRemStatement(DirectCast(node, BoundRemStatement))
         Case BoundNodeKind.ReturnStatement : Return RewriteReturnStatement(DirectCast(node, BoundReturnStatement))
         Case BoundNodeKind.StopStatement : Return RewriteStopStatement(DirectCast(node, BoundStopStatement))
         Case BoundNodeKind.SystemStatement : Return RewriteSystemStatement(DirectCast(node, BoundSystemStatement))
@@ -265,6 +266,10 @@ Namespace Bsharp.CodeAnalysis.Binding
     End Function
 
     Protected Overridable Function RewriteNopStatement(node As BoundNopStatement) As BoundStatement
+      Return node
+    End Function
+
+    Protected Overridable Function RewriteRemStatement(node As BoundRemStatement) As BoundStatement
       Return node
     End Function
 
