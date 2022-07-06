@@ -170,7 +170,7 @@ Namespace Bsharp.CodeAnalysis.Binding
           builder.Add(New BoundHandleSpcStatement(expression))
           cr = False
         ElseIf TypeOf entry Is BoundTabFunction Then
-          Dim expression = RewriteExpression(CType(entry, BoundSpcFunction).Expression)
+          Dim expression = RewriteExpression(CType(entry, BoundTabFunction).Expression)
           builder.Add(New BoundHandleTabStatement(expression))
           cr = False
         Else

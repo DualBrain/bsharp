@@ -252,15 +252,6 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Dim currentLine = m_text.GetLineIndex(Current.Span.Start)
         If currentLine <> printLine Then Exit While
 
-        Dim expression = ParseExpression()
-        If expression IsNot Nothing Then
-          'If lastToken = SyntaxKind.ExpressionStatement Then
-          '  Dim semiColonToken = New SyntaxToken(m_syntaxTree, SyntaxKind.SemicolonToken, expression.Span.Start, ";", Nothing, ImmutableArray(Of SyntaxTrivia).Empty, ImmutableArray(Of SyntaxTrivia).Empty)
-          '  nodes.Add(semiColonToken)
-          'End If
-          nodes.Add(expression)
-        End If
-
         If Current.Kind = SyntaxKind.SpcKeyword Then
           Dim spcKeyword = MatchToken(SyntaxKind.SpcKeyword)
           Dim openParen = MatchToken(SyntaxKind.OpenParenToken)
@@ -283,6 +274,15 @@ Namespace Bsharp.CodeAnalysis.Syntax
           'If lastToken <> SyntaxKind.SemicolonToken Then
           nodes.Add(semiColonToken)
           'End If
+        Else
+          Dim expression = ParseExpression()
+          If expression IsNot Nothing Then
+            'If lastToken = SyntaxKind.ExpressionStatement Then
+            '  Dim semiColonToken = New SyntaxToken(m_syntaxTree, SyntaxKind.SemicolonToken, expression.Span.Start, ";", Nothing, ImmutableArray(Of SyntaxTrivia).Empty, ImmutableArray(Of SyntaxTrivia).Empty)
+            '  nodes.Add(semiColonToken)
+            'End If
+            nodes.Add(expression)
+          End If
         End If
 
         If Current.Position = lastPosition Then

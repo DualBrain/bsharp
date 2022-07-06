@@ -703,11 +703,11 @@ Namespace Bsharp.CodeAnalysis.Binding
           nodes.Add(New BoundSymbol(","c))
         ElseIf entry.Kind = SyntaxKind.SpcFunction Then
           Dim spc = CType(entry, SpcFunctionSyntax)
-          Dim expr = BindExpression(spc.Expression, TypeSymbol.Integer)
+          Dim expr = BindExpression(spc.Expression, TypeSymbol.Long)
           nodes.Add(New BoundSpcFunction(expr))
         ElseIf entry.Kind = SyntaxKind.TabFunction Then
           Dim tab = CType(entry, TabFunctionSyntax)
-          Dim expr = BindExpression(tab.Expression, TypeSymbol.Integer)
+          Dim expr = BindExpression(tab.Expression, TypeSymbol.Long)
           nodes.Add(New BoundTabFunction(expr))
         Else
           nodes.Add(BindExpression(CType(entry, ExpressionSyntax), TypeSymbol.Any))

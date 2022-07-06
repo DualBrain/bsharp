@@ -25,6 +25,7 @@ Namespace Bsharp.CodeAnalysis.Binding
         Case BoundNodeKind.BinaryExpression : WriteBinaryExpression(CType(node, BoundBinaryExpression), writer)
         Case BoundNodeKind.BlockStatement : WriteBlockStatement(CType(node, BoundBlockStatement), writer)
         Case BoundNodeKind.CallExpression : WriteCallExpression(CType(node, BoundCallExpression), writer)
+        Case BoundNodeKind.ClsStatement : WriteClsStatement(CType(node, BoundClsStatement), writer)
         Case BoundNodeKind.ConditionalGotoStatement : WriteConditionalGotoStatement(CType(node, BoundConditionalGotoStatement), writer)
         Case BoundNodeKind.ConversionExpression : WriteConversionExpression(CType(node, BoundConversionExpression), writer)
         Case BoundNodeKind.DoWhileStatement : WriteDoWhileStatement(CType(node, BoundDoWhileStatement), writer)
@@ -32,11 +33,16 @@ Namespace Bsharp.CodeAnalysis.Binding
         Case BoundNodeKind.ExpressionStatement : WriteExpressionStatement(CType(node, BoundExpressionStatement), writer)
         Case BoundNodeKind.ForStatement : WriteForStatement(CType(node, BoundForStatement), writer)
         Case BoundNodeKind.GotoStatement : WriteGotoStatement(CType(node, BoundGotoStatement), writer)
+        Case BoundNodeKind.HandleCommaStatement : WriteHandleCommaStatement(CType(node, BoundHandleCommaStatement), writer)
+        Case BoundNodeKind.HandlePrintLineStatement : WriteHandlePrintLineStatement(CType(node, BoundHandlePrintLineStatement), writer)
+        Case BoundNodeKind.HandlePrintStatement : WriteHandlePrintStatement(CType(node, BoundHandlePrintStatement), writer)
+        Case BoundNodeKind.HandleSpcStatement : WriteHandleSpcStatement(CType(node, BoundHandleSpcStatement), writer)
+        Case BoundNodeKind.HandleTabStatement : WriteHandleTabStatement(CType(node, BoundHandleTabStatement), writer)
         Case BoundNodeKind.IfStatement : WriteIfStatement(CType(node, BoundIfStatement), writer)
         Case BoundNodeKind.LabelStatement : WriteLabelStatement(CType(node, BoundLabelStatement), writer)
         Case BoundNodeKind.LiteralExpression : WriteLiteralExpression(CType(node, BoundLiteralExpression), writer)
         Case BoundNodeKind.NopStatement : WriteNopStatement(CType(node, BoundNopStatement), writer)
-        Case BoundNodeKind.PrintStatement : WritePrintStatement(CType(node, BoundPrintStatement), writer)
+        'Case BoundNodeKind.PrintStatement : WritePrintStatement(CType(node, BoundPrintStatement), writer)
         Case BoundNodeKind.ReturnStatement : WriteReturnStatement(CType(node, BoundReturnStatement), writer)
         Case BoundNodeKind.UnaryExpression : WriteUnaryExpression(CType(node, BoundUnaryExpression), writer)
         Case BoundNodeKind.VariableDeclaration : WriteVariableDeclaration(CType(node, BoundVariableDeclaration), writer)
@@ -45,6 +51,37 @@ Namespace Bsharp.CodeAnalysis.Binding
         Case Else
           Throw New Exception($"Unexpected node {node.Kind}")
       End Select
+    End Sub
+
+    Private Sub WriteHandleCommaStatement(node As BoundHandleCommaStatement, writer As IndentedTextWriter)
+      writer.WriteKeyword("HandleCommaStatement()")
+      writer.WriteLine()
+    End Sub
+
+    Private Sub WriteHandlePrintLineStatement(node As BoundHandlePrintLineStatement, writer As IndentedTextWriter)
+      writer.WriteKeyword("HandlePrintLine()")
+      writer.WriteLine()
+    End Sub
+
+    Private Sub WriteHandlePrintStatement(node As BoundHandlePrintStatement, writer As IndentedTextWriter)
+      writer.WriteKeyword("HandlePrint(")
+      node.Expression.WriteTo(writer)
+      writer.WriteKeyword(")")
+      writer.WriteLine()
+    End Sub
+
+    Private Sub WriteHandleSpcStatement(node As BoundHandleSpcStatement, writer As IndentedTextWriter)
+      writer.WriteKeyword("HandleSpc(")
+      node.Expression.WriteTo(writer)
+      writer.WriteKeyword(")")
+      writer.WriteLine()
+    End Sub
+
+    Private Sub WriteHandleTabStatement(node As BoundHandleTabStatement, writer As IndentedTextWriter)
+      writer.WriteKeyword("HandleTab(")
+      node.Expression.WriteTo(writer)
+      writer.WriteKeyword(")")
+      writer.WriteLine()
     End Sub
 
     <Extension>
@@ -110,14 +147,14 @@ Namespace Bsharp.CodeAnalysis.Binding
 
     End Sub
 
-    Private Sub WritePrintStatement(node As BoundPrintStatement, writer As IndentedTextWriter)
-      writer.WriteKeyword(SyntaxKind.PrintKeyword)
-      writer.WriteSpace
-      For Each nd In node.Nodes
-        nd.WriteTo(writer)
-      Next
-      writer.WriteLine()
-    End Sub
+    'Private Sub WritePrintStatement(node As BoundPrintStatement, writer As IndentedTextWriter)
+    '  writer.WriteKeyword(SyntaxKind.PrintKeyword)
+    '  writer.WriteSpace
+    '  For Each nd In node.Nodes
+    '    nd.WriteTo(writer)
+    '  Next
+    '  writer.WriteLine()
+    'End Sub
 
     Private Sub WriteNopStatement(node As BoundNopStatement, writer As IndentedTextWriter)
       If node Is Nothing Then
@@ -156,6 +193,11 @@ Namespace Bsharp.CodeAnalysis.Binding
       node.Expression.WriteTo(writer)
       writer.WriteLine()
       writer.WriteNestedStatement(node.Statements)
+    End Sub
+
+    Private Sub WriteClsStatement(node As BoundClsStatement, writer As IndentedTextWriter)
+      writer.WriteKeyword(SyntaxKind.ClsKeyword)
+      writer.WriteLine()
     End Sub
 
     Private Sub WriteDoWhileStatement(node As BoundDoWhileStatement, writer As IndentedTextWriter)
