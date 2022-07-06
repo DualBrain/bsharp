@@ -361,21 +361,21 @@ end if", 5)>
 
     End Sub
 
-    <Fact>
-    Public Sub Evaluator_Variables_Can_Shadow_Functions()
+    '<Fact>
+    'Public Sub Evaluator_Variables_Can_Shadow_Functions()
 
-      Dim text = "
-        if true then
-          const instr = 42
-          i = [instr](""test"", ""e"")
-        end if"
+    '  Dim text = "
+    '    if true then
+    '      const instr = 42
+    '      i = [instr](""test"", ""e"")
+    '    end if"
 
-      Dim diagnostics = "
-        'instr' is not a function."
+    '  Dim diagnostics = "
+    '    'instr' is not a function."
 
-      AssertDiagnostics(text, diagnostics)
+    '  AssertDiagnostics(text, diagnostics)
 
-    End Sub
+    'End Sub
 
     <Fact>
     Public Sub Evaluator_VariableDeclaration_Reports_Redeclaration()
@@ -606,7 +606,7 @@ end if"
       Dim text = "[foo](42)"
 
       Dim diagnostics = "
-        'foo' is not a function."
+        Function 'foo' doesn't exist."
 
       AssertDiagnostics(text, diagnostics)
 

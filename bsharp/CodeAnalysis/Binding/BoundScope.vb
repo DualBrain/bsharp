@@ -43,13 +43,21 @@ Namespace Bsharp.CodeAnalysis.Binding
     Public Function TryLookupFunction(name As String, parameters As List(Of TypeSymbol)) As Symbol
       Dim key = $"{name.ToLower}"
       key &= $"[{If(parameters?.Count, 0)}]"
-      Return TryLookupSymbol(key)
+      Dim result = TryLookupSymbol(key)
+      If result Is Nothing Then
+        key = $"{name.ToLower}["
+        result = TryLookupSymbol(key)
+      End If
+      Return result
     End Function
 
     Public Function TryLookupSymbol(name As String) As Symbol
       Dim symbol As Symbols.Symbol = Nothing
       If m_symbols IsNot Nothing AndAlso m_symbols.TryGetValue(name.ToLower, symbol) Then
         Return symbol
+      ElseIf m_symbols IsNot Nothing AndAlso name.EndsWith("[") Then
+        Dim result = (From p In m_symbols Where p.Key.StartsWith(name.ToLower) Select p.Value).FirstOrDefault
+        If result IsNot Nothing Then Return result
       End If
       Return Parent?.TryLookupSymbol(name)
     End Function
