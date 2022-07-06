@@ -26,20 +26,28 @@ Namespace Bsharp.CodeAnalysis.Binding
     End Function
 
     Private Function TryDeclareSymbol(Of TSymbol As Symbol)(symbol As TSymbol) As Boolean
-      'TODO: Handle overloading/optional parameters.
+      Dim key = $"{symbol.Name.ToLower}"
+      If symbol.Kind = SymbolKind.Function Then
+        Dim f = TryCast(symbol, FunctionSymbol)
+        key &= $"[{If(f?.Parameters.Length, 0)}]"
+      End If
       If m_symbols Is Nothing Then
         m_symbols = New Dictionary(Of String, Symbol)
-      ElseIf m_symbols.ContainsKey(symbol.Name?.ToLower) Then
+      ElseIf m_symbols.ContainsKey(key) Then
         Return False
       End If
-      m_symbols.Add(symbol.Name?.ToLower, symbol)
+      m_symbols.Add(key, symbol)
       Return True
+    End Function
+
+    Public Function TryLookupFunction(name As String, parameters As List(Of TypeSymbol)) As Symbol
+      Dim key = $"{name.ToLower}"
+      key &= $"[{If(parameters?.Count, 0)}]"
+      Return TryLookupSymbol(key)
     End Function
 
     Public Function TryLookupSymbol(name As String) As Symbol
       Dim symbol As Symbols.Symbol = Nothing
-      'TODO: Handle Function Operator Overloading (duplicate functions names with different parameters/types).
-      'TODO: Handle Optional Parameters.
       If m_symbols IsNot Nothing AndAlso m_symbols.TryGetValue(name.ToLower, symbol) Then
         Return symbol
       End If

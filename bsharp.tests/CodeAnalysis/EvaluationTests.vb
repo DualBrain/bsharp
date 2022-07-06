@@ -117,7 +117,7 @@ return r", " 1")>
     <InlineData("let r = boolean(""true"")
 return r", True)>
     <InlineData("let r = integer(""1"")
-return r", 1)>
+return r", CShort(1))>
     <InlineData("let r = rnd(0)
 return r", 0)>
     <InlineData("if true then
@@ -606,7 +606,7 @@ end if"
       Dim text = "[foo](42)"
 
       Dim diagnostics = "
-        Function 'foo' doesn't exist."
+        'foo' is not a function."
 
       AssertDiagnostics(text, diagnostics)
 
@@ -622,7 +622,7 @@ end if"
         end if"
 
       Dim diagnostics = "
-        'foo' is not a function."
+        Function 'foo' doesn't exist."
 
       AssertDiagnostics(text, diagnostics)
 

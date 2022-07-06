@@ -420,12 +420,15 @@ Namespace Bsharp.CodeAnalysis.Binding
 
       Dim boundArguments = ImmutableArray.CreateBuilder(Of BoundExpression)()
 
+      Dim parameters = New List(Of TypeSymbol)
       For Each argument In syntax.Arguments
         Dim boundArgument = BindExpression(argument)
         boundArguments.Add(boundArgument)
+        parameters.Add(boundArgument.Type)
       Next
 
-      Dim symbol = m_scope.TryLookupSymbol(syntax.Identifier.Text)
+      'Dim symbol = m_scope.TryLookupSymbol(syntax.Identifier.Text)
+      Dim symbol = m_scope.TryLookupFunction(syntax.Identifier.Text, parameters)
       If symbol Is Nothing Then
         Diagnostics.ReportUndefinedFunction(syntax.Identifier.Location, syntax.Identifier.Text)
         Return New BoundErrorExpression

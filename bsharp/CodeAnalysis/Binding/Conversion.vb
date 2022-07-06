@@ -30,6 +30,50 @@ Namespace Bsharp.CodeAnalysis.Binding
         Return Conversion.Identity
       End If
 
+      If [from] Is TypeSymbol.Single AndAlso [to] Is TypeSymbol.Double Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.ULong64 AndAlso [to] Is TypeSymbol.Double Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.Long64 AndAlso [to] Is TypeSymbol.Double Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.ULong AndAlso [to] Is TypeSymbol.Double Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.Long AndAlso [to] Is TypeSymbol.Double Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.UInteger AndAlso [to] Is TypeSymbol.Double Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.Integer AndAlso [to] Is TypeSymbol.Double Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.SByte AndAlso [to] Is TypeSymbol.Double Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.Byte AndAlso [to] Is TypeSymbol.Double Then Return Conversion.Implicit
+
+      If [from] Is TypeSymbol.ULong64 AndAlso [to] Is TypeSymbol.Single Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.Long64 AndAlso [to] Is TypeSymbol.Single Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.ULong AndAlso [to] Is TypeSymbol.Single Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.Long AndAlso [to] Is TypeSymbol.Single Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.UInteger AndAlso [to] Is TypeSymbol.Single Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.Integer AndAlso [to] Is TypeSymbol.Single Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.SByte AndAlso [to] Is TypeSymbol.Single Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.Byte AndAlso [to] Is TypeSymbol.Single Then Return Conversion.Implicit
+
+      If [from] Is TypeSymbol.Long64 AndAlso [to] Is TypeSymbol.ULong64 Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.UInteger AndAlso [to] Is TypeSymbol.ULong64 Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.Byte AndAlso [to] Is TypeSymbol.ULong64 Then Return Conversion.Implicit
+
+      If [from] Is TypeSymbol.ULong AndAlso [to] Is TypeSymbol.Long64 Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.Long AndAlso [to] Is TypeSymbol.Long64 Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.UInteger AndAlso [to] Is TypeSymbol.Long64 Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.Integer AndAlso [to] Is TypeSymbol.Long64 Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.SByte AndAlso [to] Is TypeSymbol.Long64 Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.Byte AndAlso [to] Is TypeSymbol.Long64 Then Return Conversion.Implicit
+
+      If [from] Is TypeSymbol.UInteger AndAlso [to] Is TypeSymbol.ULong Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.Byte AndAlso [to] Is TypeSymbol.ULong Then Return Conversion.Implicit
+
+      If [from] Is TypeSymbol.UInteger AndAlso [to] Is TypeSymbol.Long Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.Integer AndAlso [to] Is TypeSymbol.Long Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.SByte AndAlso [to] Is TypeSymbol.Long Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.Byte AndAlso [to] Is TypeSymbol.Long Then Return Conversion.Implicit
+
+      If [from] Is TypeSymbol.Integer AndAlso [to] Is TypeSymbol.UInteger Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.Byte AndAlso [to] Is TypeSymbol.UInteger Then Return Conversion.Implicit
+
+      If [from] Is TypeSymbol.SByte AndAlso [to] Is TypeSymbol.Integer Then Return Conversion.Implicit
+      If [from] Is TypeSymbol.Byte AndAlso [to] Is TypeSymbol.Integer Then Return Conversion.Implicit
+
       If [from] IsNot TypeSymbol.Nothing AndAlso [to] Is TypeSymbol.Any Then
         Return Conversion.Implicit
       End If

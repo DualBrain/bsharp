@@ -698,8 +698,26 @@ Namespace Bsharp.CodeAnalysis
         Return value
       ElseIf node.Type Is TypeSymbol.Boolean Then
         Return Convert.ToBoolean(value)
+      ElseIf node.Type Is TypeSymbol.Byte Then
+        Return Convert.ToByte(value)
+      ElseIf node.Type Is TypeSymbol.SByte Then
+        Return Convert.ToSByte(value)
       ElseIf node.Type Is TypeSymbol.Integer Then
+        Return Convert.ToInt16(value)
+      ElseIf node.Type Is TypeSymbol.UInteger Then
+        Return Convert.ToUInt16(value)
+      ElseIf node.Type Is TypeSymbol.Long Then
         Return Convert.ToInt32(value)
+      ElseIf node.Type Is TypeSymbol.ULong Then
+        Return Convert.ToUInt32(value)
+      ElseIf node.Type Is TypeSymbol.Long64 Then
+        Return Convert.ToInt64(value)
+      ElseIf node.Type Is TypeSymbol.ULong64 Then
+        Return Convert.ToUInt64(value)
+      ElseIf node.Type Is TypeSymbol.Single Then
+        Return Convert.ToSingle(value)
+      ElseIf node.Type Is TypeSymbol.Double Then
+        Return Convert.ToDouble(value)
       ElseIf node.Type Is TypeSymbol.String Then
         Return Convert.ToString(value)
       Else
