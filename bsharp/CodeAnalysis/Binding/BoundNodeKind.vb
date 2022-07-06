@@ -23,6 +23,7 @@
     IfStatement
     LabelStatement
     LetStatement
+    MidStatement
     NopStatement
     OptionStatement
     PrintStatement
@@ -46,6 +47,7 @@
     HandleTabStatement
     HandleSpcStatement
     HandleCommaStatement
+
   End Enum
 
 End Namespace

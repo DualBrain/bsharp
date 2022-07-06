@@ -340,6 +340,7 @@ Namespace Bsharp.CodeAnalysis.Binding
         Case SyntaxKind.IfStatement : Return BindIfStatement(CType(syntax, IfStatementSyntax))
         Case SyntaxKind.LabelStatement : Return BindLabelStatement(CType(syntax, LabelStatementSyntax))
         Case SyntaxKind.LetStatement : Return BindLetStatement(CType(syntax, LetStatementSyntax))
+        Case SyntaxKind.MidStatement : Return BindMidStatement(CType(syntax, MidStatementSyntax))
         Case SyntaxKind.OptionStatement : Return BindOptionStatement(CType(syntax, OptionStatementSyntax))
         Case SyntaxKind.PrintStatement : Return BindPrintStatement(CType(syntax, PrintStatementSyntax))
         Case SyntaxKind.ReturnStatement : Return BindReturnStatement(CType(syntax, ReturnStatementSyntax))
@@ -685,6 +686,14 @@ Namespace Bsharp.CodeAnalysis.Binding
 
     Private Function BindParenExpression(syntax As ParenExpressionSyntax) As BoundExpression
       Return BindExpression(syntax.Expression)
+    End Function
+
+    Private Function BindMidStatement(syntax As MidStatementSyntax) As BoundStatement
+      Dim variable = DetermineVariableReference(syntax.IdentifierToken)
+      Dim positionExpression = If(syntax.PositionExpression Is Nothing, Nothing, BindExpression(syntax.PositionExpression))
+      Dim lengthExpression = If(syntax.LengthExpression Is Nothing, Nothing, BindExpression(syntax.LengthExpression))
+      Dim expression = If(syntax.Expression Is Nothing, Nothing, BindExpression(syntax.Expression))
+      Return New BoundMidStatement(variable, positionExpression, lengthExpression, expression)
     End Function
 
     Private Function BindOptionStatement(syntax As OptionStatementSyntax) As BoundStatement

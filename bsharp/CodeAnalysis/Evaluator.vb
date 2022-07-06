@@ -111,6 +111,7 @@ Namespace Bsharp.CodeAnalysis
           Case BoundNodeKind.HandleTabStatement : EvaluateHandleTabStatement(CType(s, BoundHandleTabStatement)) : index += 1
 
           Case BoundNodeKind.LabelStatement : index += 1
+          Case BoundNodeKind.MidStatement : EvaluateMidStatement(CType(s, BoundMidStatement)) : index += 1
           Case BoundNodeKind.NopStatement : index += 1
           Case BoundNodeKind.LetStatement : EvaluateLetStatement(CType(s, BoundLetStatement)) : index += 1
           Case BoundNodeKind.OptionStatement
@@ -140,6 +141,24 @@ Namespace Bsharp.CodeAnalysis
       Return m_lastValue
 
     End Function
+
+    Private Sub EvaluateMidStatement(node As BoundMidStatement)
+      Dim positionValue = CInt(EvaluateExpression(node.PositionExpression))
+      Dim lengthValue = CInt(If(node.LengthExpression Is Nothing, Integer.MaxValue, EvaluateExpression(node.LengthExpression)))
+      Dim value = CStr(EvaluateExpression(node.Expression))
+      'Assign(node.Variable, value)
+      If node.Variable.Kind = SymbolKind.GlobalVariable Then
+        Dim temp = CStr(m_globals(node.Variable))
+        Mid(temp, positionValue, lengthValue) = value
+        m_globals(node.Variable) = temp
+      Else
+        Dim locals = m_locals.Peek
+        locals(node.Variable) = value
+        Dim temp = CStr(locals(node.Variable))
+        Mid(temp, positionValue, lengthValue) = value
+        locals(node.Variable) = temp
+      End If
+    End Sub
 
     Private Sub EvaluateLetStatement(node As BoundLetStatement)
       Dim value = EvaluateExpression(node.Expression)

@@ -106,6 +106,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case "in" : Return SyntaxKind.InKeyword
         Case "let" : Return SyntaxKind.LetKeyword
         Case "loop" : Return SyntaxKind.LoopKeyword
+        Case "mid$" : Return SyntaxKind.MidKeyword
         Case "mod" : Return SyntaxKind.ModKeyword
         Case "next" : Return SyntaxKind.NextKeyword
         Case "not" : Return SyntaxKind.NotKeyword
@@ -164,6 +165,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case SyntaxKind.InKeyword : Return "In"
         Case SyntaxKind.LetKeyword : Return "Let"
         Case SyntaxKind.LoopKeyword : Return "Loop"
+        Case SyntaxKind.MidKeyword : Return "Mid$"
         Case SyntaxKind.ModKeyword : Return "Mod"
         Case SyntaxKind.NextKeyword : Return "Next"
         Case SyntaxKind.NotKeyword : Return "Not"

@@ -132,6 +132,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case SyntaxKind.IfKeyword : Return ParseIfStatement()
         Case SyntaxKind.Label : Return ParseLabelStatement()
         Case SyntaxKind.LetKeyword : Return ParseLetStatement()
+        Case SyntaxKind.MidKeyword : Return ParseMidStatement()
         Case SyntaxKind.PrintKeyword : Return ParsePrintStatement()
         Case SyntaxKind.OpenBraceToken : Return ParseBlockStatement()
         Case SyntaxKind.OptionKeyword : Return ParseOptionStatement()
@@ -225,6 +226,24 @@ Namespace Bsharp.CodeAnalysis.Syntax
       Dim numberToken = MatchToken(SyntaxKind.NumberToken)
       Return New OptionStatementSyntax(m_syntaxTree, optionKeyword, baseKeyword, numberToken)
 
+    End Function
+
+    Private Function ParseMidStatement() As MidStatementSyntax
+      Dim midKeyword = MatchToken(SyntaxKind.MidKeyword)
+      Dim openParen = MatchToken(SyntaxKind.OpenParenToken)
+      Dim identifierToken = MatchToken(SyntaxKind.IdentifierToken)
+      Dim positionCommaToken = MatchToken(SyntaxKind.CommaToken)
+      Dim position = ParseExpression()
+      Dim lengthCommaToken As SyntaxToken = Nothing
+      Dim length As ExpressionSyntax = Nothing
+      If Current.Kind = SyntaxKind.CommaToken Then
+        lengthCommaToken = MatchToken(SyntaxKind.CommaToken)
+        length = ParseExpression()
+      End If
+      Dim closeParen = MatchToken(SyntaxKind.CloseParenToken)
+      Dim equalToken = MatchToken(SyntaxKind.EqualToken)
+      Dim expression = ParseExpression()
+      Return New MidStatementSyntax(m_syntaxTree, midKeyword, openParen, identifierToken, positionCommaToken, position, lengthCommaToken, length, closeParen, equalToken, expression)
     End Function
 
     Private Function ParsePrintStatement() As PrintStatementSyntax

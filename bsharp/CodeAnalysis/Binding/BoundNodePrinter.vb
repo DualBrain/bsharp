@@ -41,6 +41,7 @@ Namespace Bsharp.CodeAnalysis.Binding
         Case BoundNodeKind.IfStatement : WriteIfStatement(CType(node, BoundIfStatement), writer)
         Case BoundNodeKind.LabelStatement : WriteLabelStatement(CType(node, BoundLabelStatement), writer)
         Case BoundNodeKind.LiteralExpression : WriteLiteralExpression(CType(node, BoundLiteralExpression), writer)
+        Case BoundNodeKind.MidStatement : WriteMidStatement(CType(node, BoundMidStatement), writer)
         Case BoundNodeKind.NopStatement : WriteNopStatement(CType(node, BoundNopStatement), writer)
         'Case BoundNodeKind.PrintStatement : WritePrintStatement(CType(node, BoundPrintStatement), writer)
         Case BoundNodeKind.ReturnStatement : WriteReturnStatement(CType(node, BoundReturnStatement), writer)
@@ -155,6 +156,26 @@ Namespace Bsharp.CodeAnalysis.Binding
     '  Next
     '  writer.WriteLine()
     'End Sub
+
+    Private Sub WriteMidStatement(node As BoundMidStatement, writer As IndentedTextWriter)
+      writer.WriteKeyword(SyntaxKind.MidKeyword)
+      writer.WritePunctuation(SyntaxKind.OpenParenToken)
+      writer.WriteIdentifier(node.Variable.Name)
+      writer.WritePunctuation(SyntaxKind.CommaToken)
+      writer.WriteSpace
+      node.PositionExpression.WriteTo(writer)
+      If node.LengthExpression IsNot Nothing Then
+        writer.WritePunctuation(SyntaxKind.CommaToken)
+        writer.WriteSpace
+        node.LengthExpression.WriteTo(writer)
+      End If
+      writer.WritePunctuation(SyntaxKind.CloseParenToken)
+      writer.WriteSpace
+      writer.WritePunctuation(SyntaxKind.EqualToken)
+      writer.WriteSpace
+      node.Expression.WriteTo(writer)
+      writer.WriteLine()
+    End Sub
 
     Private Sub WriteNopStatement(node As BoundNopStatement, writer As IndentedTextWriter)
       If node Is Nothing Then

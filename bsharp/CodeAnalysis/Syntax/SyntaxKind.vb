@@ -70,6 +70,7 @@
     InKeyword
     LetKeyword
     LoopKeyword
+    MidKeyword
     ModKeyword
     NextKeyword
     NotKeyword
@@ -123,6 +124,7 @@
     IfStatement
     LabelStatement
     LetStatement
+    MidStatement
     MultiLineIfBlock
     OptionStatement
     PrintStatement
