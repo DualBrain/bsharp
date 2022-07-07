@@ -3,6 +3,10 @@
   Friend NotInheritable Class BoundReturnStatement
     Inherits BoundStatement
 
+    Public Sub New()
+      Me.Expression = Nothing
+    End Sub
+
     Public Sub New(expression As BoundExpression)
       Me.Expression = expression
     End Sub

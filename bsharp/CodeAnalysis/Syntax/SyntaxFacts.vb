@@ -101,6 +101,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case "for" : Return SyntaxKind.ForKeyword
         Case "function" : Return SyntaxKind.FunctionKeyword
         Case "goto" : Return SyntaxKind.GotoKeyword
+        Case "gosub" : Return SyntaxKind.GosubKeyword
         Case "if" : Return SyntaxKind.IfKeyword
         Case "imp" : Return SyntaxKind.ImpKeyword
         Case "in" : Return SyntaxKind.InKeyword
@@ -161,6 +162,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case SyntaxKind.ForKeyword : Return "For"
         Case SyntaxKind.FunctionKeyword : Return "Function"
         Case SyntaxKind.GotoKeyword : Return "Goto"
+        Case SyntaxKind.GosubKeyword : Return "Gosub"
         Case SyntaxKind.IfKeyword : Return "If"
         Case SyntaxKind.ImpKeyword : Return "Imp"
         Case SyntaxKind.InKeyword : Return "In"

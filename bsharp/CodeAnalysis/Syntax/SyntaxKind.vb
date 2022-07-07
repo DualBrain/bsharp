@@ -64,6 +64,7 @@
     FalseKeyword
     ForKeyword
     FunctionKeyword
+    GosubKeyword
     GotoKeyword
     IfKeyword
     ImpKeyword
@@ -121,6 +122,7 @@
     ExpressionStatement
     ForEachStatement
     ForStatement
+    GosubStatement
     GotoStatement
     IfStatement
     LabelStatement
@@ -138,13 +140,13 @@
     WhileStatement
 
     ' Expressions
+    AssignmentExpression
+    BinaryExpression
+    CallExpression
     LiteralExpression
     NameExpression
-    UnaryExpression
-    BinaryExpression
     ParenExpression
-    AssignmentExpression
-    CallExpression
+    UnaryExpression
 
   End Enum
 

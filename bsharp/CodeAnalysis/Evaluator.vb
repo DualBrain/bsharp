@@ -4,7 +4,6 @@ Imports Bsharp.CodeAnalysis.Syntax
 
 Namespace Bsharp.CodeAnalysis
 
-  ' TODO: Get rid of evaluator in favor of Emitter (see #113)
   Friend NotInheritable Class Evaluator
 
     Private ReadOnly m_program As BoundProgram
@@ -12,6 +11,9 @@ Namespace Bsharp.CodeAnalysis
     Private ReadOnly m_functions As New Dictionary(Of FunctionSymbol, BoundBlockStatement)
     Private ReadOnly m_locals As New Stack(Of Dictionary(Of VariableSymbol, Object))
     Private m_random As Random
+
+    'TODO: Need to make this scoped.
+    Private ReadOnly m_gosubStack As New Stack(Of Integer)
 
     Private m_lastValue As Object
 
@@ -89,6 +91,22 @@ Namespace Bsharp.CodeAnalysis
           Case BoundNodeKind.EndStatement
             index = body.Statements.Length
           Case BoundNodeKind.ExpressionStatement : EvaluateExpressionStatement(CType(s, BoundExpressionStatement)) : index += 1
+
+          Case BoundNodeKind.GosubStatement
+            Dim gs = CType(s, BoundGosubStatement)
+            If labelToIndex.Keys.Contains(gs.Label) Then
+              m_gosubStack.Push(index + 1)
+              index = labelToIndex(gs.Label)
+            Else
+              For Each entry In labelToIndex.Keys
+                If entry.Name = gs.Label.Name Then
+                  m_gosubStack.Push(index + 1)
+                  index = labelToIndex(entry)
+                  Exit For
+                End If
+              Next
+            End If
+
           Case BoundNodeKind.GotoStatement
             Dim gs = CType(s, BoundGotoStatement)
 
@@ -125,9 +143,17 @@ Namespace Bsharp.CodeAnalysis
           '  EvaluatePrintStatement(CType(s, BoundPrintStatement)) : index += 1
           Case BoundNodeKind.RemStatement : index += 1
           Case BoundNodeKind.ReturnStatement
+            'TODO: Need to determine if this is a 
+            '      value Return or a Return related
+            '      to a Gosub.
             Dim rs = CType(s, BoundReturnStatement)
             m_lastValue = If(rs.Expression Is Nothing, Nothing, EvaluateExpression(rs.Expression))
-            Return m_lastValue
+            If m_lastValue Is Nothing AndAlso
+               m_gosubStack.Count > 0 Then
+              index = m_gosubStack.Pop
+            Else
+              Return m_lastValue
+            End If
           Case BoundNodeKind.StopStatement
             index = body.Statements.Length
           Case BoundNodeKind.SystemStatement

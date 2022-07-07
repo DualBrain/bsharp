@@ -19,7 +19,13 @@
     ElseIfStatement
     ExpressionStatement
     ForStatement
+    GosubStatement
     GotoStatement
+    HandleCommaStatement
+    HandlePrintLineStatement
+    HandlePrintStatement
+    HandleTabStatement
+    HandleSpcStatement
     IfStatement
     LabelStatement
     LetStatement
@@ -43,11 +49,6 @@
     LiteralExpression
     VariableExpression
     UnaryExpression
-    HandlePrintLineStatement
-    HandlePrintStatement
-    HandleTabStatement
-    HandleSpcStatement
-    HandleCommaStatement
 
   End Enum
 

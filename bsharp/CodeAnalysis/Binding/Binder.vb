@@ -336,6 +336,7 @@ Namespace Bsharp.CodeAnalysis.Binding
         Case SyntaxKind.ExitStatement : Return BindExitStatement(CType(syntax, ExitStatementSyntax))
         Case SyntaxKind.ExpressionStatement : Return BindExpressionStatement(CType(syntax, ExpressionStatementSyntax))
         Case SyntaxKind.ForStatement : Return BindForStatement(CType(syntax, ForStatementSyntax))
+        Case SyntaxKind.GosubStatement : Return BindGosubStatement(CType(syntax, GosubStatementSyntax))
         Case SyntaxKind.GotoStatement : Return BindGotoStatement(CType(syntax, GotoStatementSyntax))
         Case SyntaxKind.IfStatement : Return BindIfStatement(CType(syntax, IfStatementSyntax))
         Case SyntaxKind.LabelStatement : Return BindLabelStatement(CType(syntax, LabelStatementSyntax))
@@ -580,6 +581,15 @@ Namespace Bsharp.CodeAnalysis.Binding
 
     End Function
 
+    Private Function BindGosubStatement(syntax As GosubStatementSyntax) As BoundStatement
+      Dim value = syntax.IdentifierToken.Text
+      If IsNumeric(value) Then
+        value = $"GosubLabel{value}"
+      End If
+      Dim label = New BoundLabel(value)
+      Return New BoundGosubStatement(label)
+    End Function
+
     Private Function BindGotoStatement(syntax As GotoStatementSyntax) As BoundStatement
       Dim value = syntax.IdentifierToken.Text
       If IsNumeric(value) Then
@@ -735,6 +745,25 @@ Namespace Bsharp.CodeAnalysis.Binding
     Private Function BindReturnStatement(syntax As ReturnStatementSyntax) As BoundStatement
 
       Dim expression = If(syntax.Expression Is Nothing, Nothing, BindExpression(syntax.Expression))
+      Dim identifierToken = syntax.IdentifierToken
+
+      If identifierToken Is Nothing AndAlso
+         expression Is Nothing Then
+
+        ' RETURN
+
+        Return New BoundReturnStatement()
+
+      ElseIf identifierToken IsNot Nothing Then
+
+        ' RETURN *line number*
+        ' RETURN *label*
+
+      Else
+
+        ' RETURN *expression*
+
+      End If
 
       If m_function Is Nothing Then
         If m_isScript Then
