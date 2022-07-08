@@ -119,10 +119,13 @@ Namespace Bsharp.CodeAnalysis.Syntax
     Private Function ParseStatement() As StatementSyntax
 
       Select Case Current.Kind
+        'Case SyntaxKind.ChDirKeyword
         Case SyntaxKind.ClearKeyword : Return ParseClearStatement()
         Case SyntaxKind.ClsKeyword : Return ParseClsStatement()
+        'Case SyntaxKind.ColorKeyword
         Case SyntaxKind.ConstKeyword : Return ParseVariableDeclaration()
         Case SyntaxKind.ContinueKeyword : Return ParseContinueStatement()
+        Case SyntaxKind.DataKeyword : Return ParseDataStatement()
         Case SyntaxKind.DimKeyword : Return ParseVariableDeclaration()
         Case SyntaxKind.DoKeyword : Return ParseDoStatement()
         Case SyntaxKind.EndKeyword : Return ParseEndStatement()
@@ -137,7 +140,9 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case SyntaxKind.PrintKeyword : Return ParsePrintStatement()
         Case SyntaxKind.OpenBraceToken : Return ParseBlockStatement()
         Case SyntaxKind.OptionKeyword : Return ParseOptionStatement()
+        Case SyntaxKind.ReadKeyword : Return ParseReadStatement()
         Case SyntaxKind.RemKeyword : Return ParseRemStatement()
+        Case SyntaxKind.RestoreKeyword : Return ParseRestoreStatement()
         Case SyntaxKind.ReturnKeyword : Return ParseReturnStatement()
         Case SyntaxKind.StopKeyword : Return ParseStopStatement()
         Case SyntaxKind.SystemKeyword : Return ParseSystemStatement()
@@ -161,7 +166,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
     End Function
 
-    Private Function ParseClearStatement() As StatementSyntax
+    Private Function ParseClearStatement() As ClearStatementSyntax
 
       ' CLEAR[,[expression1][,expression2]]
 
@@ -186,23 +191,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
     End Function
 
-    Private Function IsPossibleExpression() As Boolean
-      ' 1
-      ' 1 + 1
-      ' 1 + a
-      ' a
-      ' a + a
-      ' a + 1
-      ' (a)
-      ' (1)
-      ' int(value)
-      Return Current.Kind = SyntaxKind.NumberToken OrElse
-             Current.Kind = SyntaxKind.IdentifierToken OrElse
-             Current.Kind = SyntaxKind.OpenParenToken OrElse
-             Current.Kind.Is_Keyword
-    End Function
-
-    Private Function ParseClsStatement() As StatementSyntax
+    Private Function ParseClsStatement() As ClsStatementSyntax
 
       ' CLS [*expression*]
 
@@ -212,6 +201,38 @@ Namespace Bsharp.CodeAnalysis.Syntax
         expression = ParseExpression()
       End If
       Return New ClsStatementSyntax(m_syntaxTree, clsKeyword, expression)
+
+    End Function
+
+    Private Function ParseDataStatement() As DataStatementSyntax
+
+      ' DATA constant[,constant]...
+
+      Dim dataKeyword = MatchToken(SyntaxKind.DataKeyword)
+
+      Dim constantsAndSeparators = ImmutableArray.CreateBuilder(Of SyntaxToken)()
+
+      Dim parseNextConstant = True
+      While parseNextConstant AndAlso
+            Current.Kind <> SyntaxKind.EndOfFileToken
+
+        Dim kind = SyntaxKind.NumberToken
+        If Current.Kind = SyntaxKind.StringToken Then
+          kind = Current.Kind
+        End If
+        Dim constant = MatchToken(kind)
+        constantsAndSeparators.Add(constant)
+
+        If Current.Kind = SyntaxKind.CommaToken Then
+          Dim comma = MatchToken(SyntaxKind.CommaToken)
+          constantsAndSeparators.Add(comma)
+        Else
+          parseNextConstant = False
+        End If
+
+      End While
+
+      Return New DataStatementSyntax(m_syntaxTree, dataKeyword, constantsAndSeparators.ToImmutable)
 
     End Function
 
@@ -248,6 +269,34 @@ Namespace Bsharp.CodeAnalysis.Syntax
       Return New MidStatementSyntax(m_syntaxTree, midKeyword, openParen, identifierToken, positionCommaToken, position, lengthCommaToken, length, closeParen, equalToken, expression)
     End Function
 
+    Private Function ParseReadStatement() As ReadStatementSyntax
+
+      ' READ variablelist
+
+      Dim readKeyword = MatchToken(SyntaxKind.ReadKeyword)
+
+      Dim identifiersAndSeparators = ImmutableArray.CreateBuilder(Of SyntaxToken)()
+
+      Dim parseNextIdentifier = True
+      While parseNextIdentifier AndAlso
+            Current.Kind <> SyntaxKind.EndOfFileToken
+
+        Dim identifier = MatchToken(SyntaxKind.IdentifierToken)
+        identifiersAndSeparators.Add(identifier)
+
+        If Current.Kind = SyntaxKind.CommaToken Then
+          Dim comma = MatchToken(SyntaxKind.CommaToken)
+          identifiersAndSeparators.Add(comma)
+        Else
+          parseNextIdentifier = False
+        End If
+
+      End While
+
+      Return New ReadStatementSyntax(m_syntaxTree, readKeyword, identifiersAndSeparators.ToImmutable())
+
+    End Function
+
     Private Function ParseRemStatement() As RemStatementSyntax
 
       Dim remKeyword = MatchToken(SyntaxKind.RemKeyword)
@@ -272,6 +321,21 @@ Namespace Bsharp.CodeAnalysis.Syntax
       End While
 
       Return New RemStatementSyntax(m_syntaxTree, remKeyword, comment)
+
+    End Function
+
+    Private Function ParseRestoreStatement() As RestoreStatementSyntax
+
+      ' RESTORE [line]
+
+      Dim restoreKeyword = MatchToken(SyntaxKind.RestoreKeyword)
+
+      Dim numberToken As SyntaxToken = Nothing
+      If Current.Kind = SyntaxKind.NumberToken Then
+        numberToken = MatchToken(SyntaxKind.NumberToken)
+      End If
+
+      Return New RestoreStatementSyntax(m_syntaxTree, restoreKeyword, numberToken)
 
     End Function
 
@@ -521,7 +585,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
     End Function
 
-    Private Function ParseLabelStatement() As StatementSyntax
+    Private Function ParseLabelStatement() As LabelStatementSyntax
 
       ' DoSomething:
 
@@ -530,7 +594,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
     End Function
 
-    Private Function ParseEndStatement() As StatementSyntax
+    Private Function ParseEndStatement() As EndStatementSyntax
 
       ' End
 
@@ -539,8 +603,9 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
     End Function
 
-    Private Function ParseExitStatement() As StatementSyntax
+    Private Function ParseExitStatement() As ExitStatementSyntax
 
+      ' Exit Def
       ' Exit Do
       ' Exit For
       ' Exit Function
@@ -550,9 +615,11 @@ Namespace Bsharp.CodeAnalysis.Syntax
       Dim exitKeyword = MatchToken(SyntaxKind.ExitKeyword)
       Dim kind As SyntaxKind = SyntaxKind.ForKeyword
       Select Case Current.Kind
-        Case SyntaxKind.DoKeyword,
+        Case SyntaxKind.DefKeyword,
+             SyntaxKind.DoKeyword,
              SyntaxKind.ForKeyword,
              SyntaxKind.FunctionKeyword,
+             SyntaxKind.SubKeyword,
              SyntaxKind.WhileKeyword
           kind = Current.Kind
         Case Else
@@ -562,7 +629,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
     End Function
 
-    Private Function ParseContinueStatement() As StatementSyntax
+    Private Function ParseContinueStatement() As ContinueStatementSyntax
 
       ' Continue Do
       ' Continue For
@@ -681,6 +748,22 @@ Namespace Bsharp.CodeAnalysis.Syntax
                                     increment,
                                     statements,
                                     nextKeyword)
+    End Function
+
+    Private Function IsPossibleExpression() As Boolean
+      ' 1
+      ' 1 + 1
+      ' 1 + a
+      ' a
+      ' a + a
+      ' a + 1
+      ' (a)
+      ' (1)
+      ' int(value)
+      Return Current.Kind = SyntaxKind.NumberToken OrElse
+             Current.Kind = SyntaxKind.IdentifierToken OrElse
+             Current.Kind = SyntaxKind.OpenParenToken OrElse
+             Current.Kind.Is_Keyword
     End Function
 
     Private Function ParseForEachStatement() As StatementSyntax
