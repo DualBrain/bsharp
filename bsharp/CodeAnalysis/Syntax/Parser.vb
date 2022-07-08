@@ -553,10 +553,6 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
     Private Function ParseReturnStatement() As StatementSyntax
 
-      ' RETURN [*label*]
-
-      ' RETURN [*line number*]
-
       ' RETURN [*expression*]
 
       Dim returnKeyword = MatchToken(SyntaxKind.ReturnKeyword)
@@ -564,24 +560,38 @@ Namespace Bsharp.CodeAnalysis.Syntax
       Dim currentLine = m_text.GetLineIndex(Current.Span.Start)
       Dim isEof = Current.Kind = SyntaxKind.EndOfFileToken
       Dim sameLine = Not isEof AndAlso keywordLine = currentLine
+      Dim expression = If(sameLine, ParseExpression(), Nothing)
+      Return New ReturnStatementSyntax(m_syntaxTree, returnKeyword, expression)
 
-      Dim numberToken As SyntaxToken = Nothing
-      Dim identifierToken As SyntaxToken = Nothing
-      Dim expression As ExpressionSyntax = Nothing
-      If sameLine Then
-        If Current.Kind = SyntaxKind.NumberToken Then
-          numberToken = MatchToken(SyntaxKind.NumberToken)
-        ElseIf Current.Kind = SyntaxKind.IdentifierToken Then
-          identifierToken = MatchToken(SyntaxKind.IdentifierToken)
-        Else
-          expression = ParseExpression()
-        End If
-      End If
-      If expression IsNot Nothing Then
-        Return New ReturnStatementSyntax(m_syntaxTree, returnKeyword, expression)
-      Else
-        Return New ReturnStatementSyntax(m_syntaxTree, returnKeyword, If(numberToken, identifierToken))
-      End If
+      '' RETURN [*label*]
+
+      '' RETURN [*line number*]
+
+      '' RETURN [*expression*]
+
+      'Dim returnKeyword = MatchToken(SyntaxKind.ReturnKeyword)
+      'Dim keywordLine = m_text.GetLineIndex(returnKeyword.Span.Start)
+      'Dim currentLine = m_text.GetLineIndex(Current.Span.Start)
+      'Dim isEof = Current.Kind = SyntaxKind.EndOfFileToken
+      'Dim sameLine = Not isEof AndAlso keywordLine = currentLine
+
+      'Dim numberToken As SyntaxToken = Nothing
+      'Dim identifierToken As SyntaxToken = Nothing
+      'Dim expression As ExpressionSyntax = Nothing
+      ''If sameLine Then
+      ''  If Current.Kind = SyntaxKind.NumberToken Then
+      ''    numberToken = MatchToken(SyntaxKind.NumberToken)
+      ''  ElseIf Current.Kind = SyntaxKind.IdentifierToken Then
+      ''    identifierToken = MatchToken(SyntaxKind.IdentifierToken)
+      ''  Else
+      'expression = ParseExpression()
+      ''  End If
+      ''End If
+      'If expression IsNot Nothing Then
+      '  Return New ReturnStatementSyntax(m_syntaxTree, returnKeyword, expression)
+      'Else
+      '  Return New ReturnStatementSyntax(m_syntaxTree, returnKeyword, If(numberToken, identifierToken))
+      'End If
 
     End Function
 

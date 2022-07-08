@@ -341,7 +341,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Dim possible = m_text.ToString(st, l)
 
         Select Case possible?.ToLower
-          Case "function", "if"
+          Case "function", "if", "sub", "def", "type"
             length = m_position - m_start
             text = m_text.ToString(m_start, length)
           Case Else

@@ -128,7 +128,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case "kill" : Return SyntaxKind.KillKeyword
         'Case "lbound" : Return SyntaxKind.LBoundKeyword
         Case "let" : Return SyntaxKind.LetKeyword
-        Case "line input" : Return SyntaxKind.LineInputKeyword
+        'Case "line input" : Return SyntaxKind.LineInputKeyword
         Case "locate" : Return SyntaxKind.LocateKeyword
         Case "lock" : Return SyntaxKind.LockKeyword
         Case "loop" : Return SyntaxKind.LoopKeyword
@@ -141,6 +141,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case "option" : Return SyntaxKind.OptionKeyword
         Case "or" : Return SyntaxKind.OrKeyword
         Case "orelse" : Return SyntaxKind.OrElseKeyword
+        Case "print" : Return SyntaxKind.PrintKeyword
         Case "random" : Return SyntaxKind.RandomKeyword
         Case "randomize" : Return SyntaxKind.RandomizeKeyword
         Case "read" : Return SyntaxKind.ReadKeyword
@@ -231,7 +232,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case SyntaxKind.KillKeyword : Return "Kill"
         'Case SyntaxKind.LBound : Return "LBound"
         Case SyntaxKind.LetKeyword : Return "Let"
-        Case SyntaxKind.LineInputKeyword : Return "Line Input"
+        'Case SyntaxKind.LineInputKeyword : Return "Line Input"
         Case SyntaxKind.LocateKeyword : Return "Locate"
         Case SyntaxKind.LockKeyword : Return "Lock"
         Case SyntaxKind.LoopKeyword : Return "Loop"

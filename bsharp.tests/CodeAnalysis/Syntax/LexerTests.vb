@@ -195,6 +195,9 @@ Namespace Bsharp.CodeAnalysis.Syntax
       If t1Kind = SyntaxKind.LineBreakTrivia OrElse t2Kind = SyntaxKind.LineBreakTrivia Then Return True
       If t1Kind = SyntaxKind.EndKeyword AndAlso t2Kind = SyntaxKind.IfKeyword Then Return True
       If t1Kind = SyntaxKind.EndKeyword AndAlso t2Kind = SyntaxKind.FunctionKeyword Then Return True
+      If t1Kind = SyntaxKind.EndKeyword AndAlso t2Kind = SyntaxKind.SubKeyword Then Return True
+      If t1Kind = SyntaxKind.EndKeyword AndAlso t2Kind = SyntaxKind.TypeKeyword Then Return True
+      If t1Kind = SyntaxKind.EndKeyword AndAlso t2Kind = SyntaxKind.DefKeyword Then Return True
 
       'If t2Kind = SyntaxKind.DollarToken Then Return True
       Return False
@@ -219,9 +222,11 @@ Namespace Bsharp.CodeAnalysis.Syntax
       For Each t1 In GetTokens()
         For Each t2 In GetTokens()
 
-          If t1.Kind = SyntaxKind.EndKeyword AndAlso t2.Kind = SyntaxKind.IfKeyword Then
-            Continue For
-          ElseIf t1.Kind = SyntaxKind.EndKeyword AndAlso t2.Kind = SyntaxKind.FunctionKeyword Then
+          If t1.Kind = SyntaxKind.EndKeyword AndAlso (t2.Kind = SyntaxKind.DefKeyword OrElse
+                                                      t2.Kind = SyntaxKind.IfKeyword OrElse
+                                                      t2.Kind = SyntaxKind.FunctionKeyword OrElse
+                                                      t2.Kind = SyntaxKind.SubKeyword OrElse
+                                                      t2.Kind = SyntaxKind.TypeKeyword) Then
             Continue For
           ElseIf t1.Kind = SyntaxKind.NumberToken Then
             ' Because of line numbers, need to skip any tests that start with a number literal.

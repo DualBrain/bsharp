@@ -745,25 +745,25 @@ Namespace Bsharp.CodeAnalysis.Binding
     Private Function BindReturnStatement(syntax As ReturnStatementSyntax) As BoundStatement
 
       Dim expression = If(syntax.Expression Is Nothing, Nothing, BindExpression(syntax.Expression))
-      Dim identifierToken = syntax.IdentifierToken
+      'Dim identifierToken = syntax.IdentifierToken
 
-      If identifierToken Is Nothing AndAlso
-         expression Is Nothing Then
+      'If identifierToken Is Nothing AndAlso
+      '   expression Is Nothing Then
 
-        ' RETURN
+      '  ' RETURN
 
-        Return New BoundReturnStatement()
+      '  Return New BoundReturnStatement()
 
-      ElseIf identifierToken IsNot Nothing Then
+      'ElseIf identifierToken IsNot Nothing Then
 
-        ' RETURN *line number*
-        ' RETURN *label*
+      '  ' RETURN *line number*
+      '  ' RETURN *label*
 
-      Else
+      'Else
 
-        ' RETURN *expression*
+      '  ' RETURN *expression*
 
-      End If
+      'End If
 
       If m_function Is Nothing Then
         If m_isScript Then

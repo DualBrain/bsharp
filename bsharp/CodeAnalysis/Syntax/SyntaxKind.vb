@@ -88,7 +88,7 @@
     InputKeyword
     KillKeyword
     LetKeyword
-    LineInputKeyword
+    'LineInputKeyword
     LocateKeyword
     LockKeyword
     LoopKeyword

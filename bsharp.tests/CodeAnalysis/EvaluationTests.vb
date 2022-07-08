@@ -483,8 +483,8 @@ end if"
     Public Sub Evaluator_FunctionParameters_NoInfiniteLoop()
 
       Dim text = "
-        function hi(name as string[[=]][[)]]
-            print(""Hi "" + name + ""!"" )
+        function hi(name1 as string[[=]][[)]]
+            print(""Hi "" + name1 + ""!"" )
         end function"
 
       Dim diagnostics = "
