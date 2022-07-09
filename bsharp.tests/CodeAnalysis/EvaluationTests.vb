@@ -11,242 +11,244 @@ Namespace Bsharp.Tests.CodeAnalysis
 
   Public Class EvaluationTests
 
-    <Theory>
-    <InlineData("let r = 1
-return r", 1)>
-    <InlineData("let r = not 1
-return r", -2)>
-    <InlineData("let r = +1
-return r", 1)>
-    <InlineData("let r = -1
-return r", -1)>
-    <InlineData("let r = 14 + 12
-return r", 26)>
-    <InlineData("let r = 12 - 3
-return r", 9)>
-    <InlineData("let r = 4 * 2
-return r", 8)>
-    <InlineData("let r = 9 / 3
-return r", CDbl(3))>
-    <InlineData("let r = (10)
-return r", 10)>
-    <InlineData("let r = 12 = 3
-return r", False)>
-    <InlineData("let r = 3 = 3
-return r", True)>
-    <InlineData("let r = 12 <> 3
-return r", True)>
-    <InlineData("let r = 3 <> 3
-return r", False)>
-    <InlineData("let r = false = false
-return r", True)>
-    <InlineData("let r = true = false
-return r", False)>
-    <InlineData("let r = false <> false
-return r", False)>
-    <InlineData("let r = true <> false
-return r", True)>
-    <InlineData("let r = ""test""
-return r", "test")>
-    <InlineData("let r = ""te""""st""
-return r", "te""st")>
-    <InlineData("let r = ""test""=""test""
-return r", True)>
-    <InlineData("let r = ""test""<>""test""
-return r", False)>
-    <InlineData("let r = ""test""=""abc""
-return r", False)>
-    <InlineData("let r = ""test""<>""abc""
-return r", True)>
-    <InlineData("let r = true
-return r", True)>
-    <InlineData("let r = false
-return r", False)>
-    <InlineData("let r = not true
-return r", False)>
-    <InlineData("let r = not false
-return r", True)>
-    <InlineData("let r = true andalso true
-return r", True)>
-    <InlineData("let r = false orelse false
-return r", False)>
-    <InlineData("let r = false or false
-return r", False)>
-    <InlineData("let r = false or true
-return r", True)>
-    <InlineData("let r = true or false
-return r", True)>
-    <InlineData("let r = true or true
-return r", True)>
-    <InlineData("let r = false and false
-return r", False)>
-    <InlineData("let r = false and true
-return r", False)>
-    <InlineData("let r = true and false
-return r", False)>
-    <InlineData("let r = true and true
-return r", True)>
-    <InlineData("let r = false xor false
-return r", False)>
-    <InlineData("let r = false xor true
-return r", True)>
-    <InlineData("let r = true xor false
-return r", True)>
-    <InlineData("let r = true xor true
-return r", False)>
-    <InlineData("let r = 1 or 2
-return r", 3)>
-    <InlineData("let r = 1 or 0
-return r", 1)>
-    <InlineData("let r = 1 and 2
-return r", 0)>
-    <InlineData("let r = 1 and 0
-return r", 0)>
-    <InlineData("let r = 1 xor 0
-return r", 1)>
-    <InlineData("let r = 0 xor 1
-return r", 1)>
-    <InlineData("let r = 1 xor 2
-return r", 3)>
-    <InlineData("dim a = 10
-return a", 10)>
-    <InlineData("let r = string(true)
-return r", "True")>
-    <InlineData("let r = str$(1)
-return r", " 1")>
-    <InlineData("let r = boolean(""true"")
-return r", True)>
-    <InlineData("let r = integer(""1"")
-return r", CShort(1))>
-    <InlineData("let r = rnd(0)
-return r", 0)>
-    <InlineData("if true then
-    dim a = 10
-    return (a * a) 
-end if", 100)>
-    <InlineData("{ dim b = 0
-let b = 10
-return b * b }", 100)>
-    <InlineData("
-{ 
-  dim c = 0
-  if c = 0 then
-    let c = 10
-  end if
-  return c
-}", 10)>
-    <InlineData("
-{ 
-  dim d = 0
-  if d = 4 then
-    let d = 10
-  end if
-  return d
-}", 0)>
-    <InlineData("
-{ 
-  dim e = 0
-  if e = 4 then
-    let e = 10
-  else
-    let e = 22
-  end if
-  return e
-}", 22)>
-    <InlineData("
-{ 
-  dim f = 10
-  dim result = 0
-  while f > 0
-  {
-    let result = result + f
-    let f = f - 1
-  }
-  wend
-  return result
-}", 55)>
-    <InlineData("
-{ 
-  dim result = 0
-  for g = 1 to 10
-    let result = result + g
-  next
-  return result
-}", 55)>
-    <InlineData("
-{ 
-  dim resultA = 0
-  if true then let resultA = 10
-  return resultA
-}", 10)>
-    <InlineData("
-{ 
-  dim result = 0
-  if true then 
-    let result = 10 
-  end if
-  return result
-}", 10)>
-    <InlineData("
-{ 
-  dim result = 0
-  if true then 
-    let result = 11
-  end if
-  return result
-}", 11)>
-    <InlineData("
-{ 
-  dim result = 0
-  if true then 
-    dim h = 0
-    let h = h + 10
-    let result = h
-  end if
-  let result = result + 11
-  return result
-}", 21)>
-    <InlineData("
-{ 
-  dim j = 10
-  for i = 1 to j - 1
-    let j = j + i
-  next 
-  return j
-}", 55)>
-    <InlineData("
-{ 
-  dim a = 0
-  do
-    let a = a + 1
-  loop while a < 10
-  return a
-}", 10)>
-    <InlineData("
-if true then
-  dim i = 0
-  while i < 5
-    let i = i + 1
-    if i = 5 then
-      continue while
-    end if
-  wend
-  return i
-end if", 5)>
-    <InlineData("
-if true then
-  dim i = 0
-  do
-    let i = i + 1
-    if i = 5 then
-      continue do
-    end if
-  loop while i < 5
-  return i
-end if", 5)>
-    Public Sub Evaluator_Computes_CorrectValues(text As String, expectedValue As Object)
-      AssertValue(text, expectedValue)
-    End Sub
+    '    <Theory>
+    '    <InlineData("function test() as long
+    '  let r = 1
+    '  return r
+    'end function", 1)>
+    '    <InlineData("let r = not 1
+    'return r", -2)>
+    '    <InlineData("let r = +1
+    'return r", 1)>
+    '    <InlineData("let r = -1
+    'return r", -1)>
+    '    <InlineData("let r = 14 + 12
+    'return r", 26)>
+    '    <InlineData("let r = 12 - 3
+    'return r", 9)>
+    '    <InlineData("let r = 4 * 2
+    'return r", 8)>
+    '    <InlineData("let r = 9 / 3
+    'return r", CDbl(3))>
+    '    <InlineData("let r = (10)
+    'return r", 10)>
+    '    <InlineData("let r = 12 = 3
+    'return r", False)>
+    '    <InlineData("let r = 3 = 3
+    'return r", True)>
+    '    <InlineData("let r = 12 <> 3
+    'return r", True)>
+    '    <InlineData("let r = 3 <> 3
+    'return r", False)>
+    '    <InlineData("let r = false = false
+    'return r", True)>
+    '    <InlineData("let r = true = false
+    'return r", False)>
+    '    <InlineData("let r = false <> false
+    'return r", False)>
+    '    <InlineData("let r = true <> false
+    'return r", True)>
+    '    <InlineData("let r = ""test""
+    'return r", "test")>
+    '    <InlineData("let r = ""te""""st""
+    'return r", "te""st")>
+    '    <InlineData("let r = ""test""=""test""
+    'return r", True)>
+    '    <InlineData("let r = ""test""<>""test""
+    'return r", False)>
+    '    <InlineData("let r = ""test""=""abc""
+    'return r", False)>
+    '    <InlineData("let r = ""test""<>""abc""
+    'return r", True)>
+    '    <InlineData("let r = true
+    'return r", True)>
+    '    <InlineData("let r = false
+    'return r", False)>
+    '    <InlineData("let r = not true
+    'return r", False)>
+    '    <InlineData("let r = not false
+    'return r", True)>
+    '    <InlineData("let r = true andalso true
+    'return r", True)>
+    '    <InlineData("let r = false orelse false
+    'return r", False)>
+    '    <InlineData("let r = false or false
+    'return r", False)>
+    '    <InlineData("let r = false or true
+    'return r", True)>
+    '    <InlineData("let r = true or false
+    'return r", True)>
+    '    <InlineData("let r = true or true
+    'return r", True)>
+    '    <InlineData("let r = false and false
+    'return r", False)>
+    '    <InlineData("let r = false and true
+    'return r", False)>
+    '    <InlineData("let r = true and false
+    'return r", False)>
+    '    <InlineData("let r = true and true
+    'return r", True)>
+    '    <InlineData("let r = false xor false
+    'return r", False)>
+    '    <InlineData("let r = false xor true
+    'return r", True)>
+    '    <InlineData("let r = true xor false
+    'return r", True)>
+    '    <InlineData("let r = true xor true
+    'return r", False)>
+    '    <InlineData("let r = 1 or 2
+    'return r", 3)>
+    '    <InlineData("let r = 1 or 0
+    'return r", 1)>
+    '    <InlineData("let r = 1 and 2
+    'return r", 0)>
+    '    <InlineData("let r = 1 and 0
+    'return r", 0)>
+    '    <InlineData("let r = 1 xor 0
+    'return r", 1)>
+    '    <InlineData("let r = 0 xor 1
+    'return r", 1)>
+    '    <InlineData("let r = 1 xor 2
+    'return r", 3)>
+    '    <InlineData("dim a = 10
+    'return a", 10)>
+    '    <InlineData("let r = string(true)
+    'return r", "True")>
+    '    <InlineData("let r = str$(1)
+    'return r", " 1")>
+    '    <InlineData("let r = boolean(""true"")
+    'return r", True)>
+    '    <InlineData("let r = integer(""1"")
+    'return r", CShort(1))>
+    '    <InlineData("let r = rnd(0)
+    'return r", 0)>
+    '    <InlineData("if true then
+    '    dim a = 10
+    '    return (a * a) 
+    'end if", 100)>
+    '    <InlineData("{ dim b = 0
+    'let b = 10
+    'return b * b }", 100)>
+    '    <InlineData("
+    '{ 
+    '  dim c = 0
+    '  if c = 0 then
+    '    let c = 10
+    '  end if
+    '  return c
+    '}", 10)>
+    '    <InlineData("
+    '{ 
+    '  dim d = 0
+    '  if d = 4 then
+    '    let d = 10
+    '  end if
+    '  return d
+    '}", 0)>
+    '    <InlineData("
+    '{ 
+    '  dim e = 0
+    '  if e = 4 then
+    '    let e = 10
+    '  else
+    '    let e = 22
+    '  end if
+    '  return e
+    '}", 22)>
+    '    <InlineData("
+    '{ 
+    '  dim f = 10
+    '  dim result = 0
+    '  while f > 0
+    '  {
+    '    let result = result + f
+    '    let f = f - 1
+    '  }
+    '  wend
+    '  return result
+    '}", 55)>
+    '    <InlineData("
+    '{ 
+    '  dim result = 0
+    '  for g = 1 to 10
+    '    let result = result + g
+    '  next
+    '  return result
+    '}", 55)>
+    '    <InlineData("
+    '{ 
+    '  dim resultA = 0
+    '  if true then let resultA = 10
+    '  return resultA
+    '}", 10)>
+    '    <InlineData("
+    '{ 
+    '  dim result = 0
+    '  if true then 
+    '    let result = 10 
+    '  end if
+    '  return result
+    '}", 10)>
+    '    <InlineData("
+    '{ 
+    '  dim result = 0
+    '  if true then 
+    '    let result = 11
+    '  end if
+    '  return result
+    '}", 11)>
+    '    <InlineData("
+    '{ 
+    '  dim result = 0
+    '  if true then 
+    '    dim h = 0
+    '    let h = h + 10
+    '    let result = h
+    '  end if
+    '  let result = result + 11
+    '  return result
+    '}", 21)>
+    '    <InlineData("
+    '{ 
+    '  dim j = 10
+    '  for i = 1 to j - 1
+    '    let j = j + i
+    '  next 
+    '  return j
+    '}", 55)>
+    '    <InlineData("
+    '{ 
+    '  dim a = 0
+    '  do
+    '    let a = a + 1
+    '  loop while a < 10
+    '  return a
+    '}", 10)>
+    '    <InlineData("
+    'if true then
+    '  dim i = 0
+    '  while i < 5
+    '    let i = i + 1
+    '    if i = 5 then
+    '      continue while
+    '    end if
+    '  wend
+    '  return i
+    'end if", 5)>
+    '    <InlineData("
+    'if true then
+    '  dim i = 0
+    '  do
+    '    let i = i + 1
+    '    if i = 5 then
+    '      continue do
+    '    end if
+    '  loop while i < 5
+    '  return i
+    'end if", 5)>
+    '    Public Sub Evaluator_Computes_CorrectValues(text As String, expectedValue As Object)
+    '      AssertValue(text, expectedValue)
+    '    End Sub
     '    <InlineData("
     '{ 
     '  dim result = 0

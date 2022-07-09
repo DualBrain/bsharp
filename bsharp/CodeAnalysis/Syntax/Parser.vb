@@ -112,14 +112,15 @@ Namespace Bsharp.CodeAnalysis.Syntax
     End Function
 
     Private Function ParseGlobalStatement() As MemberSyntax
-      Dim statement = ParseStatement()
+      Dim statement = ParseStatement(True)
       Return New GlobalStatementSyntax(m_syntaxTree, statement)
     End Function
 
-    Private Function ParseStatement() As StatementSyntax
+    Private Function ParseStatement(isTopLevel As Boolean) As StatementSyntax
 
       Select Case Current.Kind
         'Case SyntaxKind.ChDirKeyword
+        Case SyntaxKind.ChDirKeyword : Return ParseChDirStatement()
         Case SyntaxKind.ClearKeyword : Return ParseClearStatement()
         Case SyntaxKind.ClsKeyword : Return ParseClsStatement()
         'Case SyntaxKind.ColorKeyword
@@ -127,26 +128,30 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case SyntaxKind.ContinueKeyword : Return ParseContinueStatement()
         Case SyntaxKind.DataKeyword : Return ParseDataStatement()
         Case SyntaxKind.DimKeyword : Return ParseVariableDeclaration()
-        Case SyntaxKind.DoKeyword : Return ParseDoStatement()
+        Case SyntaxKind.DoKeyword : Return ParseDoStatement(isTopLevel)
         Case SyntaxKind.EndKeyword : Return ParseEndStatement()
         Case SyntaxKind.ExitKeyword : Return ParseExitStatement()
-        Case SyntaxKind.ForKeyword : Return ParseForStatement()
+        Case SyntaxKind.ForKeyword : Return ParseForStatement(isTopLevel)
         Case SyntaxKind.GotoKeyword : Return ParseGotoStatement()
         Case SyntaxKind.GosubKeyword : Return ParseGosubStatement()
-        Case SyntaxKind.IfKeyword : Return ParseIfStatement()
+        Case SyntaxKind.IfKeyword : Return ParseIfStatement(isTopLevel)
+        Case SyntaxKind.KillKeyword : Return ParseKillStatement()
         Case SyntaxKind.Label : Return ParseLabelStatement()
         Case SyntaxKind.LetKeyword : Return ParseLetStatement()
+        Case SyntaxKind.MkDirKeyword : Return ParseMkDirStatement()
         Case SyntaxKind.MidKeyword : Return ParseMidStatement()
+        Case SyntaxKind.NameKeyword : Return ParseNameStatement()
         Case SyntaxKind.PrintKeyword : Return ParsePrintStatement()
-        Case SyntaxKind.OpenBraceToken : Return ParseBlockStatement()
+        Case SyntaxKind.OpenBraceToken : Return ParseBlockStatement(isTopLevel)
         Case SyntaxKind.OptionKeyword : Return ParseOptionStatement()
         Case SyntaxKind.ReadKeyword : Return ParseReadStatement()
         Case SyntaxKind.RemKeyword : Return ParseRemStatement()
         Case SyntaxKind.RestoreKeyword : Return ParseRestoreStatement()
-        Case SyntaxKind.ReturnKeyword : Return ParseReturnStatement()
+        Case SyntaxKind.ReturnKeyword : Return ParseReturnStatement(isTopLevel)
+        Case SyntaxKind.RmDirKeyword : Return ParseRmDirStatement()
         Case SyntaxKind.StopKeyword : Return ParseStopStatement()
         Case SyntaxKind.SystemKeyword : Return ParseSystemStatement()
-        Case SyntaxKind.WhileKeyword : Return ParseWhileStatement()
+        Case SyntaxKind.WhileKeyword : Return ParseWhileStatement(isTopLevel)
         Case Else
           If Peek(0).Kind = SyntaxKind.IdentifierToken AndAlso
              Peek(1).Kind = SyntaxKind.EqualToken Then
@@ -163,6 +168,16 @@ Namespace Bsharp.CodeAnalysis.Syntax
           Return ParseExpressionStatement()
 
       End Select
+
+    End Function
+
+    Private Function ParseChDirStatement() As ChDirStatementSyntax
+
+      ' CHDIR path
+
+      Dim chDirKeyword = MatchToken(SyntaxKind.ChDirKeyword)
+      Dim path = ParseExpression()
+      Return New ChDirStatementSyntax(m_syntaxTree, chDirKeyword, path)
 
     End Function
 
@@ -236,18 +251,71 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
     End Function
 
-    Private Function ParseOptionStatement() As StatementSyntax
+    Private Function ParseGosubStatement() As GosubStatementSyntax
 
-      ' OPTION BASE {0|1}
+      ' GOSUB *line number*
 
-      Dim optionKeyword = MatchToken(SyntaxKind.OptionKeyword)
-      Dim baseKeyword = MatchToken(SyntaxKind.BaseKeyword)
-      If Not (Current.Kind = SyntaxKind.NumberToken AndAlso
-              (Current.Text = "0" OrElse Current.Text = "1")) Then
-        m_diagnostics.ReportUnexpectedToken(Current.Location, Current.Kind, SyntaxKind.NumberToken)
+      ' GOSUB *label*
+
+      Dim gosubKeyword = MatchToken(SyntaxKind.GosubKeyword)
+
+      If Current.Kind = SyntaxKind.NumberToken Then
+        Dim numberToken = MatchToken(SyntaxKind.NumberToken)
+        Return New GosubStatementSyntax(m_syntaxTree, gosubKeyword, numberToken)
+      Else
+        Dim identifierToken = MatchToken(SyntaxKind.IdentifierToken)
+        Return New GosubStatementSyntax(m_syntaxTree, gosubKeyword, identifierToken)
       End If
-      Dim numberToken = MatchToken(SyntaxKind.NumberToken)
-      Return New OptionStatementSyntax(m_syntaxTree, optionKeyword, baseKeyword, numberToken)
+
+    End Function
+
+    Private Function ParseGotoStatement() As GotoStatementSyntax
+
+      ' GOTO *line number*
+
+      ' GOTO *label*
+
+      Dim gotoKeyword = MatchToken(SyntaxKind.GotoKeyword)
+
+      If Current.Kind = SyntaxKind.NumberToken Then
+        Dim numberToken = MatchToken(SyntaxKind.NumberToken)
+        Return New GotoStatementSyntax(m_syntaxTree, gotoKeyword, numberToken)
+      Else
+        Dim identifierToken = MatchToken(SyntaxKind.IdentifierToken)
+        Return New GotoStatementSyntax(m_syntaxTree, gotoKeyword, identifierToken)
+      End If
+
+    End Function
+
+    Private Function ParseKillStatement() As KillStatementSyntax
+
+      ' KILL path
+
+      Dim killKeyword = MatchToken(SyntaxKind.KillKeyword)
+      Dim path = ParseExpression()
+      Return New KillStatementSyntax(m_syntaxTree, killKeyword, path)
+
+    End Function
+
+    Private Function ParseLetStatement() As StatementSyntax
+
+      ' LET *identifier* = *expression*
+
+      Dim letKeywordToken = MatchToken(SyntaxKind.LetKeyword)
+      Dim identifierToken = NextToken()
+      Dim equalToken = MatchToken(SyntaxKind.EqualToken)
+      Dim expression = ParseExpression()
+      Return New LetStatementSyntax(m_syntaxTree, letKeywordToken, identifierToken, equalToken, expression)
+
+    End Function
+
+    Private Function ParseMkDirStatement() As MkDirStatementSyntax
+
+      ' MKDIR path
+
+      Dim mkDirKeyword = MatchToken(SyntaxKind.MkDirKeyword)
+      Dim path = ParseExpression()
+      Return New MkDirStatementSyntax(m_syntaxTree, mkDirKeyword, path)
 
     End Function
 
@@ -267,6 +335,33 @@ Namespace Bsharp.CodeAnalysis.Syntax
       Dim equalToken = MatchToken(SyntaxKind.EqualToken)
       Dim expression = ParseExpression()
       Return New MidStatementSyntax(m_syntaxTree, midKeyword, openParen, identifierToken, positionCommaToken, position, lengthCommaToken, length, closeParen, equalToken, expression)
+    End Function
+
+    Private Function ParseNameStatement() As NameStatementSyntax
+
+      ' NAME path2 AS path2
+
+      Dim nameKeyword = MatchToken(SyntaxKind.NameKeyword)
+      Dim originalPath = ParseExpression()
+      Dim asKeyword = MatchToken(SyntaxKind.AsKeyword)
+      Dim destinationPath = ParseExpression()
+      Return New NameStatementSyntax(m_syntaxTree, nameKeyword, originalPath, asKeyword, destinationPath)
+
+    End Function
+
+    Private Function ParseOptionStatement() As StatementSyntax
+
+      ' OPTION BASE {0|1}
+
+      Dim optionKeyword = MatchToken(SyntaxKind.OptionKeyword)
+      Dim baseKeyword = MatchToken(SyntaxKind.BaseKeyword)
+      If Not (Current.Kind = SyntaxKind.NumberToken AndAlso
+              (Current.Text = "0" OrElse Current.Text = "1")) Then
+        m_diagnostics.ReportUnexpectedToken(Current.Location, Current.Kind, SyntaxKind.NumberToken)
+      End If
+      Dim numberToken = MatchToken(SyntaxKind.NumberToken)
+      Return New OptionStatementSyntax(m_syntaxTree, optionKeyword, baseKeyword, numberToken)
+
     End Function
 
     Private Function ParseReadStatement() As ReadStatementSyntax
@@ -336,6 +431,16 @@ Namespace Bsharp.CodeAnalysis.Syntax
       End If
 
       Return New RestoreStatementSyntax(m_syntaxTree, restoreKeyword, numberToken)
+
+    End Function
+
+    Private Function ParseRmDirStatement() As RmDirStatementSyntax
+
+      ' RMDIR path
+
+      Dim rmDirKeyword = MatchToken(SyntaxKind.RmDirKeyword)
+      Dim path = ParseExpression()
+      Return New RmDirStatementSyntax(m_syntaxTree, rmDirKeyword, path)
 
     End Function
 
@@ -410,54 +515,6 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
     End Function
 
-    Private Function ParseGosubStatement() As GosubStatementSyntax
-
-      ' GOSUB *line number*
-
-      ' GOSUB *label*
-
-      Dim gosubKeyword = MatchToken(SyntaxKind.GosubKeyword)
-
-      If Current.Kind = SyntaxKind.NumberToken Then
-        Dim numberToken = MatchToken(SyntaxKind.NumberToken)
-        Return New GosubStatementSyntax(m_syntaxTree, gosubKeyword, numberToken)
-      Else
-        Dim identifierToken = MatchToken(SyntaxKind.IdentifierToken)
-        Return New GosubStatementSyntax(m_syntaxTree, gosubKeyword, identifierToken)
-      End If
-
-    End Function
-
-    Private Function ParseGotoStatement() As GotoStatementSyntax
-
-      ' GOTO *line number*
-
-      ' GOTO *label*
-
-      Dim gotoKeyword = MatchToken(SyntaxKind.GotoKeyword)
-
-      If Current.Kind = SyntaxKind.NumberToken Then
-        Dim numberToken = MatchToken(SyntaxKind.NumberToken)
-        Return New GotoStatementSyntax(m_syntaxTree, gotoKeyword, numberToken)
-      Else
-        Dim identifierToken = MatchToken(SyntaxKind.IdentifierToken)
-        Return New GotoStatementSyntax(m_syntaxTree, gotoKeyword, identifierToken)
-      End If
-
-    End Function
-
-    Private Function ParseLetStatement() As StatementSyntax
-
-      ' LET *identifier* = *expression*
-
-      Dim letKeywordToken = MatchToken(SyntaxKind.LetKeyword)
-      Dim identifierToken = NextToken()
-      Dim equalToken = MatchToken(SyntaxKind.EqualToken)
-      Dim expression = ParseExpression()
-      Return New LetStatementSyntax(m_syntaxTree, letKeywordToken, identifierToken, equalToken, expression)
-
-    End Function
-
     Private Function ParseVariableDeclaration() As StatementSyntax
 
       ' DIM *identifier* [AS *type*] [= *initializer*]
@@ -504,7 +561,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
       Dim parameters = ParseParameterList()
       Dim closeParenToken = MatchToken(SyntaxKind.CloseParenToken)
       Dim asClause = ParseOptionalAsClause()
-      Dim statements = ParseBlockStatement()
+      Dim statements = ParseBlockStatement(False)
       Dim endFunctionKeyword = MatchToken(SyntaxKind.EndFunctionKeyword)
       Return New FunctionDeclarationSyntax(m_syntaxTree, functionKeyword, identifier, openParenToken, parameters, closeParenToken, asClause, statements, endFunctionKeyword)
 
@@ -551,47 +608,42 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
 #Region "Flow Control Blocks"
 
-    Private Function ParseReturnStatement() As StatementSyntax
+    Private Function ParseReturnStatement(isTopLevel As Boolean) As StatementSyntax
 
-      ' RETURN [*expression*]
+      If isTopLevel Then
 
-      Dim returnKeyword = MatchToken(SyntaxKind.ReturnKeyword)
-      Dim keywordLine = m_text.GetLineIndex(returnKeyword.Span.Start)
-      Dim currentLine = m_text.GetLineIndex(Current.Span.Start)
-      Dim isEof = Current.Kind = SyntaxKind.EndOfFileToken
-      Dim sameLine = Not isEof AndAlso keywordLine = currentLine
-      Dim expression = If(sameLine, ParseExpression(), Nothing)
-      Return New ReturnStatementSyntax(m_syntaxTree, returnKeyword, expression)
+        ' RETURN [*label*]
 
-      '' RETURN [*label*]
+        ' RETURN [*line number*]
 
-      '' RETURN [*line number*]
+        Dim returnKeyword = MatchToken(SyntaxKind.ReturnKeyword)
+        Dim keywordLine = m_text.GetLineIndex(returnKeyword.Span.Start)
+        Dim currentLine = m_text.GetLineIndex(Current.Span.Start)
+        Dim isEof = Current.Kind = SyntaxKind.EndOfFileToken
+        Dim sameLine = Not isEof AndAlso keywordLine = currentLine
 
-      '' RETURN [*expression*]
+        Dim token As SyntaxToken = Nothing
+        If sameLine Then
+          Dim kind = SyntaxKind.NumberToken
+          If Current.Kind = SyntaxKind.IdentifierToken Then
+            kind = SyntaxKind.IdentifierToken
+          End If
+          token = MatchToken(kind)
+        End If
+        Return New ReturnGosubStatementSyntax(m_syntaxTree, returnKeyword, token)
+      Else
 
-      'Dim returnKeyword = MatchToken(SyntaxKind.ReturnKeyword)
-      'Dim keywordLine = m_text.GetLineIndex(returnKeyword.Span.Start)
-      'Dim currentLine = m_text.GetLineIndex(Current.Span.Start)
-      'Dim isEof = Current.Kind = SyntaxKind.EndOfFileToken
-      'Dim sameLine = Not isEof AndAlso keywordLine = currentLine
+        ' RETURN [*expression*]
 
-      'Dim numberToken As SyntaxToken = Nothing
-      'Dim identifierToken As SyntaxToken = Nothing
-      'Dim expression As ExpressionSyntax = Nothing
-      ''If sameLine Then
-      ''  If Current.Kind = SyntaxKind.NumberToken Then
-      ''    numberToken = MatchToken(SyntaxKind.NumberToken)
-      ''  ElseIf Current.Kind = SyntaxKind.IdentifierToken Then
-      ''    identifierToken = MatchToken(SyntaxKind.IdentifierToken)
-      ''  Else
-      'expression = ParseExpression()
-      ''  End If
-      ''End If
-      'If expression IsNot Nothing Then
-      '  Return New ReturnStatementSyntax(m_syntaxTree, returnKeyword, expression)
-      'Else
-      '  Return New ReturnStatementSyntax(m_syntaxTree, returnKeyword, If(numberToken, identifierToken))
-      'End If
+        Dim returnKeyword = MatchToken(SyntaxKind.ReturnKeyword)
+        Dim keywordLine = m_text.GetLineIndex(returnKeyword.Span.Start)
+        Dim currentLine = m_text.GetLineIndex(Current.Span.Start)
+        Dim isEof = Current.Kind = SyntaxKind.EndOfFileToken
+        Dim sameLine = Not isEof AndAlso keywordLine = currentLine
+        Dim expression = If(sameLine, ParseExpression(), Nothing)
+        Return New ReturnStatementSyntax(m_syntaxTree, returnKeyword, expression)
+
+      End If
 
     End Function
 
@@ -659,7 +711,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
     End Function
 
-    Private Function ParseDoStatement() As StatementSyntax
+    Private Function ParseDoStatement(isTopLevel As Boolean) As StatementSyntax
 
       ' DO [WHILE *boolean_expression*]
       '   *statements*
@@ -682,7 +734,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case Else
       End Select
 
-      Dim body = ParseBlockStatement()
+      Dim body = ParseBlockStatement(isTopLevel)
 
       Dim loopKeyword = MatchToken(SyntaxKind.LoopKeyword)
 
@@ -724,10 +776,10 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
     End Function
 
-    Private Function ParseForStatement() As StatementSyntax
+    Private Function ParseForStatement(isTopLevel As Boolean) As StatementSyntax
 
       If Current.Kind = SyntaxKind.ForKeyword AndAlso Peek(1).Kind = SyntaxKind.EachKeyword Then
-        Return ParseForEachStatement()
+        Return ParseForEachStatement(isTopLevel)
       End If
 
       ' FOR *identifier* = *start_value* TO *end_value* [STEP *increment*]
@@ -746,7 +798,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
         stepKeyword = MatchToken(SyntaxKind.StepKeyword)
         increment = ParseExpression()
       End If
-      Dim statements = ParseBlockStatement()
+      Dim statements = ParseBlockStatement(isTopLevel)
       Dim nextKeyword = MatchToken(SyntaxKind.NextKeyword)
       Return New ForStatementSyntax(m_syntaxTree, forKeyword,
                                     identifier,
@@ -776,7 +828,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
              Current.Kind.Is_Keyword
     End Function
 
-    Private Function ParseForEachStatement() As StatementSyntax
+    Private Function ParseForEachStatement(isTopLevel As Boolean) As StatementSyntax
 
       ' FOR EACH *value* IN *array*
       '   *statements*
@@ -787,7 +839,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
       Dim value = MatchToken(SyntaxKind.IdentifierToken)
       Dim inKeyword = MatchToken(SyntaxKind.InKeyword)
       Dim array = MatchToken(SyntaxKind.IdentifierToken)
-      Dim statements = ParseBlockStatement()
+      Dim statements = ParseBlockStatement(isTopLevel)
       Dim nextKeyword = MatchToken(SyntaxKind.NextKeyword)
       Return New ForEachStatementSyntax(m_syntaxTree, forKeyword,
                                         eachKeyword,
@@ -816,7 +868,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
     End Function
 
-    Private Function ParseWhileStatement() As StatementSyntax
+    Private Function ParseWhileStatement(isTopLevel As Boolean) As StatementSyntax
 
       ' WHILE [*boolean_expression*]
       '   *statements*
@@ -830,7 +882,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
       Dim whileKeyword = MatchToken(SyntaxKind.WhileKeyword)
       Dim expression = ParseExpression()
-      Dim body = ParseBlockStatement()
+      Dim body = ParseBlockStatement(isTopLevel)
       'If Peek(0).Kind = SyntaxKind.WendKeyword Then
       Dim wendKeyword = MatchToken(SyntaxKind.WendKeyword)
       'Else
@@ -846,7 +898,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
 #Region "Decision Blocks"
 
-    Private Function ParseIfStatement() As StatementSyntax
+    Private Function ParseIfStatement(isTopLevel As Boolean) As StatementSyntax
 
       ' IF *expression* THEN
       '   *statements*
@@ -868,13 +920,13 @@ Namespace Bsharp.CodeAnalysis.Syntax
       Dim peekLine = m_text.GetLineIndex(Peek(0).Span.Start)
       Dim multiLine = Current.Kind = SyntaxKind.EndOfFileToken OrElse peekLine > thenLine
 
-      Dim statements = ParseBlockStatement()
+      Dim statements = ParseBlockStatement(isTopLevel)
 
       If multiLine Then
         'Dim ifStatement = New IfStatementSyntax(m_syntaxTree, ifKeyword, expression, thenKeyword, statements)
         'TODO: Need to handle ElseIf...
         'Dim elseIfStatements = ImmutableArray(Of ElseIfStatementSyntax).Empty
-        Dim elseClause = ParseOptionalElseClauseSyntax()
+        Dim elseClause = ParseOptionalElseClauseSyntax(isTopLevel)
         Dim endIfKeyword = MatchToken(SyntaxKind.EndIfKeyword)
         Return New IfStatementSyntax(m_syntaxTree,
                                      ifKeyword,
@@ -884,7 +936,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
                                      elseClause,
                                      endIfKeyword)
       Else
-        Dim elseClause = ParseOptionalSingleLineElseClause()
+        Dim elseClause = ParseOptionalSingleLineElseClause(isTopLevel)
         Return New SingleLineIfStatementSyntax(m_syntaxTree,
                                                ifKeyword,
                                                expression,
@@ -895,18 +947,18 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
     End Function
 
-    Private Function ParseOptionalSingleLineElseClause() As SingleLineElseClauseSyntax
+    Private Function ParseOptionalSingleLineElseClause(isTopLevel As Boolean) As SingleLineElseClauseSyntax
 
       ' ... ELSE *statements*
 
       If Current.Kind <> SyntaxKind.ElseKeyword Then Return Nothing
       Dim elseKeyword = MatchToken(SyntaxKind.ElseKeyword)
-      Dim statements = ParseBlockStatement()
+      Dim statements = ParseBlockStatement(isTopLevel)
       Return New SingleLineElseClauseSyntax(m_syntaxTree, elseKeyword, statements)
 
     End Function
 
-    Private Function ParseOptionalElseClauseSyntax() As ElseClauseSyntax
+    Private Function ParseOptionalElseClauseSyntax(isTopLevel As Boolean) As ElseClauseSyntax
 
       ' ...
       ' ELSE
@@ -915,7 +967,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
       If Current.Kind <> SyntaxKind.ElseKeyword Then Return Nothing
       Dim elseKeyword = MatchToken(SyntaxKind.ElseKeyword)
-      Dim statements = ParseBlockStatement()
+      Dim statements = ParseBlockStatement(isTopLevel)
       Return New ElseClauseSyntax(m_syntaxTree, elseKeyword, statements)
 
     End Function
@@ -1047,7 +1099,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
       End Select
     End Function
 
-    Private Function ParseBlockStatement() As BlockStatementSyntax
+    Private Function ParseBlockStatement(isTopLevel As Boolean) As BlockStatementSyntax
       Dim statements = ImmutableArray.CreateBuilder(Of StatementSyntax)
       Dim openBraceToken As SyntaxToken = Nothing
       If Current.Kind = SyntaxKind.OpenBraceToken Then
@@ -1058,7 +1110,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
         'Current.Kind <> SyntaxKind.CloseBraceToken
 
         startToken = Current()
-        Dim statement = ParseStatement()
+        Dim statement = ParseStatement(isTopLevel)
         statements.Add(statement)
 
         ' If ParseStatement did not consume any tokens,

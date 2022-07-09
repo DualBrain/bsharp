@@ -7,6 +7,7 @@ Namespace Bsharp.CodeAnalysis.Binding
     Public Overridable Function RewriteStatement(node As BoundStatement) As BoundStatement
       Select Case node.Kind
         Case BoundNodeKind.BlockStatement : Return RewriteBlockStatement(DirectCast(node, BoundBlockStatement))
+        Case BoundNodeKind.ChDirStatement : Return RewriteChDirStatement(DirectCast(node, BoundChDirStatement))
         Case BoundNodeKind.ClearStatement : Return RewriteClearStatement(DirectCast(node, BoundClearStatement))
         Case BoundNodeKind.ClsStatement : Return RewriteClsStatement(DirectCast(node, BoundClsStatement))
         Case BoundNodeKind.ConditionalGotoStatement : Return RewriteConditionalGotoStatement(DirectCast(node, BoundConditionalGotoStatement))
@@ -18,13 +19,18 @@ Namespace Bsharp.CodeAnalysis.Binding
         Case BoundNodeKind.GosubStatement : Return RewriteGosubStatement(DirectCast(node, BoundGosubStatement))
         Case BoundNodeKind.GotoStatement : Return RewriteGotoStatement(DirectCast(node, BoundGotoStatement))
         Case BoundNodeKind.IfStatement : Return RewriteIfStatement(DirectCast(node, BoundIfStatement))
+        Case BoundNodeKind.KillStatement : Return RewriteKillStatement(DirectCast(node, BoundKillStatement))
         Case BoundNodeKind.LabelStatement : Return RewriteLabelStatement(DirectCast(node, BoundLabelStatement))
         Case BoundNodeKind.LetStatement : Return RewriteLetStatement(DirectCast(node, BoundLetStatement))
         Case BoundNodeKind.MidStatement : Return RewriteMidStatement(DirectCast(node, BoundMidStatement))
+        Case BoundNodeKind.MkDirStatement : Return RewriteMkDirStatement(DirectCast(node, BoundMkDirStatement))
+        Case BoundNodeKind.NameStatement : Return RewriteNameStatement(DirectCast(node, BoundNameStatement))
         Case BoundNodeKind.NopStatement : Return RewriteNopStatement(DirectCast(node, BoundNopStatement))
         Case BoundNodeKind.OptionStatement : Return RewriteOptionStatement(DirectCast(node, BoundOptionStatement))
         Case BoundNodeKind.PrintStatement : Return RewritePrintStatement(DirectCast(node, BoundPrintStatement))
         Case BoundNodeKind.RemStatement : Return RewriteRemStatement(DirectCast(node, BoundRemStatement))
+        Case BoundNodeKind.RmDirStatement : Return RewriteRmDirStatement(DirectCast(node, BoundRmDirStatement))
+        Case BoundNodeKind.ReturnGosubStatement : Return RewriteReturnGosubStatement(DirectCast(node, BoundReturnGosubStatement))
         Case BoundNodeKind.ReturnStatement : Return RewriteReturnStatement(DirectCast(node, BoundReturnStatement))
         Case BoundNodeKind.StopStatement : Return RewriteStopStatement(DirectCast(node, BoundStopStatement))
         Case BoundNodeKind.SystemStatement : Return RewriteSystemStatement(DirectCast(node, BoundSystemStatement))
@@ -96,6 +102,10 @@ Namespace Bsharp.CodeAnalysis.Binding
       Return New BoundBlockStatement(builder.MoveToImmutable)
     End Function
 
+    Protected Overridable Function RewriteChDirStatement(node As BoundChDirStatement) As BoundStatement
+      Return node
+    End Function
+
     Protected Overridable Function RewriteClearStatement(node As BoundClearStatement) As BoundStatement
       Return node
     End Function
@@ -109,6 +119,22 @@ Namespace Bsharp.CodeAnalysis.Binding
     End Function
 
     Protected Overridable Function RewriteSystemStatement(node As BoundSystemStatement) As BoundStatement
+      Return node
+    End Function
+
+    Protected Overridable Function RewriteMkDirStatement(node As BoundMkDirStatement) As BoundStatement
+      Return node
+    End Function
+
+    Protected Overridable Function RewriteKillStatement(node As BoundKillStatement) As BoundStatement
+      Return node
+    End Function
+
+    Protected Overridable Function RewriteNameStatement(node As BoundNameStatement) As BoundStatement
+      Return node
+    End Function
+
+    Protected Overridable Function RewriteRmDirStatement(node As BoundRmDirStatement) As BoundStatement
       Return node
     End Function
 
@@ -359,6 +385,10 @@ Namespace Bsharp.CodeAnalysis.Binding
         Return node
       End If
       Return New BoundConditionalGotoStatement(node.Label, condition, node.JumpIfTrue)
+    End Function
+
+    Protected Overridable Function RewriteReturnGosubStatement(node As BoundReturnGosubStatement) As BoundStatement
+      Return node
     End Function
 
     Protected Overridable Function RewriteReturnStatement(node As BoundReturnStatement) As BoundStatement

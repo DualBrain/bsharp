@@ -3,15 +3,15 @@
   Partial Public NotInheritable Class GotoStatementSyntax
     Inherits StatementSyntax
 
-    Public Sub New(tree As SyntaxTree, gotoKeyword As SyntaxToken, identifierToken As SyntaxToken)
+    Public Sub New(tree As SyntaxTree, gotoKeyword As SyntaxToken, targetToken As SyntaxToken)
       MyBase.New(tree)
       Me.GotoKeyword = gotoKeyword
-      Me.IdentifierToken = identifierToken
+      Me.TargetToken = targetToken
     End Sub
 
     Public Overrides ReadOnly Property Kind() As SyntaxKind = SyntaxKind.GotoStatement
     Public ReadOnly Property GotoKeyword() As SyntaxToken
-    Public ReadOnly Property IdentifierToken() As SyntaxToken
+    Public ReadOnly Property TargetToken() As SyntaxToken
 
   End Class
 

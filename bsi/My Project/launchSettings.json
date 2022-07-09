@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "bsi": {
+      "commandName": "Project",
+      "workingDirectory": "..\\samples"
+    }
+  }
+}

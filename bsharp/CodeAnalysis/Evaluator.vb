@@ -59,6 +59,11 @@ Namespace Bsharp.CodeAnalysis
       While index < body.Statements.Length
         Dim s = body.Statements(index)
         Select Case s.Kind
+          Case BoundNodeKind.ChDirStatement
+            Dim chdir = CType(s, BoundChDirStatement)
+            Dim value = CStr(EvaluateExpression(chdir.Expression))
+            System.IO.Directory.SetCurrentDirectory(value)
+            index += 1
           Case BoundNodeKind.ClearStatement
             index += 1
           Case BoundNodeKind.ClsStatement
@@ -94,7 +99,7 @@ Namespace Bsharp.CodeAnalysis
 
           Case BoundNodeKind.GosubStatement
             Dim gs = CType(s, BoundGosubStatement)
-            If labelToIndex.Keys.Contains(gs.Label) Then
+            If labelToIndex.ContainsKey(gs.Label) Then
               m_gosubStack.Push(index + 1)
               index = labelToIndex(gs.Label)
             Else
@@ -110,7 +115,7 @@ Namespace Bsharp.CodeAnalysis
           Case BoundNodeKind.GotoStatement
             Dim gs = CType(s, BoundGotoStatement)
 
-            If labelToIndex.Keys.Contains(gs.Label) Then
+            If labelToIndex.ContainsKey(gs.Label) Then
               index = labelToIndex(gs.Label)
             Else
               For Each entry In labelToIndex.Keys
@@ -128,8 +133,32 @@ Namespace Bsharp.CodeAnalysis
           Case BoundNodeKind.HandleSpcStatement : EvaluateHandleSpcStatement(CType(s, BoundHandleSpcStatement)) : index += 1
           Case BoundNodeKind.HandleTabStatement : EvaluateHandleTabStatement(CType(s, BoundHandleTabStatement)) : index += 1
 
+          Case BoundNodeKind.KillStatement
+            Dim kill = CType(s, BoundKillStatement)
+            Dim value = CStr(EvaluateExpression(kill.Expression))
+            If System.IO.Directory.Exists(value) Then
+              System.IO.Directory.Delete(value)
+            Else
+              System.IO.File.Delete(value)
+            End If
+            index += 1
           Case BoundNodeKind.LabelStatement : index += 1
           Case BoundNodeKind.MidStatement : EvaluateMidStatement(CType(s, BoundMidStatement)) : index += 1
+          Case BoundNodeKind.MkDirStatement
+            Dim mkdir = CType(s, BoundMkDirStatement)
+            Dim value = CStr(EvaluateExpression(mkdir.Expression))
+            System.IO.Directory.CreateDirectory(value)
+            index += 1
+          Case BoundNodeKind.NameStatement
+            Dim name = CType(s, BoundNameStatement)
+            Dim originalPath = CStr(EvaluateExpression(name.OriginalPath))
+            Dim destinationPath = CStr(EvaluateExpression(name.DestinationPath))
+            If System.IO.Directory.Exists(originalPath) Then
+              System.IO.Directory.Move(originalPath, destinationPath)
+            Else
+              System.IO.File.Move(originalPath, destinationPath)
+            End If
+            index += 1
           Case BoundNodeKind.NopStatement : index += 1
           Case BoundNodeKind.LetStatement : EvaluateLetStatement(CType(s, BoundLetStatement)) : index += 1
           Case BoundNodeKind.OptionStatement
@@ -142,18 +171,37 @@ Namespace Bsharp.CodeAnalysis
           'Case BoundNodeKind.PrintStatement
           '  EvaluatePrintStatement(CType(s, BoundPrintStatement)) : index += 1
           Case BoundNodeKind.RemStatement : index += 1
+
+          Case BoundNodeKind.ReturnGosubStatement
+            Dim rg = CType(s, BoundReturnGosubStatement)
+
+            If rg.Label Is Nothing Then
+              If m_gosubStack.Count > 0 Then
+                index = m_gosubStack.Pop
+              End If
+            ElseIf labelToIndex.ContainsKey(rg.Label) Then
+              index = labelToIndex(rg.Label)
+            Else
+              For Each entry In labelToIndex.Keys
+                If entry.Name = rg.Label.Name Then
+                  index = labelToIndex(entry)
+                  Exit For
+                End If
+              Next
+            End If
+
           Case BoundNodeKind.ReturnStatement
             'TODO: Need to determine if this is a 
             '      value Return or a Return related
             '      to a Gosub.
             Dim rs = CType(s, BoundReturnStatement)
             m_lastValue = If(rs.Expression Is Nothing, Nothing, EvaluateExpression(rs.Expression))
-            If m_lastValue Is Nothing AndAlso
-               m_gosubStack.Count > 0 Then
-              index = m_gosubStack.Pop
-            Else
-              Return m_lastValue
-            End If
+            Return m_lastValue
+          Case BoundNodeKind.RmDirStatement
+            Dim rmdir = CType(s, BoundRmDirStatement)
+            Dim value = CStr(EvaluateExpression(rmdir.Expression))
+            System.IO.Directory.Delete(value)
+            index += 1
           Case BoundNodeKind.StopStatement
             index = body.Statements.Length
           Case BoundNodeKind.SystemStatement
@@ -194,21 +242,25 @@ Namespace Bsharp.CodeAnalysis
       Assign(node.Variable, value)
     End Sub
 
-    Private Sub EvaluateHandleCommaStatement(node As BoundHandleCommaStatement)
-      Dim screenWidth = 80
+    Private Shared Sub EvaluateHandleCommaStatement(node As BoundHandleCommaStatement)
+      If node IsNot Nothing Then
+      End If
+      'Dim screenWidth = 80
       Dim zoneWidth = 14
       Dim pos = Console.CursorLeft + 1
       Dim cur = pos Mod zoneWidth
       Console.Write(Microsoft.VisualBasic.Strings.Space(cur))
     End Sub
 
-    Private Sub EvaluateHandlePrintLineStatement(node As BoundHandlePrintLineStatement)
+    Private Shared Sub EvaluateHandlePrintLineStatement(node As BoundHandlePrintLineStatement)
+      If node IsNot Nothing Then
+      End If
       Console.WriteLine()
     End Sub
 
     Private Sub EvaluateHandlePrintStatement(node As BoundHandlePrintStatement)
       Dim value = EvaluateExpression(node.Expression)
-      Dim str = ""
+      Dim str As String '= ""
       If TypeOf value Is BoundConstant Then
         str = CStr(CType(value, BoundConstant).Value)
       Else
@@ -219,7 +271,7 @@ Namespace Bsharp.CodeAnalysis
 
     Private Sub EvaluateHandleSpcStatement(node As BoundHandleSpcStatement)
       Dim screenWidth = 80
-      Dim zoneWidth = 14
+      'Dim zoneWidth = 14
       Dim result = EvaluateExpression(node.Expression)
       Dim value = CInt(result)
       If value < 0 OrElse value > 255 Then
@@ -233,7 +285,7 @@ Namespace Bsharp.CodeAnalysis
 
     Private Sub EvaluateHandleTabStatement(node As BoundHandleTabStatement)
       Dim screenWidth = 80
-      Dim zoneWidth = 14
+      'Dim zoneWidth = 14
       Dim result = EvaluateExpression(node.Expression)
       Dim value = CInt(result)
       If value < 0 OrElse value > 255 Then
@@ -348,7 +400,7 @@ Namespace Bsharp.CodeAnalysis
 
     End Function
 
-    Private Function EvaluateConstantExpression(node As BoundExpression) As Object
+    Private Shared Function EvaluateConstantExpression(node As BoundExpression) As Object
       Debug.Assert(node.ConstantValue IsNot Nothing)
       Return node.ConstantValue.Value
     End Function

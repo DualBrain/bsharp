@@ -8,18 +8,14 @@ Namespace Bsharp.CodeAnalysis.Binding
 
   Friend NotInheritable Class Binder
 
+    Private Const GOTO_LABEL_PREFIX As String = "$LABEL"
+
     Private m_scope As BoundScope
     Private ReadOnly m_isScript As Boolean
     Private ReadOnly m_function As FunctionSymbol
     Private ReadOnly Property Diagnostics As DiagnosticBag = New DiagnosticBag
     Private ReadOnly m_loopStack As New Stack(Of (ExitLabel As BoundLabel, ContinueLabel As BoundLabel))
     Private m_labelCounter As Integer
-
-    'Public ReadOnly Property Diagnostics As DiagnosticBag
-    '  Get
-    '    Return Diagnostics
-    '  End Get
-    'End Property
 
     Public Sub New(isScript As Boolean, parent As BoundScope, [function] As FunctionSymbol)
       m_scope = New BoundScope(parent)
@@ -55,9 +51,9 @@ Namespace Bsharp.CodeAnalysis.Binding
       For Each statement In globalStatements
         If TypeOf statement.Statement Is GotoStatementSyntax Then
           Dim g = CType(statement.Statement, GotoStatementSyntax)
-          If IsNumeric(g.IdentifierToken.Text) Then
+          If IsNumeric(g.TargetToken.Text) Then
             ' Target is a line number?
-            Dim value = CInt(g.IdentifierToken.Text)
+            Dim value = CInt(g.TargetToken.Text)
             If Not targetLineNumbers.Contains(value) Then
               targetLineNumbers.Add(value)
             End If
@@ -88,7 +84,7 @@ Namespace Bsharp.CodeAnalysis.Binding
                   If targetLineNumbers.Contains(value) Then
                     ' matching target
                     'TODO: Need to transform the LineNumberTrivia into a numbered Label.
-                    Dim label = New SyntaxToken(globalStatement.SyntaxTree, SyntaxKind.LabelStatement, token.Position, $"GotoLabel{value}:", Nothing, ImmutableArray(Of SyntaxTrivia).Empty, ImmutableArray(Of SyntaxTrivia).Empty)
+                    Dim label = New SyntaxToken(globalStatement.SyntaxTree, SyntaxKind.LabelStatement, token.Position, $"{GOTO_LABEL_PREFIX}{value}:", Nothing, ImmutableArray(Of SyntaxTrivia).Empty, ImmutableArray(Of SyntaxTrivia).Empty)
                     Dim stmt = New LabelStatementSyntax(globalStatement.SyntaxTree, label)
                     statements.Add(binder.BindGlobalStatement(stmt))
                   End If
@@ -325,8 +321,11 @@ Namespace Bsharp.CodeAnalysis.Binding
     End Function
 
     Private Function BindStatementInternal(syntax As StatementSyntax, Optional isGlobal As Boolean = False) As BoundStatement
+      If isGlobal Then
+      End If
       Select Case syntax.Kind
         Case SyntaxKind.BlockStatement : Return BindBlockStatement(CType(syntax, BlockStatementSyntax))
+        Case SyntaxKind.ChDirStatement : Return BindChDirStatement(CType(syntax, ChDirStatementSyntax))
         Case SyntaxKind.ClearStatement : Return BindClearStatement(CType(syntax, ClearStatementSyntax))
         Case SyntaxKind.ClsStatement : Return BindClsStatement(CType(syntax, ClsStatementSyntax))
         Case SyntaxKind.ContinueStatement : Return BindContinueStatement(CType(syntax, ContinueStatementSyntax))
@@ -339,13 +338,18 @@ Namespace Bsharp.CodeAnalysis.Binding
         Case SyntaxKind.GosubStatement : Return BindGosubStatement(CType(syntax, GosubStatementSyntax))
         Case SyntaxKind.GotoStatement : Return BindGotoStatement(CType(syntax, GotoStatementSyntax))
         Case SyntaxKind.IfStatement : Return BindIfStatement(CType(syntax, IfStatementSyntax))
+        Case SyntaxKind.KillStatement : Return BindKillStatement(CType(syntax, KillStatementSyntax))
         Case SyntaxKind.LabelStatement : Return BindLabelStatement(CType(syntax, LabelStatementSyntax))
         Case SyntaxKind.LetStatement : Return BindLetStatement(CType(syntax, LetStatementSyntax))
         Case SyntaxKind.MidStatement : Return BindMidStatement(CType(syntax, MidStatementSyntax))
+        Case SyntaxKind.MkDirStatement : Return BindMkDirStatement(CType(syntax, MkDirStatementSyntax))
+        Case SyntaxKind.NameStatement : Return BindNameStatement(CType(syntax, NameStatementSyntax))
         Case SyntaxKind.OptionStatement : Return BindOptionStatement(CType(syntax, OptionStatementSyntax))
         Case SyntaxKind.PrintStatement : Return BindPrintStatement(CType(syntax, PrintStatementSyntax))
         Case SyntaxKind.RemStatement : Return BindRemStatement(CType(syntax, RemStatementSyntax))
+        Case SyntaxKind.ReturnGosubStatement : Return BindReturnGosubStatement(CType(syntax, ReturnGosubStatementSyntax))
         Case SyntaxKind.ReturnStatement : Return BindReturnStatement(CType(syntax, ReturnStatementSyntax))
+        Case SyntaxKind.RmDirStatement : Return BindRmDirStatement(CType(syntax, RmDirStatementSyntax))
         Case SyntaxKind.SingleLineIfStatement : Return BindSingleLineIfStatement(CType(syntax, SingleLineIfStatementSyntax))
         Case SyntaxKind.StopStatement : Return BindStopStatement(CType(syntax, StopStatementSyntax))
         Case SyntaxKind.SystemStatement : Return BindSystemStatement(CType(syntax, SystemStatementSyntax))
@@ -391,17 +395,6 @@ Namespace Bsharp.CodeAnalysis.Binding
 
     End Function
 
-    Private Function BindBlockStatement(syntax As BlockStatementSyntax) As BoundStatement
-      Dim statements = ImmutableArray.CreateBuilder(Of BoundStatement)
-      m_scope = New BoundScope(m_scope)
-      For Each statementSyntax In syntax.Statements
-        Dim statement = BindStatement(statementSyntax)
-        statements.Add(statement)
-      Next
-      m_scope = m_scope.Parent
-      Return New BoundBlockStatement(statements.ToImmutable)
-    End Function
-
     Private Function BindBinaryExpression(syntax As BinaryExpressionSyntax) As BoundExpression
       Dim boundLeft = BindExpression(syntax.Left)
       Dim boundRight = BindExpression(syntax.Right)
@@ -412,6 +405,17 @@ Namespace Bsharp.CodeAnalysis.Binding
         Return New BoundErrorExpression
       End If
       Return New BoundBinaryExpression(boundLeft, boundOperator, boundRight)
+    End Function
+
+    Private Function BindBlockStatement(syntax As BlockStatementSyntax) As BoundStatement
+      Dim statements = ImmutableArray.CreateBuilder(Of BoundStatement)
+      m_scope = New BoundScope(m_scope)
+      For Each statementSyntax In syntax.Statements
+        Dim statement = BindStatement(statementSyntax)
+        statements.Add(statement)
+      Next
+      m_scope = m_scope.Parent
+      Return New BoundBlockStatement(statements.ToImmutable)
     End Function
 
     Private Function BindCallExpression(syntax As CallExpressionSyntax) As BoundExpression
@@ -474,6 +478,11 @@ Namespace Bsharp.CodeAnalysis.Binding
 
       Return New BoundCallExpression(func, boundArguments.ToImmutable())
 
+    End Function
+
+    Private Function BindChDirStatement(syntax As ChDirStatementSyntax) As BoundStatement
+      Dim path = BindExpression(syntax.Path)
+      Return New BoundChDirStatement(path)
     End Function
 
     Private Function BindClearStatement(syntax As ClearStatementSyntax) As BoundStatement
@@ -541,7 +550,9 @@ Namespace Bsharp.CodeAnalysis.Binding
       Return New BoundDoWhileStatement(statements, expression, atBeginning, exitLabel, continueLabel)
     End Function
 
-    Private Function BindEndStatement(syntax As EndStatementSyntax) As BoundStatement
+    Private Shared Function BindEndStatement(syntax As EndStatementSyntax) As BoundStatement
+      If syntax IsNot Nothing Then
+      End If
       Return New BoundEndStatement()
     End Function
 
@@ -581,7 +592,7 @@ Namespace Bsharp.CodeAnalysis.Binding
 
     End Function
 
-    Private Function BindGosubStatement(syntax As GosubStatementSyntax) As BoundStatement
+    Private Shared Function BindGosubStatement(syntax As GosubStatementSyntax) As BoundStatement
       Dim value = syntax.IdentifierToken.Text
       If IsNumeric(value) Then
         value = $"GosubLabel{value}"
@@ -590,19 +601,13 @@ Namespace Bsharp.CodeAnalysis.Binding
       Return New BoundGosubStatement(label)
     End Function
 
-    Private Function BindGotoStatement(syntax As GotoStatementSyntax) As BoundStatement
-      Dim value = syntax.IdentifierToken.Text
+    Private Shared Function BindGotoStatement(syntax As GotoStatementSyntax) As BoundStatement
+      Dim value = syntax.TargetToken.Text
       If IsNumeric(value) Then
-        value = $"GotoLabel{value}"
+        value = $"{GOTO_LABEL_PREFIX}{value}"
       End If
       Dim label = New BoundLabel(value)
       Return New BoundGotoStatement(label)
-    End Function
-
-    Private Function BindLabelStatement(syntax As LabelStatementSyntax) As BoundStatement
-      Dim label = syntax.Label
-      Dim boundLabel = New BoundLabel(label.Text.Substring(0, label.Text.Length - 1))
-      Return New BoundLabelStatement(boundLabel)
     End Function
 
     Private Function BindIfStatement(syntax As IfStatementSyntax) As BoundStatement
@@ -627,6 +632,17 @@ Namespace Bsharp.CodeAnalysis.Binding
       Dim elseClause = If(elseStatement IsNot Nothing, BindStatement(elseStatement.Statements), Nothing)
       Return New BoundIfStatement(condition, thenStatement, elseClause)
 
+    End Function
+
+    Private Function BindKillStatement(syntax As KillStatementSyntax) As BoundStatement
+      Dim path = BindExpression(syntax.Path)
+      Return New BoundKillStatement(path)
+    End Function
+
+    Private Shared Function BindLabelStatement(syntax As LabelStatementSyntax) As BoundStatement
+      Dim label = syntax.Label
+      Dim boundLabel = New BoundLabel(label.Text.Substring(0, label.Text.Length - 1))
+      Return New BoundLabelStatement(boundLabel)
     End Function
 
     Private Function BindLetStatement(syntax As LetStatementSyntax) As BoundStatement
@@ -681,6 +697,25 @@ Namespace Bsharp.CodeAnalysis.Binding
 
     End Function
 
+    Private Function BindMidStatement(syntax As MidStatementSyntax) As BoundStatement
+      Dim variable = DetermineVariableReference(syntax.IdentifierToken)
+      Dim positionExpression = If(syntax.PositionExpression Is Nothing, Nothing, BindExpression(syntax.PositionExpression))
+      Dim lengthExpression = If(syntax.LengthExpression Is Nothing, Nothing, BindExpression(syntax.LengthExpression))
+      Dim expression = If(syntax.Expression Is Nothing, Nothing, BindExpression(syntax.Expression))
+      Return New BoundMidStatement(variable, positionExpression, lengthExpression, expression)
+    End Function
+
+    Private Function BindMkDirStatement(syntax As MkDirStatementSyntax) As BoundStatement
+      Dim path = BindExpression(syntax.Path)
+      Return New BoundMkDirStatement(path)
+    End Function
+
+    Private Function BindNameStatement(syntax As NameStatementSyntax) As BoundStatement
+      Dim originalPath = BindExpression(syntax.OriginalPath)
+      Dim destinationPath = BindExpression(syntax.DestinationPath)
+      Return New BoundNameStatement(originalPath, destinationPath)
+    End Function
+
     Private Function BindNameExpression(syntax As NameExpressionSyntax) As BoundExpression
       Dim name = syntax.IdentifierToken.Text
       If syntax.IdentifierToken.IsMissing Then
@@ -695,25 +730,13 @@ Namespace Bsharp.CodeAnalysis.Binding
       Return New BoundVariableExpression(variable)
     End Function
 
-    Private Function BindParenExpression(syntax As ParenExpressionSyntax) As BoundExpression
-      Return BindExpression(syntax.Expression)
-    End Function
-
-    Private Function BindMidStatement(syntax As MidStatementSyntax) As BoundStatement
-      Dim variable = DetermineVariableReference(syntax.IdentifierToken)
-      Dim positionExpression = If(syntax.PositionExpression Is Nothing, Nothing, BindExpression(syntax.PositionExpression))
-      Dim lengthExpression = If(syntax.LengthExpression Is Nothing, Nothing, BindExpression(syntax.LengthExpression))
-      Dim expression = If(syntax.Expression Is Nothing, Nothing, BindExpression(syntax.Expression))
-      Return New BoundMidStatement(variable, positionExpression, lengthExpression, expression)
-    End Function
-
-    Private Function BindOptionStatement(syntax As OptionStatementSyntax) As BoundStatement
+    Private Shared Function BindOptionStatement(syntax As OptionStatementSyntax) As BoundStatement
       Dim numberToken = syntax.NumberToken
       Return New BoundOptionStatement(CInt(numberToken.Text))
     End Function
 
-    Private Function BindRemStatement(syntax As RemStatementSyntax) As BoundStatement
-      Return New BoundRemStatement()
+    Private Function BindParenExpression(syntax As ParenExpressionSyntax) As BoundExpression
+      Return BindExpression(syntax.Expression)
     End Function
 
     Private Function BindPrintStatement(syntax As PrintStatementSyntax) As BoundStatement
@@ -742,28 +765,24 @@ Namespace Bsharp.CodeAnalysis.Binding
 
     End Function
 
+    Private Shared Function BindRemStatement(syntax As RemStatementSyntax) As BoundStatement
+      If syntax IsNot Nothing Then
+      End If
+      Return New BoundRemStatement()
+    End Function
+
+    Private Shared Function BindReturnGosubStatement(syntax As ReturnGosubStatementSyntax) As BoundStatement
+      Dim value = syntax.TargetToken?.Text
+      If value IsNot Nothing AndAlso IsNumeric(value) Then
+        value = $"{GOTO_LABEL_PREFIX}{value}"
+      End If
+      Dim label = If(value IsNot Nothing, New BoundLabel(value), Nothing)
+      Return New BoundReturnGosubStatement(label)
+    End Function
+
     Private Function BindReturnStatement(syntax As ReturnStatementSyntax) As BoundStatement
 
       Dim expression = If(syntax.Expression Is Nothing, Nothing, BindExpression(syntax.Expression))
-      'Dim identifierToken = syntax.IdentifierToken
-
-      'If identifierToken Is Nothing AndAlso
-      '   expression Is Nothing Then
-
-      '  ' RETURN
-
-      '  Return New BoundReturnStatement()
-
-      'ElseIf identifierToken IsNot Nothing Then
-
-      '  ' RETURN *line number*
-      '  ' RETURN *label*
-
-      'Else
-
-      '  ' RETURN *expression*
-
-      'End If
 
       If m_function Is Nothing Then
         If m_isScript Then
@@ -793,6 +812,11 @@ Namespace Bsharp.CodeAnalysis.Binding
 
     End Function
 
+    Private Function BindRmDirStatement(syntax As RmDirStatementSyntax) As BoundStatement
+      Dim path = BindExpression(syntax.Path)
+      Return New BoundRmDirStatement(path)
+    End Function
+
     Private Function BindSingleLineIfStatement(syntax As SingleLineIfStatementSyntax) As BoundStatement
 
       Dim condition = BindExpression(syntax.Expression, TypeSymbol.Boolean)
@@ -811,22 +835,16 @@ Namespace Bsharp.CodeAnalysis.Binding
 
     End Function
 
-    Private Function BindStopStatement(syntax As StopStatementSyntax) As BoundStatement
+    Private Shared Function BindStopStatement(syntax As StopStatementSyntax) As BoundStatement
+      If syntax IsNot Nothing Then
+      End If
       Return New BoundStopStatement()
     End Function
 
-    Private Function BindSystemStatement(syntax As SystemStatementSyntax) As BoundStatement
+    Private Shared Function BindSystemStatement(syntax As SystemStatementSyntax) As BoundStatement
+      If syntax IsNot Nothing Then
+      End If
       Return New BoundSystemStatement()
-    End Function
-
-    Private Function BindVariableDeclaration(syntax As VariableDeclarationSyntax) As BoundStatement
-      Dim isReadOnly = (syntax.KeywordToken.Kind = SyntaxKind.ConstKeyword)
-      Dim type = BindAsClause(syntax.AsClause)
-      Dim initializer = BindExpression(syntax.Initializer)
-      Dim variableType = If(type, initializer.Type)
-      Dim variable = BindVariableDeclaration(syntax.IdentifierToken, isReadOnly, variableType)
-      Dim convertedInitializer = BindConversion(syntax.Initializer.Location, initializer, variableType)
-      Return New BoundVariableDeclaration(variable, convertedInitializer)
     End Function
 
     Private Function BindUnaryExpression(syntax As UnaryExpressionSyntax) As BoundExpression
@@ -840,6 +858,16 @@ Namespace Bsharp.CodeAnalysis.Binding
       Return New BoundUnaryExpression(boundOperator, boundOperand)
     End Function
 
+    Private Function BindVariableDeclaration(syntax As VariableDeclarationSyntax) As BoundStatement
+      Dim isReadOnly = (syntax.KeywordToken.Kind = SyntaxKind.ConstKeyword)
+      Dim type = BindAsClause(syntax.AsClause)
+      Dim initializer = BindExpression(syntax.Initializer)
+      Dim variableType = If(type, initializer.Type)
+      Dim variable = BindVariableDeclaration(syntax.IdentifierToken, isReadOnly, variableType)
+      Dim convertedInitializer = BindConversion(syntax.Initializer.Location, initializer, variableType)
+      Return New BoundVariableDeclaration(variable, convertedInitializer)
+    End Function
+
     Private Function BindVariableDeclaration(identifier As SyntaxToken, isReadOnly As Boolean, type As TypeSymbol, Optional constant As BoundConstant = Nothing) As VariableSymbol
       Dim name = If(identifier.Text, "?")
       Dim [declare] = Not identifier.IsMissing
@@ -850,19 +878,6 @@ Namespace Bsharp.CodeAnalysis.Binding
         Diagnostics.ReportSymbolAlreadyDeclared(identifier.Location, name)
       End If
       Return variable
-    End Function
-
-    Private Function DetermineVariableReference(identifierToken As SyntaxToken) As VariableSymbol
-
-      Dim name = identifierToken.Text
-      Dim s = m_scope.TryLookupSymbol(name)
-
-      If TypeOf s Is VariableSymbol Then
-        Return TryCast(s, VariableSymbol)
-      Else
-        Return Nothing
-      End If
-
     End Function
 
     Private Function BindVariableReference(identifierToken As SyntaxToken) As VariableSymbol
@@ -899,6 +914,19 @@ Namespace Bsharp.CodeAnalysis.Binding
 
     End Function
 
+    Private Function DetermineVariableReference(identifierToken As SyntaxToken) As VariableSymbol
+
+      Dim name = identifierToken.Text
+      Dim s = m_scope.TryLookupSymbol(name)
+
+      If TypeOf s Is VariableSymbol Then
+        Return TryCast(s, VariableSymbol)
+      Else
+        Return Nothing
+      End If
+
+    End Function
+
     Private Shared Function LookupType(name As String) As TypeSymbol
       Select Case name.ToLower
         Case "any" : Return TypeSymbol.Any
@@ -923,6 +951,7 @@ Namespace Bsharp.CodeAnalysis.Binding
           Return Nothing
       End Select
     End Function
+
   End Class
 
 End Namespace

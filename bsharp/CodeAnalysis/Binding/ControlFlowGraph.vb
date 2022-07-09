@@ -92,10 +92,12 @@ Namespace Bsharp.CodeAnalysis.Binding
               m_statements.Add(statement)
             Case BoundNodeKind.ConditionalGotoStatement,
                  BoundNodeKind.GotoStatement,
+                 BoundNodeKind.ReturnGosubStatement,
                  BoundNodeKind.ReturnStatement
               m_statements.Add(statement)
               StartBlock()
-            Case BoundNodeKind.ClearStatement,
+            Case BoundNodeKind.ChDirStatement,
+                 BoundNodeKind.ClearStatement,
                  BoundNodeKind.ClsStatement,
                  BoundNodeKind.EndStatement,
                  BoundNodeKind.ExpressionStatement,
@@ -105,10 +107,14 @@ Namespace Bsharp.CodeAnalysis.Binding
                  BoundNodeKind.HandlePrintStatement,
                  BoundNodeKind.HandleSpcStatement,
                  BoundNodeKind.HandleTabStatement,
+                 BoundNodeKind.KillStatement,
                  BoundNodeKind.LetStatement,
+                 BoundNodeKind.NameStatement,
                  BoundNodeKind.MidStatement,
+                 BoundNodeKind.MkDirStatement,
                  BoundNodeKind.NopStatement,
                  BoundNodeKind.RemStatement,
+                 BoundNodeKind.RmDirStatement,
                  BoundNodeKind.OptionStatement,
                  BoundNodeKind.PrintStatement,
                  BoundNodeKind.StopStatement,
@@ -196,7 +202,8 @@ Namespace Bsharp.CodeAnalysis.Binding
                 Connect(current, elseBlock, elseCondition)
               Case BoundNodeKind.ReturnStatement
                 Connect(current, m_end)
-              Case BoundNodeKind.ClearStatement,
+              Case BoundNodeKind.ChDirStatement,
+                   BoundNodeKind.ClearStatement,
                    BoundNodeKind.ClsStatement,
                    BoundNodeKind.EndStatement,
                    BoundNodeKind.ExpressionStatement,
@@ -206,11 +213,16 @@ Namespace Bsharp.CodeAnalysis.Binding
                    BoundNodeKind.HandlePrintStatement,
                    BoundNodeKind.HandleSpcStatement,
                    BoundNodeKind.HandleTabStatement,
+                   BoundNodeKind.KillStatement,
                    BoundNodeKind.LabelStatement,
                    BoundNodeKind.LetStatement,
                    BoundNodeKind.MidStatement,
+                   BoundNodeKind.MkDirStatement,
+                   BoundNodeKind.NameStatement,
                    BoundNodeKind.NopStatement,
                    BoundNodeKind.RemStatement,
+                   BoundNodeKind.ReturnGosubStatement,
+                   BoundNodeKind.RmDirStatement,
                    BoundNodeKind.OptionStatement,
                    BoundNodeKind.PrintStatement,
                    BoundNodeKind.StopStatement,

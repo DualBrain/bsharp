@@ -129,8 +129,9 @@ Namespace Bsharp
 
           Dim immediateCommand = False
           If Not text.Contains(Environment.NewLine) Then
-            If text.StartsWith("$") Then immediateCommand = True
-            If m_immediateCommands.Contains(text.ToLower) Then immediateCommand = True
+            Dim word = text?.Split(" "c)?.First
+            If word.StartsWith("$") Then immediateCommand = True
+            If m_immediateCommands.Contains(word.ToLower) Then immediateCommand = True
           End If
 
           If immediateCommand Then

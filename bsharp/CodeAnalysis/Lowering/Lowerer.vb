@@ -11,6 +11,8 @@ Namespace Bsharp.CodeAnalysis.Lowering
   Friend NotInheritable Class Lowerer
     Inherits BoundTreeRewriter
 
+    Private Const GENERATED_LABEL_PREFIX As String = "$$LABEL"
+
     Private m_labelCount As Integer = 0
 
     Private Sub New()
@@ -18,7 +20,7 @@ Namespace Bsharp.CodeAnalysis.Lowering
 
     Private Function GenerateLabel() As BoundLabel
       m_labelCount += 1
-      Dim name = $"Label{m_labelCount}"
+      Dim name = $"{GENERATED_LABEL_PREFIX}{m_labelCount}"
       Return New BoundLabel(name)
     End Function
 

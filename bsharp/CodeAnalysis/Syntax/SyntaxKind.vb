@@ -150,6 +150,7 @@
 
     ' Statements
     BlockStatement
+    ChDirStatement
     ClearStatement
     ClsStatement
     ContinueStatement
@@ -166,16 +167,21 @@
     GosubStatement
     GotoStatement
     IfStatement
+    KillStatement
     LabelStatement
     LetStatement
     MidStatement
+    MkDirStatement
     MultiLineIfBlock
+    NameStatement
     OptionStatement
     PrintStatement
     ReadStatement
     RemStatement
     RestoreStatement
+    ReturnGosubStatement
     ReturnStatement
+    RmDirStatement
     SingleLineIfStatement
     StopStatement
     SystemStatement

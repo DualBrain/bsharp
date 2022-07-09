@@ -49,7 +49,12 @@
     LiteralExpression
     VariableExpression
     UnaryExpression
-
+    ReturnGosubStatement
+    ChDirStatement
+    MkDirStatement
+    RmDirStatement
+    KillStatement
+    NameStatement
   End Enum
 
 End Namespace
