@@ -8,8 +8,6 @@ Namespace Bsharp.CodeAnalysis.Binding
 
   Friend NotInheritable Class Binder
 
-    Private Const STRONGLY_TYPED As Boolean = False
-
     Private Const GOTO_LABEL_PREFIX As String = "$LABEL"
 
     Private m_scope As BoundScope
@@ -79,26 +77,39 @@ Namespace Bsharp.CodeAnalysis.Binding
       Dim statements = ImmutableArray.CreateBuilder(Of BoundStatement)
       For Each globalStatement In globalStatements
 
-        'TODO: Need to figure out a way to significantly improve the following code.
-        For Each child In globalStatement.Statement.GetChildren
-          If child.Kind.Is_Keyword Then
-            Dim token = TryCast(child, SyntaxToken)
-            If token IsNot Nothing Then
-              For Each trivia In token.LeadingTrivia
-                If trivia.Kind = SyntaxKind.LineNumberTrivia Then
-                  Dim value = CInt(trivia.Text)
-                  If True OrElse targetLineNumbers.Contains(value) Then
-                    ' matching target
-                    'TODO: Need to transform the LineNumberTrivia into a numbered Label.
-                    Dim label = New SyntaxToken(globalStatement.SyntaxTree, SyntaxKind.LabelStatement, token.Position, $"{GOTO_LABEL_PREFIX}{value}:", Nothing, ImmutableArray(Of SyntaxTrivia).Empty, ImmutableArray(Of SyntaxTrivia).Empty)
-                    Dim stmt = New LabelStatementSyntax(globalStatement.SyntaxTree, label)
-                    statements.Add(binder.BindGlobalStatement(stmt))
-                  End If
-                End If
-              Next
+        Dim lineNumbers = IterateLineNumbers(globalStatement.Statement)
+
+        For Each token In lineNumbers
+          For Each trivia In token.LeadingTrivia
+            If trivia.Kind = SyntaxKind.LineNumberTrivia Then
+              Dim value = CInt(trivia.Text)
+              Dim label = New SyntaxToken(globalStatement.SyntaxTree, SyntaxKind.LabelStatement, token.Position, $"{GOTO_LABEL_PREFIX}{value}:", Nothing, ImmutableArray(Of SyntaxTrivia).Empty, ImmutableArray(Of SyntaxTrivia).Empty)
+              Dim stmt = New LabelStatementSyntax(globalStatement.SyntaxTree, label)
+              statements.Add(binder.BindGlobalStatement(stmt))
             End If
-          End If
+          Next
         Next
+
+        ''TODO: Need to figure out a way to significantly improve the following code.
+        'For Each child In globalStatement.Statement.GetChildren
+        '  If child.Kind.Is_Keyword Then
+        '    Dim token = TryCast(child, SyntaxToken)
+        '    If token IsNot Nothing Then
+        '      For Each trivia In token.LeadingTrivia
+        '        If trivia.Kind = SyntaxKind.LineNumberTrivia Then
+        '          Dim value = CInt(trivia.Text)
+        '          If True OrElse targetLineNumbers.Contains(value) Then
+        '            ' matching target
+        '            'TODO: Need to transform the LineNumberTrivia into a numbered Label.
+        '            Dim label = New SyntaxToken(globalStatement.SyntaxTree, SyntaxKind.LabelStatement, token.Position, $"{GOTO_LABEL_PREFIX}{value}:", Nothing, ImmutableArray(Of SyntaxTrivia).Empty, ImmutableArray(Of SyntaxTrivia).Empty)
+        '            Dim stmt = New LabelStatementSyntax(globalStatement.SyntaxTree, label)
+        '            statements.Add(binder.BindGlobalStatement(stmt))
+        '          End If
+        '        End If
+        '      Next
+        '    End If
+        '  End If
+        'Next
 
         Dim statement = binder.BindGlobalStatement(globalStatement.Statement)
         statements.Add(statement)
@@ -168,6 +179,55 @@ Namespace Bsharp.CodeAnalysis.Binding
       End If
 
       Return New BoundGlobalScope(previous, diagnostics, mainFunction, scriptFunction, functions, variables, statements.ToImmutable)
+
+    End Function
+
+    Private Shared Function IterateLineNumbers(statement As SyntaxNode) As List(Of SyntaxToken)
+
+      Dim results As New List(Of SyntaxToken)
+
+      For Each child In statement.GetChildren
+        'If child.Kind.Is_Keyword Then
+        Dim token = TryCast(child, SyntaxToken)
+        If token IsNot Nothing Then
+          For Each trivia In token.LeadingTrivia
+            If trivia.Kind = SyntaxKind.LineNumberTrivia Then
+              'Dim value = CInt(trivia.Text)
+              'If True Then 'OrElse targetLineNumbers.Contains(value) Then
+              'TODO: Need to transform the LineNumberTrivia into a numbered Label.
+              'Dim label = New SyntaxToken(globalStatement.SyntaxTree, SyntaxKind.LabelStatement, token.Position, $"{GOTO_LABEL_PREFIX}{value}:", Nothing, ImmutableArray(Of SyntaxTrivia).Empty, ImmutableArray(Of SyntaxTrivia).Empty)
+              'Dim stmt = New LabelStatementSyntax(globalStatement.SyntaxTree, label)
+              'statements.Add(Binder.BindGlobalStatement(stmt))
+              results.Add(token)
+              'End If
+            End If
+          Next
+        End If
+        'End If
+        Dim r = IterateLineNumbers(child)
+        If r.Count > 0 Then
+          For Each entry In r
+            results.Add(entry)
+          Next
+        End If
+        'If TypeOf child Is StatementSyntax Then
+        '  Dim r = IterateLineNumbers(CType(child, StatementSyntax))
+        '  If r.Count > 0 Then
+        '    For Each entry In r
+        '      results.Add(entry)
+        '    Next
+        '  End If
+        'ElseIf TypeOf child Is ExpressionSyntax Then
+        '  Dim r = IterateLineNumbers(CType(child, StatementSyntax))
+        '  If r.Count > 0 Then
+        '    For Each entry In r
+        '      results.Add(entry)
+        '    Next
+        '  End If
+        'End If
+      Next
+
+      Return results
 
     End Function
 
@@ -661,7 +721,7 @@ Namespace Bsharp.CodeAnalysis.Binding
 
           Dim variable = DetermineVariableReference(token)
           If variable Is Nothing Then
-            If STRONGLY_TYPED Then
+            If OPTION_EXPLICIT Then
               ' Variable appears to not have been already declared, 
               ' run through the normal process in order to generate
               ' the appropriate error(s).
@@ -704,7 +764,7 @@ Namespace Bsharp.CodeAnalysis.Binding
 
       Dim variable = DetermineVariableReference(syntax.IdentifierToken)
       If variable Is Nothing Then
-        If STRONGLY_TYPED Then
+        If OPTION_EXPLICIT Then
           ' Variable appears to not have been already declared, 
           ' run through the normal process in order to generate
           ' the appropriate error(s).
@@ -964,7 +1024,7 @@ Namespace Bsharp.CodeAnalysis.Binding
       If TypeOf s Is VariableSymbol Then
         Return TryCast(s, VariableSymbol)
       ElseIf s Is Nothing Then
-        If Not STRONGLY_TYPED Then
+        If Not OPTION_EXPLICIT Then
           Dim type = TypeSymbol.String
           If Not identifierToken.Text.EndsWith("$") Then
             type = TypeSymbol.Double
@@ -974,6 +1034,7 @@ Namespace Bsharp.CodeAnalysis.Binding
             Diagnostics.ReportUndefinedVariable(identifierToken.Location, name)
             Return Nothing
           Else
+            s = m_scope.TryLookupSymbol(name)
             Return TryCast(s, VariableSymbol)
           End If
         Else

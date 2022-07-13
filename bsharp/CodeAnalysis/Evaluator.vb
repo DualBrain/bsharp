@@ -402,6 +402,10 @@ Namespace Bsharp.CodeAnalysis
 
     Private Function EvaluateVariableExpression(node As BoundVariableExpression) As Object
       If node.Variable.Kind = SymbolKind.GlobalVariable Then
+        If Not OPTION_EXPLICIT AndAlso
+           Not m_globals.ContainsKey(node.Variable) Then
+          Assign(node.Variable, 0)
+        End If
         Return m_globals(node.Variable)
       Else
         Dim locals = m_locals.Peek
@@ -921,6 +925,7 @@ Namespace Bsharp.CodeAnalysis
 
   Friend Module Singleton
 
+    Friend Const OPTION_EXPLICIT As Boolean = False
     Friend Const OPTION_DOUBLE As Boolean = False
 
     Friend g_seed As Integer = 0
