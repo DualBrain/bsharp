@@ -29,6 +29,7 @@ Namespace Bsharp.CodeAnalysis.Binding
         Case BoundNodeKind.ConditionalGotoStatement : WriteConditionalGotoStatement(CType(node, BoundConditionalGotoStatement), writer)
         Case BoundNodeKind.ConversionExpression : WriteConversionExpression(CType(node, BoundConversionExpression), writer)
         Case BoundNodeKind.DoWhileStatement : WriteDoWhileStatement(CType(node, BoundDoWhileStatement), writer)
+        Case BoundNodeKind.EndStatement : WriteEndStatement(CType(node, BoundEndStatement), writer)
         Case BoundNodeKind.ErrorExpression : WriteErrorExpression(CType(node, BoundErrorExpression), writer)
         Case BoundNodeKind.ExpressionStatement : WriteExpressionStatement(CType(node, BoundExpressionStatement), writer)
         Case BoundNodeKind.ForStatement : WriteForStatement(CType(node, BoundForStatement), writer)
@@ -325,6 +326,12 @@ Namespace Bsharp.CodeAnalysis.Binding
     Private Sub WriteExpressionStatement(node As BoundExpressionStatement, writer As IndentedTextWriter)
       node.Expression.WriteTo(writer)
       writer.WriteLine()
+    End Sub
+
+    Private Sub WriteEndStatement(node As BoundEndStatement, writer As IndentedTextWriter)
+      If node Is Nothing Then
+      End If
+      writer.WriteKeyword(SyntaxKind.EndKeyword)
     End Sub
 
     Private Sub WriteErrorExpression(node As BoundErrorExpression, writer As IndentedTextWriter)

@@ -746,7 +746,13 @@ Namespace Bsharp.CodeAnalysis
       ElseIf node.[Function] Is BuiltinFunctions.Rnd Then
         Dim max = CInt(EvaluateExpression(node.Arguments(0)))
         If m_random Is Nothing Then m_random = New Random
-        Return m_random.[Next](max)
+        If max = 0 Then
+          Return CSng(If(g_lastRndResult, 0))
+        Else
+          g_lastRndResult = m_random.NextSingle()
+          Return g_lastRndResult
+        End If
+        'Return Microsoft.VisualBasic.Rnd
       ElseIf node.Function Is BuiltinFunctions.Sgn Then
         Dim value = CDbl(EvaluateExpression(node.Arguments(0)))
         Return Math.Sign(value)
@@ -897,5 +903,11 @@ Namespace Bsharp.CodeAnalysis
   '  End Function
 
   'End Class
+
+  Friend Module Singleton
+
+    Friend g_lastRndResult As New Single?
+
+  End Module
 
 End Namespace

@@ -8,6 +8,8 @@ Namespace Bsharp.CodeAnalysis.Binding
 
   Friend NotInheritable Class Binder
 
+    Private Const STRONGLY_TYPED As Boolean = False
+
     Private Const GOTO_LABEL_PREFIX As String = "$LABEL"
 
     Private m_scope As BoundScope
@@ -49,25 +51,29 @@ Namespace Bsharp.CodeAnalysis.Binding
       ' Determine if any GOTO or GOSUB statements target a numeric value (Line Number).
       Dim targetLineNumbers As New List(Of Integer)
       For Each statement In globalStatements
+
+        Dim target As New Integer?
+
         If TypeOf statement.Statement Is GotoStatementSyntax Then
           Dim g = CType(statement.Statement, GotoStatementSyntax)
           If IsNumeric(g.TargetToken.Text) Then
-            ' Target is a line number?
-            Dim value = CInt(g.TargetToken.Text)
-            If Not targetLineNumbers.Contains(value) Then
-              targetLineNumbers.Add(value)
-            End If
+            target = CInt(g.TargetToken.Text)
+          Else
+            Continue For
           End If
-          'ElseIf TypeOf statement.Statement Is GosubStatementSyntax Then
-          '  Dim g = CType(statement.Statement, GosubStatementSyntax)
-          '  If IsNumeric(g.IdentifierToken.Text) Then
-          '    ' Target is a line number?
-          '    Dim value = CInt(g.IdentifierToken.Text)
-          '    If Not targetLineNumbers.Contains(value) Then
-          '      targetLineNumbers.Add(value)
-          '    End If
-          '  End If
+        ElseIf TypeOf statement.Statement Is SingleLineIfStatementSyntax Then
+          ' Any GOTO statement(s)?
+        Else
+          Continue For
         End If
+
+        If target IsNot Nothing Then
+          Dim value = CInt(target)
+          If Not targetLineNumbers.Contains(value) Then
+            targetLineNumbers.Add(value)
+          End If
+        End If
+
       Next
 
       Dim statements = ImmutableArray.CreateBuilder(Of BoundStatement)
@@ -81,7 +87,7 @@ Namespace Bsharp.CodeAnalysis.Binding
               For Each trivia In token.LeadingTrivia
                 If trivia.Kind = SyntaxKind.LineNumberTrivia Then
                   Dim value = CInt(trivia.Text)
-                  If targetLineNumbers.Contains(value) Then
+                  If True OrElse targetLineNumbers.Contains(value) Then
                     ' matching target
                     'TODO: Need to transform the LineNumberTrivia into a numbered Label.
                     Dim label = New SyntaxToken(globalStatement.SyntaxTree, SyntaxKind.LabelStatement, token.Position, $"{GOTO_LABEL_PREFIX}{value}:", Nothing, ImmutableArray(Of SyntaxTrivia).Empty, ImmutableArray(Of SyntaxTrivia).Empty)
@@ -379,7 +385,11 @@ Namespace Bsharp.CodeAnalysis.Binding
       Dim variable = DetermineVariableReference(syntax.IdentifierToken)
       If variable Is Nothing Then
         ' Variable has not been declared, let's go ahead and do so.
-        variable = BindVariableDeclaration(syntax.IdentifierToken, False, boundExpression.Type)
+        Dim type = TypeSymbol.String
+        If Not syntax.IdentifierToken.Text.EndsWith("$") Then
+          type = TypeSymbol.Double
+        End If
+        variable = BindVariableDeclaration(syntax.IdentifierToken, False, type) ' boundExpression.Type
       End If
       'Dim variable = BindVariableReference(syntax.IdentifierToken)
       If variable Is Nothing Then
@@ -637,8 +647,6 @@ Namespace Bsharp.CodeAnalysis.Binding
 
     Private Function BindInputStatement(syntax As InputStatementSyntax) As BoundStatement
 
-      Dim stronglyTyped = False
-
       Dim suppressCr = syntax.OptionalSemiColonToken IsNot Nothing
       Dim suppressQuestionMark = If(syntax.SemiColonOrCommaToken?.Kind = SyntaxKind.CommaToken, False)
       Dim prompt As BoundExpression = Nothing
@@ -653,7 +661,7 @@ Namespace Bsharp.CodeAnalysis.Binding
 
           Dim variable = DetermineVariableReference(token)
           If variable Is Nothing Then
-            If stronglyTyped Then
+            If STRONGLY_TYPED Then
               ' Variable appears to not have been already declared, 
               ' run through the normal process in order to generate
               ' the appropriate error(s).
@@ -691,21 +699,23 @@ Namespace Bsharp.CodeAnalysis.Binding
 
     Private Function BindLetStatement(syntax As LetStatementSyntax) As BoundStatement
 
-      Dim stronglyTyped = False
-
       Dim name = syntax.IdentifierToken.Text
       Dim boundExpression = BindExpression(syntax.Expression)
 
       Dim variable = DetermineVariableReference(syntax.IdentifierToken)
       If variable Is Nothing Then
-        If stronglyTyped Then
+        If STRONGLY_TYPED Then
           ' Variable appears to not have been already declared, 
           ' run through the normal process in order to generate
           ' the appropriate error(s).
           variable = BindVariableReference(syntax.IdentifierToken)
         Else
           ' Variable has not been declared, let's go ahead and do so.
-          variable = BindVariableDeclaration(syntax.IdentifierToken, False, boundExpression.Type)
+          Dim type = TypeSymbol.String
+          If Not syntax.IdentifierToken.Text.EndsWith("$") Then
+            type = TypeSymbol.Double
+          End If
+          variable = BindVariableDeclaration(syntax.IdentifierToken, False, type) ' boundExpression.Type
         End If
       End If
       If variable Is Nothing Then
@@ -873,7 +883,29 @@ Namespace Bsharp.CodeAnalysis.Binding
         End If
       End If
 
-      Dim statements = BindStatement(syntax.Statements)
+      Dim statements As BoundStatement = Nothing
+      If syntax.Statements.Kind = SyntaxKind.BlockStatement Then
+        Dim child = syntax.Statements.GetChildren.First
+        If child.Kind = SyntaxKind.ExpressionStatement Then
+          child = child.GetChildren.First
+          If child.Kind = SyntaxKind.LiteralExpression Then
+            child = child.GetChildren.First
+            If child.Kind = SyntaxKind.NumberToken Then
+              Dim value = CType(child, SyntaxToken).Text
+              If IsNumeric(value) Then
+                ' An inferred GOTO... old school IF statement.
+                value = $"{GOTO_LABEL_PREFIX}{value}"
+                Dim label = New BoundLabel(value)
+                Dim statement As BoundStatement = New BoundGotoStatement(label)
+                statements = New BoundBlockStatement({statement}.ToImmutableArray)
+              End If
+            End If
+          End If
+        End If
+      End If
+      If statements Is Nothing Then
+        statements = BindStatement(syntax.Statements)
+      End If
       Dim elseStatement = If(syntax.ElseClause IsNot Nothing, BindStatement(syntax.ElseClause.Statements), Nothing)
       Return New BoundIfStatement(condition, statements, elseStatement)
 
@@ -932,8 +964,22 @@ Namespace Bsharp.CodeAnalysis.Binding
       If TypeOf s Is VariableSymbol Then
         Return TryCast(s, VariableSymbol)
       ElseIf s Is Nothing Then
-        Diagnostics.ReportUndefinedVariable(identifierToken.Location, name)
-        Return Nothing
+        If Not STRONGLY_TYPED Then
+          Dim type = TypeSymbol.String
+          If Not identifierToken.Text.EndsWith("$") Then
+            type = TypeSymbol.Double
+          End If
+          Dim variable = BindVariableDeclaration(identifierToken, False, type)
+          If variable Is Nothing Then
+            Diagnostics.ReportUndefinedVariable(identifierToken.Location, name)
+            Return Nothing
+          Else
+            Return TryCast(s, VariableSymbol)
+          End If
+        Else
+          Diagnostics.ReportUndefinedVariable(identifierToken.Location, name)
+          Return Nothing
+        End If
       Else
         Diagnostics.ReportNotAVariable(identifierToken.Location, name)
         Return Nothing

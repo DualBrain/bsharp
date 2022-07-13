@@ -960,7 +960,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
       Dim peekLine = m_text.GetLineIndex(Peek(0).Span.Start)
       Dim multiLine = Current.Kind = SyntaxKind.EndOfFileToken OrElse peekLine > thenLine
 
-      Dim statements = ParseBlockStatement(isTopLevel)
+      Dim statements = ParseBlockStatement(isTopLevel, Not multiLine)
 
       If multiLine Then
         'Dim ifStatement = New IfStatementSyntax(m_syntaxTree, ifKeyword, expression, thenKeyword, statements)
@@ -1139,15 +1139,25 @@ Namespace Bsharp.CodeAnalysis.Syntax
       End Select
     End Function
 
-    Private Function ParseBlockStatement(isTopLevel As Boolean) As BlockStatementSyntax
+    Private Function ParseBlockStatement(isTopLevel As Boolean, Optional singleLine As Boolean = False) As BlockStatementSyntax
       Dim statements = ImmutableArray.CreateBuilder(Of StatementSyntax)
       Dim openBraceToken As SyntaxToken = Nothing
       If Current.Kind = SyntaxKind.OpenBraceToken Then
         openBraceToken = MatchToken(SyntaxKind.OpenBraceToken)
       End If
       Dim startToken As SyntaxToken '= Current()
+
+      Dim beginLine = m_text.GetLineIndex(Current.Span.Start)
+
       While Current.Kind <> SyntaxKind.EndOfFileToken AndAlso Not IsEndOfBlock()
         'Current.Kind <> SyntaxKind.CloseBraceToken
+
+        If singleLine Then
+          Dim peekLine = m_text.GetLineIndex(Current.Span.Start)
+          If peekLine > beginLine Then
+            Exit While
+          End If
+        End If
 
         startToken = Current()
         Dim statement = ParseStatement(isTopLevel)

@@ -180,7 +180,7 @@ Namespace Bsharp.CodeAnalysis.Binding
                 Dim gs = CType(statement, BoundGotoStatement)
 
                 Dim toBlock As BasicBlock = Nothing
-                If m_blockFromLabel.Keys.Contains(gs.Label) Then
+                If m_blockFromLabel.ContainsKey(gs.Label) Then
                   toBlock = m_blockFromLabel(gs.Label)
                 Else
                   For Each entry In m_blockFromLabel.Keys

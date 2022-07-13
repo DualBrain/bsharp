@@ -1,0 +1,7 @@
+10 print "10"
+20 goto 40
+30 end
+40 print "40"
+50 if true then goto 70
+60 end
+70 print "70"
