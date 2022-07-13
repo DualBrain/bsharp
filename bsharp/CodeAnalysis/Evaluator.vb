@@ -10,7 +10,7 @@ Namespace Bsharp.CodeAnalysis
     Private ReadOnly m_globals As Dictionary(Of VariableSymbol, Object)
     Private ReadOnly m_functions As New Dictionary(Of FunctionSymbol, BoundBlockStatement)
     Private ReadOnly m_locals As New Stack(Of Dictionary(Of VariableSymbol, Object))
-    Private m_random As Random
+    'Private m_random As Random
 
     'TODO: Need to make this scoped.
     Private ReadOnly m_gosubStack As New Stack(Of Integer)
@@ -743,19 +743,28 @@ Namespace Bsharp.CodeAnalysis
         Dim value = CStr(EvaluateExpression(node.Arguments(0)))
         Dim position = CInt(EvaluateExpression(node.Arguments(1)))
         Return Microsoft.VisualBasic.Right(value, position)
-      ElseIf node.[Function] Is BuiltinFunctions.Rnd Then
+      ElseIf node.[Function] Is BuiltinFunctions.Rnd1 Then
+        ' NOTES:
+        '   PRINT RND() in QBasic 1.1 always results in .7055475 if RANDOMIZE is not called prior.
+        '   According to documentation, RND is initially set to utilize seed of 0 if RANDOMIZE is never called.
+        '   Allowed range on RANDOMIZE is -32768 to 32767; however, it does appear that pretty much any number is allowed?
+        'If m_random Is Nothing Then m_random = New Random(g_seed)
+        ' Return a new random number between 0 and 1...
+        g_lastRndResult = g_random.NextSingle()
+        Return g_lastRndResult
+      ElseIf node.[Function] Is BuiltinFunctions.Rnd2 Then
         ' NOTES:
         '   PRINT RND(1) in QBasic 1.1 always results in .7055475 if RANDOMIZE is not called prior.
         '   According to documentation, RND is initially set to utilize seed of 0 if RANDOMIZE is never called.
         '   Allowed range on RANDOMIZE is -32768 to 32767; however, it does appear that pretty much any number is allowed?
         Dim opt = CInt(EvaluateExpression(node.Arguments(0)))
-        If m_random Is Nothing Then m_random = New Random(g_seed)
+        'If m_random Is Nothing Then m_random = New Random(g_seed)
         If opt = 0 Then
           ' Return last result...
           Return CSng(If(g_lastRndResult, 0))
         Else
           ' Return a new random number between 0 and 1...
-          g_lastRndResult = m_random.NextSingle()
+          g_lastRndResult = g_random.NextSingle()
           Return g_lastRndResult
         End If
         'Return Microsoft.VisualBasic.Rnd
@@ -913,6 +922,7 @@ Namespace Bsharp.CodeAnalysis
   Friend Module Singleton
 
     Friend g_seed As Integer = 0
+    Friend g_random As New Random(g_seed)
     Friend g_lastRndResult As New Single?
 
   End Module

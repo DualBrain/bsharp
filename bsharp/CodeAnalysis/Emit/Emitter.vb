@@ -295,7 +295,7 @@ Namespace Bsharp.CodeAnalysis.Emit
 
     Private Sub EmitCallExpression(ilProcessor As ILProcessor, node As BoundCallExpression)
 
-      If node.Function Is BuiltinFunctions.Rnd Then
+      If node.Function Is BuiltinFunctions.Rnd2 Then
 
         If _randomFieldDefinition Is Nothing Then
           EmitRandomField()
