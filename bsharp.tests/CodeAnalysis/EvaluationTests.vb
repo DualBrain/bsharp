@@ -688,22 +688,22 @@ end if"
 
     End Sub
 
-    <Fact>
-    Public Sub Evaluator_Wrong_Argument_Type()
+    '<Fact>
+    'Public Sub Evaluator_Wrong_Argument_Type()
 
-      Dim text = "
-        function test(n as integer) as boolean
-          return n > 10
-        end function
-        dim value = ""string""
-        result = test([value])"
+    '  Dim text = "
+    '    function test(n as integer) as boolean
+    '      return n > 10
+    '    end function
+    '    dim value = ""string""
+    '    result = test([value])"
 
-      Dim diagnostics = "
-        Cannot convert type 'String' to 'Integer'. An explicit conversion exists (are you missing a cast?)"
+    '  Dim diagnostics = "
+    '    Cannot convert type 'String' to 'Integer'. An explicit conversion exists (are you missing a cast?)"
 
-      AssertDiagnostics(text, diagnostics)
+    '  AssertDiagnostics(text, diagnostics)
 
-    End Sub
+    'End Sub
 
     <Fact>
     Public Sub Evaluator_Bad_Type()
