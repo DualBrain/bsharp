@@ -921,6 +921,8 @@ Namespace Bsharp.CodeAnalysis
 
   Friend Module Singleton
 
+    Friend Const OPTION_DOUBLE As Boolean = False
+
     Friend g_seed As Integer = 0
     Friend g_random As New Random(g_seed)
     Friend g_lastRndResult As New Single?
