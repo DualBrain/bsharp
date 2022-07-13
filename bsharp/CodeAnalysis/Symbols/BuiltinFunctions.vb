@@ -16,7 +16,7 @@ Namespace Bsharp.CodeAnalysis.Symbols
     Public ReadOnly LBound As New FunctionSymbol("ubound", ImmutableArray.Create(New ParameterSymbol("lbound", TypeSymbol.Any)), TypeSymbol.Long)
     Public ReadOnly Len As New FunctionSymbol("len", ImmutableArray.Create(New ParameterSymbol("value", TypeSymbol.String)), TypeSymbol.Long)
     Public ReadOnly Log As New FunctionSymbol("log", ImmutableArray.Create(New ParameterSymbol("value", TypeSymbol.Double, 0)), TypeSymbol.Double)
-    Public ReadOnly Rnd As New FunctionSymbol("rnd", ImmutableArray.Create(New ParameterSymbol("max", TypeSymbol.Any, 0)), TypeSymbol.Long)
+    Public ReadOnly Rnd As New FunctionSymbol("rnd", ImmutableArray.Create(New ParameterSymbol("opt", TypeSymbol.Double, 0)), TypeSymbol.Single)
     Public ReadOnly Sgn As New FunctionSymbol("sgn", ImmutableArray.Create(New ParameterSymbol("value", TypeSymbol.Double, 0)), TypeSymbol.Long)
     Public ReadOnly Sin As New FunctionSymbol("sin", ImmutableArray.Create(New ParameterSymbol("value", TypeSymbol.Double, 0)), TypeSymbol.Double)
     Public ReadOnly Sqr As New FunctionSymbol("sqr", ImmutableArray.Create(New ParameterSymbol("value", TypeSymbol.Double, 0)), TypeSymbol.Double)
