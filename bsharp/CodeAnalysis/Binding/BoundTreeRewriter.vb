@@ -19,6 +19,7 @@ Namespace Bsharp.CodeAnalysis.Binding
         Case BoundNodeKind.GosubStatement : Return RewriteGosubStatement(DirectCast(node, BoundGosubStatement))
         Case BoundNodeKind.GotoStatement : Return RewriteGotoStatement(DirectCast(node, BoundGotoStatement))
         Case BoundNodeKind.IfStatement : Return RewriteIfStatement(DirectCast(node, BoundIfStatement))
+        Case BoundNodeKind.InputStatement : Return RewriteInputStatement(DirectCast(node, BoundInputStatement))
         Case BoundNodeKind.KillStatement : Return RewriteKillStatement(DirectCast(node, BoundKillStatement))
         Case BoundNodeKind.LabelStatement : Return RewriteLabelStatement(DirectCast(node, BoundLabelStatement))
         Case BoundNodeKind.LetStatement : Return RewriteLetStatement(DirectCast(node, BoundLetStatement))
@@ -123,6 +124,10 @@ Namespace Bsharp.CodeAnalysis.Binding
     End Function
 
     Protected Overridable Function RewriteMkDirStatement(node As BoundMkDirStatement) As BoundStatement
+      Return node
+    End Function
+
+    Protected Overridable Function RewriteInputStatement(node As BoundInputStatement) As BoundStatement
       Return node
     End Function
 

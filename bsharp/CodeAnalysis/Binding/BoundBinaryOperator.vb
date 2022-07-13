@@ -225,18 +225,22 @@ Namespace Bsharp.CodeAnalysis.Binding
 
     Private Shared Sub Initialize()
 
-      ' ^
+      '' ^
 
-      m_operators.Add(New BoundBinaryOperator(SyntaxKind.HatToken, BoundBinaryOperatorKind.Raise, TypeSymbol.Integer))
+      'm_operators.Add(New BoundBinaryOperator(SyntaxKind.HatToken, BoundBinaryOperatorKind.Raise, TypeSymbol.Long64))
+      'm_operators.Add(New BoundBinaryOperator(SyntaxKind.HatToken, BoundBinaryOperatorKind.Raise, TypeSymbol.Long))
+      'm_operators.Add(New BoundBinaryOperator(SyntaxKind.HatToken, BoundBinaryOperatorKind.Raise, TypeSymbol.Integer))
 
-      ' + - * / \
+      ' + - * / \ ^
 
-      Dim tokens = {SyntaxKind.PlusToken,
+      Dim tokens = {SyntaxKind.HatToken,
+                    SyntaxKind.PlusToken,
                     SyntaxKind.MinusToken,
                     SyntaxKind.StarToken,
                     SyntaxKind.SlashToken,
                     SyntaxKind.BackslashToken}
-      Dim operations = {BoundBinaryOperatorKind.Addition,
+      Dim operations = {BoundBinaryOperatorKind.Raise,
+                        BoundBinaryOperatorKind.Addition,
                         BoundBinaryOperatorKind.Subtraction,
                         BoundBinaryOperatorKind.Multiplication,
                         BoundBinaryOperatorKind.Division,

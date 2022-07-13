@@ -135,6 +135,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case SyntaxKind.GotoKeyword : Return ParseGotoStatement()
         Case SyntaxKind.GosubKeyword : Return ParseGosubStatement()
         Case SyntaxKind.IfKeyword : Return ParseIfStatement(isTopLevel)
+        Case SyntaxKind.InputKeyword : Return ParseInputStatement()
         Case SyntaxKind.KillKeyword : Return ParseKillStatement()
         Case SyntaxKind.Label : Return ParseLabelStatement()
         Case SyntaxKind.LetKeyword : Return ParseLetStatement()
@@ -284,6 +285,45 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Dim identifierToken = MatchToken(SyntaxKind.IdentifierToken)
         Return New GotoStatementSyntax(m_syntaxTree, gotoKeyword, identifierToken)
       End If
+
+    End Function
+
+    Private Function ParseInputStatement() As InputStatementSyntax
+
+      ' INPUT[;][prompt string;] list of variables
+      ' INPUT[;][prompt String,] list Of variables
+
+      Dim inputKeyword = MatchToken(SyntaxKind.InputKeyword)
+      Dim optionalSemiColonToken As SyntaxToken = Nothing
+      If Current.Kind = SyntaxKind.SemicolonToken Then optionalSemiColonToken = MatchToken(SyntaxKind.SemicolonToken)
+      Dim optionalPromptExpression As ExpressionSyntax = Nothing
+      Dim semiColonOrCommaToken As SyntaxToken = Nothing
+      If Current.Kind = SyntaxKind.StringToken Then
+        optionalPromptExpression = ParseExpression()
+        Dim kind = SyntaxKind.SemicolonToken
+        If Current.Kind = SyntaxKind.CommaToken Then kind = SyntaxKind.CommaToken
+        semiColonOrCommaToken = MatchToken(kind)
+      End If
+
+      Dim identifiersAndSeparators = ImmutableArray.CreateBuilder(Of SyntaxToken)()
+
+      Dim parseNextIdentifier = True
+      While parseNextIdentifier AndAlso
+            Current.Kind <> SyntaxKind.EndOfFileToken
+
+        Dim identifier = MatchToken(SyntaxKind.IdentifierToken)
+        identifiersAndSeparators.Add(identifier)
+
+        If Current.Kind = SyntaxKind.CommaToken Then
+          Dim comma = MatchToken(SyntaxKind.CommaToken)
+          identifiersAndSeparators.Add(comma)
+        Else
+          parseNextIdentifier = False
+        End If
+
+      End While
+
+      Return New InputStatementSyntax(m_syntaxTree, inputKeyword, optionalSemiColonToken, optionalPromptExpression, semiColonOrCommaToken, identifiersAndSeparators.ToImmutable())
 
     End Function
 

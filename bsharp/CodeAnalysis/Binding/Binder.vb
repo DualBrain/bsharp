@@ -338,6 +338,7 @@ Namespace Bsharp.CodeAnalysis.Binding
         Case SyntaxKind.GosubStatement : Return BindGosubStatement(CType(syntax, GosubStatementSyntax))
         Case SyntaxKind.GotoStatement : Return BindGotoStatement(CType(syntax, GotoStatementSyntax))
         Case SyntaxKind.IfStatement : Return BindIfStatement(CType(syntax, IfStatementSyntax))
+        Case SyntaxKind.InputStatement : Return BindInputStatement(CType(syntax, InputStatementSyntax))
         Case SyntaxKind.KillStatement : Return BindKillStatement(CType(syntax, KillStatementSyntax))
         Case SyntaxKind.LabelStatement : Return BindLabelStatement(CType(syntax, LabelStatementSyntax))
         Case SyntaxKind.LetStatement : Return BindLetStatement(CType(syntax, LetStatementSyntax))
@@ -634,6 +635,49 @@ Namespace Bsharp.CodeAnalysis.Binding
 
     End Function
 
+    Private Function BindInputStatement(syntax As InputStatementSyntax) As BoundStatement
+
+      Dim stronglyTyped = False
+
+      Dim suppressCr = syntax.OptionalSemiColonToken IsNot Nothing
+      Dim suppressQuestionMark = If(syntax.SemiColonOrCommaToken?.Kind = SyntaxKind.CommaToken, False)
+      Dim prompt As BoundExpression = Nothing
+      If syntax.OptionalPromptExpression IsNot Nothing Then
+        prompt = BindExpression(syntax.OptionalPromptExpression, TypeSymbol.String)
+      End If
+      Dim variables As New List(Of VariableSymbol)
+      For Each token In syntax.Tokens
+        If token.Kind <> SyntaxKind.CommaToken Then
+
+          'variables.Add(DetermineVariableReference(token))
+
+          Dim variable = DetermineVariableReference(token)
+          If variable Is Nothing Then
+            If stronglyTyped Then
+              ' Variable appears to not have been already declared, 
+              ' run through the normal process in order to generate
+              ' the appropriate error(s).
+              variable = BindVariableReference(token)
+            Else
+              ' Variable has not been declared, let's go ahead and do so.
+              Dim type = TypeSymbol.String
+              If Not token.Text.EndsWith("$") Then
+                type = TypeSymbol.Double
+              End If
+              variable = BindVariableDeclaration(token, False, type)
+            End If
+          End If
+          If variable Is Nothing Then
+            Return Nothing
+          End If
+
+          variables.Add(variable)
+
+        End If
+      Next
+      Return New BoundInputStatement(suppressCr, suppressQuestionMark, prompt, variables.ToImmutableArray)
+    End Function
+
     Private Function BindKillStatement(syntax As KillStatementSyntax) As BoundStatement
       Dim path = BindExpression(syntax.Path)
       Return New BoundKillStatement(path)
@@ -872,8 +916,8 @@ Namespace Bsharp.CodeAnalysis.Binding
       Dim name = If(identifier.Text, "?")
       Dim [declare] = Not identifier.IsMissing
       Dim variable = If(m_function Is Nothing,
-                                    DirectCast(New GlobalVariableSymbol(name, isReadOnly, type, constant), VariableSymbol),
-                                    DirectCast(New LocalVariableSymbol(name, isReadOnly, type, constant), VariableSymbol))
+                        DirectCast(New GlobalVariableSymbol(name, isReadOnly, type, constant), VariableSymbol),
+                        DirectCast(New LocalVariableSymbol(name, isReadOnly, type, constant), VariableSymbol))
       If [declare] AndAlso Not m_scope.TryDeclareVariable(variable) Then
         Diagnostics.ReportSymbolAlreadyDeclared(identifier.Location, name)
       End If

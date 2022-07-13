@@ -1,0 +1,4 @@
+input "Name: ", n$
+print "Result: "; n$
+end
+

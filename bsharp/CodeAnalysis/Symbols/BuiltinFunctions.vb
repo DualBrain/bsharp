@@ -6,7 +6,7 @@ Namespace Bsharp.CodeAnalysis.Symbols
   Friend Module BuiltinFunctions
 
     'Public ReadOnly Print As New FunctionSymbol("print", ImmutableArray.Create(New ParameterSymbol("text", TypeSymbol.String, 0)), TypeSymbol.Nothing)
-    Public ReadOnly Input As New FunctionSymbol("input", ImmutableArray(Of ParameterSymbol).Empty, TypeSymbol.String)
+    'Public ReadOnly Input As New FunctionSymbol("input", ImmutableArray(Of ParameterSymbol).Empty, TypeSymbol.String)
 
     Public ReadOnly Asc As New FunctionSymbol("asc", ImmutableArray.Create(New ParameterSymbol("value", TypeSymbol.String)), TypeSymbol.Long)
     Public ReadOnly Abs As New FunctionSymbol("abs", ImmutableArray.Create(New ParameterSymbol("value", TypeSymbol.Double, 0)), TypeSymbol.Double)

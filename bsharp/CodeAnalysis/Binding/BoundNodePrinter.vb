@@ -39,6 +39,7 @@ Namespace Bsharp.CodeAnalysis.Binding
         Case BoundNodeKind.HandleSpcStatement : WriteHandleSpcStatement(CType(node, BoundHandleSpcStatement), writer)
         Case BoundNodeKind.HandleTabStatement : WriteHandleTabStatement(CType(node, BoundHandleTabStatement), writer)
         Case BoundNodeKind.IfStatement : WriteIfStatement(CType(node, BoundIfStatement), writer)
+        Case BoundNodeKind.InputStatement : WriteInputStatement(CType(node, BoundInputStatement), writer)
         Case BoundNodeKind.LabelStatement : WriteLabelStatement(CType(node, BoundLabelStatement), writer)
         Case BoundNodeKind.LiteralExpression : WriteLiteralExpression(CType(node, BoundLiteralExpression), writer)
         Case BoundNodeKind.MidStatement : WriteMidStatement(CType(node, BoundMidStatement), writer)
@@ -207,6 +208,28 @@ Namespace Bsharp.CodeAnalysis.Binding
         writer.WriteLine()
         writer.WriteNestedStatement(node.ElseStatement)
       End If
+    End Sub
+
+    Private Sub WriteInputStatement(node As BoundInputStatement, writer As IndentedTextWriter)
+      writer.WriteKeyword(SyntaxKind.InputKeyword)
+      writer.WriteSpace
+      If node.SuppressCr Then writer.WritePunctuation(SyntaxKind.SemicolonToken)
+      If node.PromptExpression IsNot Nothing Then
+        node.PromptExpression.WriteTo(writer)
+        If node.SuppressQuestionMark Then
+          writer.WritePunctuation(SyntaxKind.CommaToken)
+        Else
+          writer.WritePunctuation(SyntaxKind.SemicolonToken)
+        End If
+        writer.WriteSpace
+      End If
+      For index = 0 To node.Variables.Length - 1
+        writer.WriteIdentifier(node.Variables(index).Name)
+        If index < node.Variables.Length - 1 Then
+          writer.WritePunctuation(SyntaxKind.CommaToken)
+        End If
+      Next
+      writer.WriteLine()
     End Sub
 
     Private Sub WriteWhileStatement(node As BoundWhileStatement, writer As IndentedTextWriter)

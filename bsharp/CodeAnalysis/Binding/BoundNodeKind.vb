@@ -10,6 +10,7 @@
 
     ' Statements
     BlockStatement
+    ChDirStatement
     ClearStatement
     ClsStatement
     ConditionalGotoStatement
@@ -27,14 +28,20 @@
     HandleTabStatement
     HandleSpcStatement
     IfStatement
+    InputStatement
+    KillStatement
     LabelStatement
     LetStatement
     MidStatement
+    MkDirStatement
+    NameStatement
     NopStatement
     OptionStatement
     PrintStatement
     RemStatement
+    ReturnGosubStatement
     ReturnStatement
+    RmDirStatement
     StopStatement
     SystemStatement
     VariableDeclaration
@@ -49,12 +56,7 @@
     LiteralExpression
     VariableExpression
     UnaryExpression
-    ReturnGosubStatement
-    ChDirStatement
-    MkDirStatement
-    RmDirStatement
-    KillStatement
-    NameStatement
+
   End Enum
 
 End Namespace

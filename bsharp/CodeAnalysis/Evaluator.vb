@@ -133,6 +133,67 @@ Namespace Bsharp.CodeAnalysis
           Case BoundNodeKind.HandleSpcStatement : EvaluateHandleSpcStatement(CType(s, BoundHandleSpcStatement)) : index += 1
           Case BoundNodeKind.HandleTabStatement : EvaluateHandleTabStatement(CType(s, BoundHandleTabStatement)) : index += 1
 
+          Case BoundNodeKind.InputStatement
+
+            Dim input = CType(s, BoundInputStatement)
+            Dim suppressCr = input.SuppressCr
+            Dim suppressQuestionMark = input.SuppressQuestionMark
+            Dim prompt As String = Nothing
+            If input.PromptExpression IsNot Nothing Then
+              Dim value = CStr(EvaluateExpression(input.PromptExpression))
+              prompt = value
+            End If
+            Do
+              If Not String.IsNullOrEmpty(prompt) Then
+                Console.Write(prompt)
+              End If
+              If Not suppressQuestionMark Then
+                Console.Write("? ")
+              End If
+              Dim potential = Console.ReadLine()
+              Dim potentials = Split(potential, ",")
+              If potentials.Length = input.Variables.Length Then
+                For i = 0 To input.Variables.Length - 1
+                  Dim value = potentials(i)
+                  If input.Variables(i).Type Is TypeSymbol.Double OrElse
+                     input.Variables(i).Type Is TypeSymbol.Single OrElse
+                     input.Variables(i).Type Is TypeSymbol.ULong64 OrElse
+                     input.Variables(i).Type Is TypeSymbol.Long64 OrElse
+                     input.Variables(i).Type Is TypeSymbol.ULong OrElse
+                     input.Variables(i).Type Is TypeSymbol.Long OrElse
+                     input.Variables(i).Type Is TypeSymbol.UInteger OrElse
+                     input.Variables(i).Type Is TypeSymbol.Integer OrElse
+                     input.Variables(i).Type Is TypeSymbol.SByte OrElse
+                     input.Variables(i).Type Is TypeSymbol.Byte Then
+                    If IsNumeric(value) Then
+                      If value.Contains("."c) Then
+                        If input.Variables(i).Type Is TypeSymbol.Single OrElse
+                           input.Variables(i).Type Is TypeSymbol.Double Then
+                          Assign(input.Variables(i), value)
+                        Else
+                          Console.WriteLine() : Continue Do
+                        End If
+                      Else
+                        'TODO: Check in-range for values/types.
+                        Assign(input.Variables(i), value)
+                      End If
+                    Else
+                      Console.WriteLine() : Continue Do
+                    End If
+                  Else
+                    Assign(input.Variables(i), value)
+                  End If
+                Next
+                'If Not suppressCr Then Console.WriteLine()
+                'TODO: If suppressCr is True, need to move the cursor back????
+                Exit Do
+              Else
+                Console.WriteLine()
+              End If
+            Loop
+
+            index += 1
+
           Case BoundNodeKind.KillStatement
             Dim kill = CType(s, BoundKillStatement)
             Dim value = CStr(EvaluateExpression(kill.Expression))
@@ -168,8 +229,7 @@ Namespace Bsharp.CodeAnalysis
             '      other statements are *invalid* in this
             '      context.)
             index += 1
-          'Case BoundNodeKind.PrintStatement
-          '  EvaluatePrintStatement(CType(s, BoundPrintStatement)) : index += 1
+
           Case BoundNodeKind.RemStatement : index += 1
 
           Case BoundNodeKind.ReturnGosubStatement
@@ -266,7 +326,7 @@ Namespace Bsharp.CodeAnalysis
       Else
         str = CStr(value)
       End If
-      Console.Write(str)
+      Console.Write(str) : Console.Write(" "c)
     End Sub
 
     Private Sub EvaluateHandleSpcStatement(node As BoundHandleSpcStatement)
@@ -303,71 +363,6 @@ Namespace Bsharp.CodeAnalysis
       Dim str = Microsoft.VisualBasic.Strings.Space(diff)
       Console.Write(str)
     End Sub
-
-    'Private Sub EvaluatePrintStatement(s As BoundPrintStatement)
-
-    '  Dim screenWidth = 80
-    '  Dim zoneWidth = 14
-
-    '  Dim cr = True
-    '  For Each entry In s.Nodes
-    '    If TypeOf entry Is BoundSymbol Then
-    '      Select Case CType(entry, BoundSymbol).Value
-    '        Case ";"c
-    '          cr = False
-    '        Case ","
-    '          Dim pos = Console.CursorLeft + 1
-    '          Dim cur = pos Mod zoneWidth
-    '          Console.Write(Microsoft.VisualBasic.Strings.Space(cur))
-    '          cr = False
-    '        Case Else
-    '          Throw New NotImplementedException
-    '          cr = True
-    '      End Select
-    '    ElseIf TypeOf entry Is BoundSpcFunction Then
-    '      Dim result = EvaluateExpression(CType(entry, BoundSpcFunction).Expression)
-    '      Dim value = CInt(result)
-    '      If value < 0 OrElse value > 255 Then
-    '        'error
-    '      ElseIf value > screenWidth Then
-    '        value = value Mod screenWidth
-    '      End If
-    '      Dim str = Microsoft.VisualBasic.Strings.Space(value)
-    '      Console.Write(str)
-    '      cr = False
-    '    ElseIf TypeOf entry Is BoundTabFunction Then
-    '      Dim result = EvaluateExpression(CType(entry, BoundTabFunction).Expression)
-    '      Dim value = CInt(result)
-    '      If value < 0 OrElse value > 255 Then
-    '        ' error
-    '      End If
-    '      Dim pos = Console.CursorLeft + 1
-    '      Dim diff = 0
-    '      If pos < value Then
-    '        diff = value - pos
-    '      ElseIf pos > value Then
-    '        diff = screenWidth - pos
-    '        Console.WriteLine(Microsoft.VisualBasic.Strings.Space(diff))
-    '        diff = value
-    '      End If
-    '      Dim str = Microsoft.VisualBasic.Strings.Space(diff)
-    '      Console.Write(str)
-    '    Else
-    '      Dim value = EvaluateExpression(CType(entry, BoundExpression))
-    '      Dim str = ""
-    '      If TypeOf value Is BoundConstant Then
-    '        str = CStr(CType(value, BoundConstant).Value)
-    '      Else
-    '        str = CStr(value)
-    '      End If
-    '      Console.Write(str)
-    '      cr = True
-    '    End If
-    '  Next
-    '  If cr Then
-    '    Console.WriteLine()
-    '  End If
-    'End Sub
 
     Private Sub EvaluateVariableDeclaration(node As BoundVariableDeclaration)
       Dim value = EvaluateExpression(node.Initializer)
@@ -455,7 +450,20 @@ Namespace Bsharp.CodeAnalysis
 ' 02 EQV
 ' 01 IMP
 
-        Case BoundBinaryOperatorKind.Raise : Return CInt(left) ^ CInt(right)
+        Case BoundBinaryOperatorKind.Raise
+          Select Case TypeSymbol.TypeSymbolToType(node.Type)
+            Case TypeSymbol.Type.Decimal : Return (CDec(left) ^ CDec(right))
+            Case TypeSymbol.Type.Double : Return (CDbl(left) ^ CDbl(right))
+            Case TypeSymbol.Type.Single : Return (CSng(left) ^ CSng(right))
+            Case TypeSymbol.Type.ULong64 : Return (CULng(left) ^ CULng(right))
+            Case TypeSymbol.Type.Long64 : Return (CLng(left) ^ CLng(right))
+            Case TypeSymbol.Type.ULong : Return (CUInt(left) ^ CUInt(right))
+            Case TypeSymbol.Type.Long : Return (CInt(left) ^ CInt(right))
+            Case TypeSymbol.Type.UInteger : Return (CUShort(left) ^ CUShort(right))
+            Case TypeSymbol.Type.Integer : Return (CShort(left) ^ CShort(right))
+            Case TypeSymbol.Type.SByte : Return (CSByte(left) ^ CSByte(right))
+            Case TypeSymbol.Type.Byte : Return (CByte(left) ^ CByte(right))
+          End Select
 
         Case BoundBinaryOperatorKind.Multiplication
           Select Case TypeSymbol.TypeSymbolToType(node.Type)
@@ -689,8 +697,8 @@ Namespace Bsharp.CodeAnalysis
       ElseIf node.Function Is BuiltinFunctions.Hex Then
         Dim value = CInt(EvaluateExpression(node.Arguments(0)))
         Return Microsoft.VisualBasic.Hex(value)
-      ElseIf node.[Function] Is BuiltinFunctions.Input Then
-        Return Console.ReadLine()
+        'ElseIf node.[Function] Is BuiltinFunctions.Input Then
+        '  Return Console.ReadLine()
       ElseIf node.Function Is BuiltinFunctions.Instr1 Then
         Dim string1 = CStr(EvaluateExpression(node.Arguments(0)))
         Dim string2 = CStr(EvaluateExpression(node.Arguments(1)))

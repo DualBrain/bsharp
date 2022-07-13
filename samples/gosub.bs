@@ -1,8 +1,13 @@
 print "1"
 gosub testing
 print "3"
+print test1()
 end
 
 testing:
   print "2"
   return
+
+function test1() as long
+  return 5
+end function

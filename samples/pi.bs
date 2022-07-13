@@ -1,0 +1,7 @@
+pi = 3.14
+r = 7.4
+print pi * r
+print r ^ 2
+print (pi * r) ^ 2
+print pi * (r ^ 2)
+print pi * r ^ 2

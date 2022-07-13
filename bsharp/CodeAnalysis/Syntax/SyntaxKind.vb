@@ -167,6 +167,7 @@
     GosubStatement
     GotoStatement
     IfStatement
+    InputStatement
     KillStatement
     LabelStatement
     LetStatement
