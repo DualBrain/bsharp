@@ -2,7 +2,8 @@
   "profiles": {
     "bsc": {
       "commandName": "Project",
-      "commandLineArgs": "..\\..\\..\\..\\samples\\hello.bas"
+      "commandLineArgs": "-p js ..\\..\\..\\..\\samples\\hello.bs",
+      "sqlDebugging": false
     }
   }
 }

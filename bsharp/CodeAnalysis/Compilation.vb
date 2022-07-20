@@ -228,7 +228,7 @@ Namespace Bsharp.CodeAnalysis
     'End Function
 
     ' TODO: References should be part of the compilation, not arguments for Emit
-    Public Function Emit(moduleName As String, references As String(), outputPath As String) As ImmutableArray(Of Diagnostic)
+    Public Function Emit(target As Bsharp.CodeAnalysis.Emit.TargetPlatform, moduleName As String, references As String(), outputPath As String) As ImmutableArray(Of Diagnostic)
 
       Dim parseDiagnostics = SyntaxTrees.SelectMany(Function(st) st.Diagnostics)
       Dim diagnostics = parseDiagnostics.Concat(GlobalScope.Diagnostics).ToImmutableArray()
@@ -243,7 +243,7 @@ Namespace Bsharp.CodeAnalysis
         Return program.Diagnostics
       End If
 
-      Return Bsharp.CodeAnalysis.Emit.Emitter.Emit(program, moduleName, references, outputPath)
+      Return Bsharp.CodeAnalysis.Emit.Emitter.Emit(target, program, moduleName, references, outputPath)
 
     End Function
 
