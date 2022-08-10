@@ -10,6 +10,9 @@ Namespace Bsharp.CodeAnalysis
     Private ReadOnly m_globals As Dictionary(Of VariableSymbol, Object)
     Private ReadOnly m_functions As New Dictionary(Of FunctionSymbol, BoundBlockStatement)
     Private ReadOnly m_locals As New Stack(Of Dictionary(Of VariableSymbol, Object))
+
+    Private ReadOnly m_container As New Stack(Of String)
+
     'Private m_random As Random
 
     'TODO: Need to make this scoped.
@@ -23,14 +26,14 @@ Namespace Bsharp.CodeAnalysis
       m_globals = variables
       m_locals.Push(New Dictionary(Of VariableSymbol, Object))
 
-      Dim currrent = program
-      While currrent IsNot Nothing
-        For Each kv In currrent.Functions
+      Dim current = program
+      While current IsNot Nothing
+        For Each kv In current.Functions
           Dim func = kv.Key
           Dim body = kv.Value
           m_functions.Add(func, body)
         Next
-        currrent = currrent.Previous
+        current = current.Previous
       End While
 
     End Sub
@@ -41,7 +44,10 @@ Namespace Bsharp.CodeAnalysis
         Return Nothing
       Else
         Dim body = m_functions(func)
-        Return EvaluateStatement(body)
+        m_container.Push(func.Name)
+        Dim result = EvaluateStatement(body)
+        m_container.Pop()
+        Return result
       End If
     End Function
 
@@ -221,7 +227,18 @@ Namespace Bsharp.CodeAnalysis
             End If
             index += 1
           Case BoundNodeKind.NopStatement : index += 1
-          Case BoundNodeKind.LetStatement : EvaluateLetStatement(CType(s, BoundLetStatement)) : index += 1
+          Case BoundNodeKind.LetStatement
+            Dim temp = CType(s, BoundLetStatement)
+            Dim variableName = temp.Variable.Name
+            Dim functionName = m_container.Peek()
+            If String.Compare(functionName, variableName, True) = 0 Then
+              m_lastValue = EvaluateExpression(temp.Expression)
+            Else
+              EvaluateLetStatement(CType(s, BoundLetStatement))
+            End If
+            index += 1
+
+            'EvaluateLetStatement(CType(s, BoundLetStatement)) : index += 1
           Case BoundNodeKind.OptionStatement
             'TODO: Need to handle with Arrays.
             'TODO: Also need to track that no other invalid
@@ -817,7 +834,9 @@ Namespace Bsharp.CodeAnalysis
         Next
         m_locals.Push(locals)
         Dim statement = m_functions(node.Function)
+        m_container.Push(node.Function.Name)
         Dim result = EvaluateStatement(statement)
+        m_container.Pop()
         m_locals.Pop()
         Return result
       End If

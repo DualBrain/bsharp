@@ -341,20 +341,51 @@ ScanAgain:
       Return graphBuilder.Build(blocks)
     End Function
 
-    Public Shared Function AllPathsReturn(body As BoundBlockStatement) As Boolean
+    Public Shared Function AllPathsReturn(name As String, body As BoundBlockStatement) As Boolean
 
       Dim graph = Create(body)
 
-      For Each branch In graph.End.Incoming
-        'Dim lastStatement = branch.From.Statements.Last()
-        'If lastStatement.Kind <> BoundNodeKind.ReturnStatement Then
-        Dim lastStatement = branch.From.Statements.LastOrDefault
-        If lastStatement Is Nothing OrElse lastStatement.Kind <> BoundNodeKind.ReturnStatement Then
-          Return False
+      ' Rules:
+      '   If using any Return statements, must have all return paths covered. ("Modern")
+      '   If no Return statements at all...
+      '     If the "LET" style utilized, default return to min return value. ("Classic")
+      '     Otherwise, default to "Modern" (requiring Return).
+
+      Dim returnCount = 0
+      Dim nameCount = 0
+      For Each entry In body.Statements
+        If entry.Kind = BoundNodeKind.ReturnStatement Then
+          returnCount += 1
+        ElseIf entry.Kind = BoundNodeKind.ExpressionStatement Then
+          Dim es = CType(entry, BoundExpressionStatement)
+          If es.Expression.Kind = BoundNodeKind.AssignmentExpression Then
+            Dim ae = CType(es.Expression, BoundAssignmentExpression)
+            If String.Compare(ae.Variable.Name, name, True) = 0 Then
+              nameCount += 1
+            End If
+          End If
+        ElseIf entry.Kind = BoundNodeKind.LetStatement Then
+          Dim s = CType(entry, BoundLetStatement)
+          If String.Compare(s.Variable.Name, name, True) = 0 Then
+            nameCount += 1
+          End If
         End If
       Next
 
-      Return True
+      If nameCount > 0 AndAlso returnCount = 0 Then
+        ' Classic Mode
+        Return True
+      Else
+        ' Modern Mode
+        For Each branch In graph.End.Incoming
+          Dim lastStatement = branch.From.Statements.LastOrDefault
+          If lastStatement Is Nothing OrElse
+             lastStatement.Kind <> BoundNodeKind.ReturnStatement Then
+            Return False
+          End If
+        Next
+        Return True
+      End If
 
     End Function
 

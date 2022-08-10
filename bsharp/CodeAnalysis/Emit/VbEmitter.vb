@@ -40,10 +40,13 @@ Namespace Bsharp.CodeAnalysis.Emit
     'Private ReadOnly _typeDefinition As TypeDefinition
     'Private _randomFieldDefinition As FieldDefinition
 
-    Private m_moduleName As String
+    Private ReadOnly m_moduleName As String
     Private m_contents As String = ""
 
     Friend Sub New(moduleName As String, references() As String)
+
+      If references Is Nothing Then
+      End If
 
       m_moduleName = moduleName
 
@@ -189,6 +192,8 @@ Namespace Bsharp.CodeAnalysis.Emit
     End Sub
 
     Private Sub EmitFunctionBody(func As FunctionSymbol, body As BoundBlockStatement)
+      If func Is Nothing Then
+      End If
       For Each statement In body.Statements
         EmitStatement(statement)
       Next
@@ -216,7 +221,9 @@ Namespace Bsharp.CodeAnalysis.Emit
       End Select
     End Sub
 
-    Private Sub EmitAssignmentExpression(node As BoundAssignmentExpression)
+    Private Shared Sub EmitAssignmentExpression(node As BoundAssignmentExpression)
+      If node Is Nothing Then
+      End If
       'Dim variableDefinition = _locals(node.Variable)
       'EmitExpression(ilProcessor, node.Expression)
       'ilProcessor.Emit(OpCodes.Dup)
@@ -302,7 +309,9 @@ Namespace Bsharp.CodeAnalysis.Emit
 
     End Sub
 
-    Private Sub EmitCallExpression(node As BoundCallExpression)
+    Private Shared Sub EmitCallExpression(node As BoundCallExpression)
+      If node Is Nothing Then
+      End If
 
       Stop
 
@@ -432,6 +441,8 @@ Namespace Bsharp.CodeAnalysis.Emit
     'End Sub
 
     Private Sub EmitHandlePrintLineStatement(node As BoundHandlePrintLineStatement)
+      If node Is Nothing Then
+      End If
       m_contents &= $"{Tab()}System.Console.WriteLine(){vbCrLf}"
     End Sub
 
@@ -481,6 +492,8 @@ Namespace Bsharp.CodeAnalysis.Emit
     'End Sub
 
     Private Sub EmitPrintStatement(node As BoundPrintStatement)
+      If node Is Nothing Then
+      End If
       m_contents &= $"{Tab()}' PRINT ????{vbCrLf}"
     End Sub
 
@@ -614,7 +627,9 @@ Namespace Bsharp.CodeAnalysis.Emit
 
     'End Function
 
-    Private Sub EmitUnaryExpression(node As BoundUnaryExpression)
+    Private Shared Sub EmitUnaryExpression(node As BoundUnaryExpression)
+      If node Is Nothing Then
+      End If
       'EmitExpression(ilProcessor, node.Operand)
       'If node.Op.Kind = BoundUnaryOperatorKind.Identity Then
       '  ' Done.
@@ -651,9 +666,9 @@ Namespace Bsharp.CodeAnalysis.Emit
 
 #Region "Converted from 'inline' functions."
 
-    Private Function ProperCase(value As String) As String
+    Private Shared Function ProperCase(value As String) As String
       If "abcdefghijklmnopqrstuvwxyz".Contains(value(0)) Then
-        Return value(0).ToString.ToUpper & value.Substring(1)
+        Return String.Concat(value(0).ToString.ToUpper, value.AsSpan(1))
       Else
         Return value
       End If

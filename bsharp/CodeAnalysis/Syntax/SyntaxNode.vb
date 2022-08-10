@@ -56,9 +56,11 @@ Namespace Bsharp.CodeAnalysis.Syntax
           If child IsNot Nothing Then Yield child
         ElseIf GetType(SeparatedSyntaxList).IsAssignableFrom(prop.PropertyType) Then
           Dim separatedSyntaxList = TryCast(prop.GetValue(Me), SeparatedSyntaxList)
-          For Each child In separatedSyntaxList.GetWithSeparators
-            If child IsNot Nothing Then Yield child
-          Next
+          If separatedSyntaxList IsNot Nothing Then
+            For Each child In separatedSyntaxList.GetWithSeparators
+              If child IsNot Nothing Then Yield child
+            Next
+          End If
         ElseIf GetType(IEnumerable(Of SyntaxNode)).IsAssignableFrom(prop.PropertyType) Then
           Dim values = TryCast(prop.GetValue(Me), IEnumerable(Of SyntaxNode))
           For Each child In values

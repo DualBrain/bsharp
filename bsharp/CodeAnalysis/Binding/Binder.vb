@@ -44,6 +44,12 @@ Namespace Bsharp.CodeAnalysis.Binding
         binder.BindFunctionDeclaration(func)
       Next
 
+      Dim defDeclarations = syntaxTrees.SelectMany(Function(st) st.Root.Members).OfType(Of DefDeclarationSyntax)
+
+      For Each func In defDeclarations
+        binder.BindDefDeclaration(func)
+      Next
+
       Dim globalStatements = syntaxTrees.SelectMany(Function(st) st.Root.Members).OfType(Of GlobalStatementSyntax)
 
       ' Determine if any GOTO or GOSUB statements target a numeric value (Line Number).
@@ -140,7 +146,7 @@ Namespace Bsharp.CodeAnalysis.Binding
         mainFunction = Nothing
 
         If globalStatements.Any Then
-          scriptFunction = New FunctionSymbol("$eval", ImmutableArray(Of ParameterSymbol).Empty, TypeSymbol.Any, Nothing)
+          scriptFunction = New FunctionSymbol("$eval", ImmutableArray(Of ParameterSymbol).Empty, TypeSymbol.Any)
         Else
           scriptFunction = Nothing
         End If
@@ -246,7 +252,7 @@ Namespace Bsharp.CodeAnalysis.Binding
         Dim binder = New Binder(isScript, parentScope, func)
         Dim body = binder.BindStatement(func.Declaration.Statements)
         Dim loweredBody = Lowerer.Lower(func, body)
-        If func.Type IsNot TypeSymbol.Nothing AndAlso Not ControlFlowGraph.AllPathsReturn(loweredBody) Then
+        If func.Type IsNot TypeSymbol.Nothing AndAlso Not ControlFlowGraph.AllPathsReturn(func.Name, loweredBody) Then
           binder.Diagnostics.ReportAllPathsMustReturn(func.Declaration.Identifier.Location)
         End If
         functionBodies.Add(func, loweredBody)
@@ -295,6 +301,34 @@ Namespace Bsharp.CodeAnalysis.Binding
       Next
 
       Dim type = If(BindAsClause(syntax.AsClause), TypeSymbol.Nothing)
+
+      Dim func As New FunctionSymbol(syntax.Identifier.Text, parameters.ToImmutable(), type, syntax)
+      'If func.Declaration.Identifier.Text IsNot Nothing AndAlso
+      If syntax.Identifier.Text IsNot Nothing AndAlso
+         Not m_scope.TryDeclareFunction(func) Then
+        Diagnostics.ReportSymbolAlreadyDeclared(syntax.Identifier.Location, func.Name)
+      End If
+
+    End Sub
+
+    Private Sub BindDefDeclaration(syntax As DefDeclarationSyntax)
+
+      Dim parameters = ImmutableArray.CreateBuilder(Of ParameterSymbol)()
+
+      Dim seenParameterNames As New HashSet(Of String)
+
+      For Each parameterSyntax In syntax.Parameters
+        Dim parameterName = parameterSyntax.Identifier.Text
+        Dim parameterType = BindAsClause(parameterSyntax.AsClause)
+        If Not seenParameterNames.Add(parameterName) Then
+          Diagnostics.ReportParameterAlreadyDeclared(parameterSyntax.Location, parameterName)
+        Else
+          Dim parameter As New ParameterSymbol(parameterName, parameterType, parameters.Count)
+          parameters.Add(parameter)
+        End If
+      Next
+
+      Dim type = If(BindAsClause(syntax.Parameters.First.AsClause), TypeSymbol.Nothing)
 
       Dim func As New FunctionSymbol(syntax.Identifier.Text, parameters.ToImmutable(), type, syntax)
       'If func.Declaration.Identifier.Text IsNot Nothing AndAlso

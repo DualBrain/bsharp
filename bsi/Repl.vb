@@ -524,7 +524,13 @@ Namespace Bsharp
       Dim view = New SubmissionView(AddressOf RenderLine, document)
 
       While Not m_done
-        Dim key = Console.ReadKey(True)
+        Dim key As ConsoleKeyInfo
+        Try
+          key = Console.ReadKey(True)
+        Catch ex As InvalidOperationException
+          ' Because we closed the console window (X)
+          Exit While
+        End Try
         HandleKey(key, document, view)
       End While
 

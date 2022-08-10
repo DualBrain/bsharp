@@ -135,14 +135,15 @@
     XorKeyword
 
     ' Nodes
-    CompilationUnit
-    GlobalStatement
-    FunctionDeclaration
-    Parameter
     AsClause
+    CompilationUnit
+    DefDeclaration
+    FunctionDeclaration
+    GlobalStatement
+    Parameter
     SingleLineElseClause
-    WhileClause
     UntilClause
+    WhileClause
 
     ' Functions
     SpcFunction
@@ -183,6 +184,7 @@
     ReturnGosubStatement
     ReturnStatement
     RmDirStatement
+    SingleLineDefDeclaration
     SingleLineIfStatement
     StopStatement
     SystemStatement

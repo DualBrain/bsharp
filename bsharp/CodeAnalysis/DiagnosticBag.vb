@@ -73,6 +73,10 @@ Namespace Bsharp.CodeAnalysis
       ReportError(location, $"Variable '{name}' doesn't exist.")
     End Sub
 
+    Public Sub ReportInvalidFunctionName(location As TextLocation, name As String)
+      ReportError(location, $"Function '{name}' is invalid.")
+    End Sub
+
     Public Sub ReportNotAVariable(location As TextLocation, name As String)
       ReportError(location, $"'{name}' is not a variable.")
     End Sub

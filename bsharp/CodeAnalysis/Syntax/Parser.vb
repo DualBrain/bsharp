@@ -108,6 +108,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
     Private Function ParseMember() As MemberSyntax
       If Current.Kind = SyntaxKind.FunctionKeyword Then Return ParseFunctionDeclaration()
+      If Current.Kind = SyntaxKind.DefKeyword Then Return ParseDefDeclaration()
       Return ParseGlobalStatement()
     End Function
 
@@ -588,6 +589,44 @@ Namespace Bsharp.CodeAnalysis.Syntax
     End Function
 
 #Region "Function Block"
+
+    Private Function ParseDefDeclaration() As MemberSyntax
+
+      ' DEF FN*identifier*[(*parameters*)]
+      '   *statements*
+      ' END DEF
+
+      Dim defKeyword = MatchToken(SyntaxKind.DefKeyword)
+      Dim identifier = MatchToken(SyntaxKind.IdentifierToken)
+      'TODO: Are the first two characters FN?  If not, error!
+      Dim openParenToken As SyntaxToken = Nothing
+      Dim parameters As SeparatedSyntaxList(Of ParameterSyntax) = Nothing
+      Dim closeParenToken As SyntaxToken = Nothing
+      If Current.Kind = SyntaxKind.OpenParenToken Then
+        openParenToken = MatchToken(SyntaxKind.OpenParenToken)
+        If Current.Kind <> SyntaxKind.CloseParenToken Then parameters = ParseParameterList()
+        closeParenToken = MatchToken(SyntaxKind.CloseParenToken)
+      End If
+
+      Dim value = identifier?.Text
+      If Not value?.StartsWith("fn", StringComparison.InvariantCultureIgnoreCase) Then
+        m_diagnostics.ReportInvalidFunctionName(Current.Location, value)
+      End If
+
+      If Current.Kind = SyntaxKind.EqualToken Then
+        ' single line version
+        Dim equalToken = MatchToken(SyntaxKind.EqualToken)
+        Dim expression = ParseExpression()
+        Return New SingleLineDefDeclarationSyntax(m_syntaxTree, defKeyword, identifier, openParenToken, parameters, closeParenToken, equalToken, expression)
+      Else
+        ' multi line version
+        'Dim asClause = ParseOptionalAsClause()
+        Dim statements = ParseBlockStatement(False)
+        Dim endDefKeyword = MatchToken(SyntaxKind.EndDefKeyword)
+        Return New DefDeclarationSyntax(m_syntaxTree, defKeyword, identifier, openParenToken, parameters, closeParenToken, statements, endDefKeyword)
+      End If
+
+    End Function
 
     Private Function ParseFunctionDeclaration() As MemberSyntax
 
@@ -1117,6 +1156,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
       ' SyncLock/End SyncLock
       Select Case Current.Kind
         Case SyntaxKind.EndIfKeyword,
+             SyntaxKind.EndDefKeyword,
              SyntaxKind.EndFunctionKeyword
           'Select Case Peek(1).Kind
           '  Case SyntaxKind.IfKeyword,
