@@ -50,6 +50,12 @@ Namespace Bsharp.CodeAnalysis.Binding
         binder.BindDefDeclaration(func)
       Next
 
+      Dim singleLineDefDeclarations = syntaxTrees.SelectMany(Function(st) st.Root.Members).OfType(Of SingleLineDefDeclarationSyntax)
+
+      For Each func In singleLineDefDeclarations
+        binder.BindDefDeclaration(func)
+      Next
+
       Dim globalStatements = syntaxTrees.SelectMany(Function(st) st.Root.Members).OfType(Of GlobalStatementSyntax)
 
       ' Determine if any GOTO or GOSUB statements target a numeric value (Line Number).
@@ -312,6 +318,34 @@ Namespace Bsharp.CodeAnalysis.Binding
     End Sub
 
     Private Sub BindDefDeclaration(syntax As DefDeclarationSyntax)
+
+      Dim parameters = ImmutableArray.CreateBuilder(Of ParameterSymbol)()
+
+      Dim seenParameterNames As New HashSet(Of String)
+
+      For Each parameterSyntax In syntax.Parameters
+        Dim parameterName = parameterSyntax.Identifier.Text
+        Dim parameterType = BindAsClause(parameterSyntax.AsClause)
+        If Not seenParameterNames.Add(parameterName) Then
+          Diagnostics.ReportParameterAlreadyDeclared(parameterSyntax.Location, parameterName)
+        Else
+          Dim parameter As New ParameterSymbol(parameterName, parameterType, parameters.Count)
+          parameters.Add(parameter)
+        End If
+      Next
+
+      Dim type = If(BindAsClause(syntax.Parameters.First.AsClause), TypeSymbol.Nothing)
+
+      Dim func As New FunctionSymbol(syntax.Identifier.Text, parameters.ToImmutable(), type, syntax)
+      'If func.Declaration.Identifier.Text IsNot Nothing AndAlso
+      If syntax.Identifier.Text IsNot Nothing AndAlso
+         Not m_scope.TryDeclareFunction(func) Then
+        Diagnostics.ReportSymbolAlreadyDeclared(syntax.Identifier.Location, func.Name)
+      End If
+
+    End Sub
+
+    Private Sub BindDefDeclaration(syntax As SingleLineDefDeclarationSyntax)
 
       Dim parameters = ImmutableArray.CreateBuilder(Of ParameterSymbol)()
 
