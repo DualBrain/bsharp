@@ -38,7 +38,7 @@ For now the rough list contains:
 - Will have automated (unit) tests to help ensure stability over time.
 - Evaluate (long-term) the idea of compiling to other "interesting" target platforms (Arduino, CoCo, C65, etc.)
 
-I mention above GW-BASIC and/or QBasic, but should also include MBASIC as this is the precursor to GW-BASIC and where most of the current focus is at the moment since it's less effort to implement this language level related to cross-platform targetting.
+I mention above GW-BASIC and/or QBasic, but should also include MBASIC as this is the precursor to GW-BASIC and where most of the current focus is at the moment since it's "less effort" to implement this language level related to cross-platform targetting.
 
 For now the main goal is to get the language parsing and working within an interpreter.  Why an interpreter?  Immediate/instant results. Also, the interpreter is leveraging the same tool chain that the compiler(s) will eventually be utilizing; the only difference is that the interpreter will interpret and execute these in memory where the compiler(s) will emit code to disk.
 
