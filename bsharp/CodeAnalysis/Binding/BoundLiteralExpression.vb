@@ -9,7 +9,11 @@ Namespace Bsharp.CodeAnalysis.Binding
       If TypeOf value Is Decimal Then
         Me.Type = TypeSymbol.Decimal
       ElseIf TypeOf value Is Double Then
-        Me.Type = TypeSymbol.Double
+        If CDbl(value) >= Single.MinValue AndAlso CDbl(value) <= Single.MaxValue Then
+          Me.Type = TypeSymbol.Single
+        Else
+          Me.Type = TypeSymbol.Double
+        End If
       ElseIf TypeOf value Is Single Then
         Me.Type = TypeSymbol.Single
       ElseIf TypeOf value Is ULong Then
@@ -19,7 +23,11 @@ Namespace Bsharp.CodeAnalysis.Binding
       ElseIf TypeOf value Is UInteger Then
         Me.Type = TypeSymbol.ULong
       ElseIf TypeOf value Is Integer Then
-        Me.Type = TypeSymbol.Long
+        If CInt(value) >= Short.MinValue AndAlso CInt(value) <= Short.MaxValue Then
+          Me.Type = TypeSymbol.Integer
+        Else
+          Me.Type = TypeSymbol.Long
+        End If
       ElseIf TypeOf value Is UShort Then
         Me.Type = TypeSymbol.UInteger
       ElseIf TypeOf value Is Short Then

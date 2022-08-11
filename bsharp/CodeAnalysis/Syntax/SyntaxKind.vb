@@ -29,7 +29,6 @@
     LessThanGreaterThanToken
     LessThanToken
     MinusToken
-    NumberToken
     OpenBraceToken
     OpenParenToken
     PeriodToken
@@ -40,6 +39,11 @@
     SlashToken
     StarToken
     StringToken
+
+    NumberToken
+    'ExclamationToken
+    'AmpersandToken
+    'PercentToken
 
     ' Keywords
 

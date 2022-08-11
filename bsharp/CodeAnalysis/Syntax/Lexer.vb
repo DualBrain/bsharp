@@ -190,7 +190,20 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
       Select Case Current
         Case ChrW(0) : m_kind = SyntaxKind.EndOfFileToken
-        Case "#"c : m_kind = SyntaxKind.PoundToken : m_position += 1
+
+        'Case "%"c : m_kind = SyntaxKind.PercentToken : m_position += 1 ' Integer
+        'Case "&"c
+        '  'TODO: Need to handle hexadecimal, binary and octal literals.
+        '  '      &H
+        '  '      &B
+        '  '      &O
+        '  '      NOTE: Allow for the underscore (_) character as a group separator.
+        '  m_kind = SyntaxKind.AmpersandToken : m_position += 1 ' Long
+        'Case "!"c : m_kind = SyntaxKind.ExclamationToken : m_position += 1 ' Single
+        Case "#"c : m_kind = SyntaxKind.PoundToken : m_position += 1 ' Double
+        'Case "$"c : m_kind = SyntaxKind.DollarToken : m_position += 1 ' String
+        'Case "@"c : m_kind = SyntaxKind.AtToken : m_position += 1 ' Integer
+
         Case "+"c : m_kind = SyntaxKind.PlusToken : m_position += 1
         Case "-"c : m_kind = SyntaxKind.MinusToken : m_position += 1
         Case "*"c : m_kind = SyntaxKind.StarToken : m_position += 1
@@ -219,7 +232,7 @@ Namespace Bsharp.CodeAnalysis.Syntax
         Case ":"c : m_kind = SyntaxKind.ColonToken : m_position += 1
         Case ";"c : m_kind = SyntaxKind.SemicolonToken : m_position += 1
         Case "?"c : m_kind = SyntaxKind.QuestionToken : m_position += 1
-        'Case "$"c : m_kind = SyntaxKind.DollarToken : m_position += 1
+
         Case ChrW(34)
           ReadString()
         Case "0"c, "1"c, "2"c, "3"c, "4"c, "5"c, "6"c, "7"c, "8"c, "9"c
@@ -286,6 +299,19 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
     Private Sub ReadNumberToken()
 
+      'TODO: Forced Literal Types
+
+      ' S - Short
+      ' I - Integer
+      ' L - Long
+      ' D - Decimal
+      ' F - Single
+      ' R - Double
+      ' US - UShort
+      ' UI - UInteger
+      ' UL - ULong
+      ' C - Char
+
       Dim decimalCount = 0
       While Char.IsDigit(Current) OrElse Current = "."c
         If Current = "."c AndAlso decimalCount > 0 Then Exit While
@@ -315,8 +341,15 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
     Private Sub ReadIdentifierOrKeyword()
 
-      While Char.IsLetterOrDigit(Current) OrElse Current = "_"c OrElse Current = "$"c
-        m_position += 1
+      Const suffixChars As String = "%!#&$"
+
+      While Char.IsLetterOrDigit(Current) OrElse Current = "_"c OrElse suffixChars.Contains(Current) 'Current = "$"c
+        If suffixChars.Contains(Current) Then
+          m_position += 1
+          Exit While
+        Else
+          m_position += 1
+        End If
       End While
 
       Dim length = m_position - m_start
@@ -354,10 +387,14 @@ Namespace Bsharp.CodeAnalysis.Syntax
       If Current = ":" AndAlso
          Char.IsLetter(text(0)) AndAlso
          Not text.Contains(" "c) AndAlso
+         Not text.Contains("%"c) AndAlso
+         Not text.Contains("!"c) AndAlso
+         Not text.Contains("&"c) AndAlso
+         Not text.Contains("#"c) AndAlso
          Not text.Contains("$"c) Then
         ' start of line
         ' start with a-z character (yes)
-        ' no spaces or $ (yes)
+        ' no spaces or %!&#$ (yes)
         ' no reserved words?
         ' end with a colon (:) (yes)
         m_kind = SyntaxKind.Label

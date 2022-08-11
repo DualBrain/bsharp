@@ -280,7 +280,7 @@ Namespace Bsharp.Tests.CodeAnalysis
         end if"
 
       Dim diagnostics = "
-        Cannot convert type 'Long' to 'Boolean'."
+        Cannot convert type 'Integer' to 'Boolean'."
 
       AssertDiagnostics(text, diagnostics)
 
@@ -537,7 +537,7 @@ end if"
 
       Dim diagnostics = "
         Variable 'x' is read-only and cannot be assigned to.
-        Cannot convert type 'Boolean' to 'Long'."
+        Cannot convert type 'Boolean' to 'Integer'."
 
       AssertDiagnostics(text, diagnostics)
 

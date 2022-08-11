@@ -513,10 +513,21 @@ Namespace Bsharp.CodeAnalysis.Binding
       Dim variable = DetermineVariableReference(syntax.IdentifierToken)
       If variable Is Nothing Then
         ' Variable has not been declared, let's go ahead and do so.
-        Dim type = TypeSymbol.String
-        If Not syntax.IdentifierToken.Text.EndsWith("$") Then
-          type = TypeSymbol.Double
-        End If
+        Dim type As TypeSymbol '= TypeSymbol.String
+        Dim suffix = syntax.IdentifierToken.Text.Last
+        Select Case suffix
+          Case "%"c : type = TypeSymbol.Integer
+          Case "&"c : type = TypeSymbol.Long
+          Case "!"c : type = TypeSymbol.Single
+          Case "#"c : type = TypeSymbol.Double
+          Case "$"c : type = TypeSymbol.String
+          Case Else
+            'TODO: This needs to be set based on current DEFINT, etc.
+            type = TypeSymbol.Single
+        End Select
+        'If Not syntax.IdentifierToken.Text.EndsWith("$") Then
+        '  type = TypeSymbol.Double
+        'End If
         variable = BindVariableDeclaration(syntax.IdentifierToken, False, type) ' boundExpression.Type
       End If
       'Dim variable = BindVariableReference(syntax.IdentifierToken)
@@ -796,10 +807,22 @@ Namespace Bsharp.CodeAnalysis.Binding
               variable = BindVariableReference(token)
             Else
               ' Variable has not been declared, let's go ahead and do so.
-              Dim type = TypeSymbol.String
-              If Not token.Text.EndsWith("$") Then
-                type = TypeSymbol.Double
-              End If
+              'Dim type = TypeSymbol.String
+              Dim type As TypeSymbol '= TypeSymbol.String
+              Dim suffix = token.Text.Last
+              Select Case suffix
+                Case "%"c : type = TypeSymbol.Integer
+                Case "&"c : type = TypeSymbol.Long
+                Case "!"c : type = TypeSymbol.Single
+                Case "#"c : type = TypeSymbol.Double
+                Case "$"c : type = TypeSymbol.String
+                Case Else
+                  'TODO: This needs to be set based on current DEFINT, etc.
+                  type = TypeSymbol.Single
+              End Select
+              'If Not token.Text.EndsWith("$") Then
+              '  type = TypeSymbol.Double
+              'End If
               variable = BindVariableDeclaration(token, False, type)
             End If
           End If
@@ -839,10 +862,21 @@ Namespace Bsharp.CodeAnalysis.Binding
           variable = BindVariableReference(syntax.IdentifierToken)
         Else
           ' Variable has not been declared, let's go ahead and do so.
-          Dim type = TypeSymbol.String
-          If Not syntax.IdentifierToken.Text.EndsWith("$") Then
-            type = TypeSymbol.Double
-          End If
+          Dim type As TypeSymbol '= TypeSymbol.String
+          Dim suffix = syntax.IdentifierToken.Text.Last
+          Select Case suffix
+            Case "%"c : type = TypeSymbol.Integer
+            Case "&"c : type = TypeSymbol.Long
+            Case "!"c : type = TypeSymbol.Single
+            Case "#"c : type = TypeSymbol.Double
+            Case "$"c : type = TypeSymbol.String
+            Case Else
+              'TODO: This needs to be set based on current DEFINT, etc.
+              type = TypeSymbol.Single
+          End Select
+          'If Not syntax.IdentifierToken.Text.EndsWith("$") Then
+          '  type = TypeSymbol.Double
+          'End If
           variable = BindVariableDeclaration(syntax.IdentifierToken, False, type) ' boundExpression.Type
         End If
       End If
@@ -1093,10 +1127,21 @@ Namespace Bsharp.CodeAnalysis.Binding
         Return TryCast(s, VariableSymbol)
       ElseIf s Is Nothing Then
         If Not OPTION_EXPLICIT Then
-          Dim type = TypeSymbol.String
-          If Not identifierToken.Text.EndsWith("$") Then
-            type = TypeSymbol.Double
-          End If
+          Dim type As TypeSymbol '= TypeSymbol.String
+          Dim suffix = identifierToken.Text.Last
+          Select Case suffix
+            Case "%"c : type = TypeSymbol.Integer
+            Case "&"c : type = TypeSymbol.Long
+            Case "!"c : type = TypeSymbol.Single
+            Case "#"c : type = TypeSymbol.Double
+            Case "$"c : type = TypeSymbol.String
+            Case Else
+              'TODO: This needs to be set based on current DEFINT, etc.
+              type = TypeSymbol.Single
+          End Select
+          'If Not identifierToken.Text.EndsWith("$") Then
+          '  type = TypeSymbol.Double
+          'End If
           Dim variable = BindVariableDeclaration(identifierToken, False, type)
           If variable Is Nothing Then
             Diagnostics.ReportUndefinedVariable(identifierToken.Location, name)

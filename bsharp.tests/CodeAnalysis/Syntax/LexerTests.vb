@@ -162,6 +162,8 @@ Namespace Bsharp.CodeAnalysis.Syntax
       Dim t1IsKeyword = t1Kind.ToString.EndsWith("Keyword")
       Dim t2IsKeyword = t2Kind.ToString.EndsWith("Keyword")
 
+      If t2Kind = SyntaxKind.PoundToken Then Return True
+
       ' Labels
       If t2Kind = SyntaxKind.ColonToken Then Return True
       ' Line Numbers

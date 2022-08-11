@@ -26,7 +26,15 @@ Namespace Bsharp.CodeAnalysis.Binding
     End Function
 
     Private Function TryDeclareSymbol(Of TSymbol As Symbol)(symbol As TSymbol) As Boolean
-      Dim key = $"{symbol.Name.ToLower}"
+      Dim name = symbol.Name
+      'If (symbol.Kind = SymbolKind.LocalVariable OrElse
+      '    symbol.Kind = SymbolKind.GlobalVariable) AndAlso
+      '   Not "%&!#$".Contains(name.Last) Then
+      '  'TODO: Need to determine type based on DEF... setting.
+      '  '      Until that happens, default to single-precision.
+      '  name &= "!"c
+      'End If
+      Dim key = $"{name.ToLower}"
       If symbol.Kind = SymbolKind.Function Then
         Dim f = TryCast(symbol, FunctionSymbol)
         key &= $"[{If(f?.Parameters.Length, 0)}]"
@@ -41,6 +49,7 @@ Namespace Bsharp.CodeAnalysis.Binding
     End Function
 
     Public Function TryLookupFunction(name As String, parameters As List(Of TypeSymbol)) As Symbol
+      'If Not "%&!#$".Contains(name.Last) Then name &= "!"c
       Dim key = $"{name.ToLower}"
       key &= $"[{If(parameters?.Count, 0)}]"
       Dim result = TryLookupSymbol(key)
@@ -53,6 +62,7 @@ Namespace Bsharp.CodeAnalysis.Binding
 
     Public Function TryLookupSymbol(name As String) As Symbol
       Dim symbol As Symbols.Symbol = Nothing
+      'If Not "%&!#$".Contains(name.Last) Then name &= "!"c
       If m_symbols IsNot Nothing AndAlso m_symbols.TryGetValue(name.ToLower, symbol) Then
         Return symbol
       ElseIf m_symbols IsNot Nothing AndAlso name.EndsWith("[") Then
