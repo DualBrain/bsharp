@@ -668,7 +668,7 @@ Namespace Bsharp.CodeAnalysis.Emit
 
     Private Shared Function ProperCase(value As String) As String
       If "abcdefghijklmnopqrstuvwxyz".Contains(value(0)) Then
-        Return String.Concat(value(0).ToString.ToUpper, value.AsSpan(1))
+        Return String.Concat(value(0).ToString.ToUpper, value.Substring(1))
       Else
         Return value
       End If

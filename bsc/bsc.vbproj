@@ -4,7 +4,7 @@
 	<IsTool>true</IsTool>
  	<OutputType>Exe</OutputType>
 	<RootNamespace></RootNamespace>
-	<TargetFramework>net6.0</TargetFramework>
+	<TargetFramework>net7.0</TargetFramework>
 	<OptionStrict>On</OptionStrict>
 	<SignAssembly>false</SignAssembly>
 	<DelaySign>false</DelaySign>

@@ -32,8 +32,8 @@ Namespace Bsharp
                                                              "run",
                                                              "save"}
 
-      Console.WriteLine("BASIC .NET (""B#"") ver 0.0.1-alpha.3")
-      Console.WriteLine("(C) Copyright 2010-2022 Cory Smith")
+      Console.WriteLine("BASIC .NET (""B#"") ver 0.0.1-alpha.2023.01.13")
+      Console.WriteLine("(C) Copyright 2010-2023 Cory Smith")
       Console.WriteLine()
 
       'LoadSubmissions()
