@@ -344,9 +344,17 @@ Namespace Bsharp.CodeAnalysis.Syntax
 
       Dim letKeywordToken = MatchToken(SyntaxKind.LetKeyword)
       Dim identifierToken = NextToken()
+      Dim openParenToken As SyntaxToken = Nothing
+      Dim arguments As SeparatedSyntaxList(Of ExpressionSyntax) = Nothing
+      Dim closeParenToken As SyntaxToken = Nothing
+      If Current.Kind = SyntaxKind.OpenParenToken Then
+        openParenToken = MatchToken(SyntaxKind.OpenParenToken)
+        arguments = ParseArguments()
+        closeParenToken = MatchToken(SyntaxKind.CloseParenToken)
+      End If
       Dim equalToken = MatchToken(SyntaxKind.EqualToken)
       Dim expression = ParseExpression()
-      Return New LetStatementSyntax(m_syntaxTree, letKeywordToken, identifierToken, equalToken, expression)
+      Return New LetStatementSyntax(m_syntaxTree, letKeywordToken, identifierToken, openParenToken, arguments, closeParenToken, equalToken, expression)
 
     End Function
 
@@ -561,15 +569,56 @@ Namespace Bsharp.CodeAnalysis.Syntax
       ' DIM *identifier* [AS *type*] [= *initializer*]
       ' CONST *identifier* [AS *type*] [= *initializer*]
 
+      ' DIM *identifier*(*subscripts*)[,*identifier*(*subscripts*)]...
+
       Dim expected = SyntaxKind.DimKeyword
       If Current.Kind = SyntaxKind.ConstKeyword Then expected = SyntaxKind.ConstKeyword
       If Current.Kind = SyntaxKind.DimKeyword Then expected = SyntaxKind.DimKeyword
       Dim keyword = MatchToken(expected)
       Dim identifier = MatchToken(SyntaxKind.IdentifierToken)
+      Dim subscriptClause = ParseOptionalSubscriptClause()
       Dim asClause = ParseOptionalAsClause()
+      Dim initClause = ParseOptionalInitClause()
+      Return New VariableDeclarationSyntax(m_syntaxTree, keyword, identifier, subscriptClause, asClause, initClause)
+
+    End Function
+
+    Private Function ParseOptionalSubscriptClause() As SubscriptClauseSyntax
+      If Current.Kind <> SyntaxKind.OpenParenToken Then Return Nothing
+      Return ParseSubscriptClause()
+    End Function
+
+    Private Function ParseSubscriptClause() As SubscriptClauseSyntax
+
+      ' ... ( [*lower* TO] *upper* )
+
+      Dim openParen = MatchToken(SyntaxKind.OpenParenToken)
+      Dim upper = ParseExpression()
+      Dim optionalLower As LowerSubscriptClauseSyntax = Nothing
+      If Current.Kind = SyntaxKind.ToKeyword Then
+        Dim lower = upper
+        Dim toKeyword = MatchToken(SyntaxKind.ToKeyword)
+        optionalLower = New LowerSubscriptClauseSyntax(m_syntaxTree, lower, toKeyword)
+        upper = ParseExpression()
+      End If
+      Dim closeParen = MatchToken(SyntaxKind.CloseParenToken)
+      Return New SubscriptClauseSyntax(m_syntaxTree, openParen, optionalLower, upper, closeParen)
+
+    End Function
+
+    Private Function ParseOptionalInitClause() As InitClauseSyntax
+      If Current.Kind <> SyntaxKind.EqualToken Then Return Nothing
+      Return ParseInitClause()
+    End Function
+
+    Private Function ParseInitClause() As InitClauseSyntax
+
+      ' ... = *expression*
+
       Dim equalToken = MatchToken(SyntaxKind.EqualToken)
       Dim initializer = ParseExpression()
-      Return New VariableDeclarationSyntax(m_syntaxTree, keyword, identifier, asClause, equalToken, initializer)
+
+      Return New InitClauseSyntax(m_syntaxTree, equalToken, initializer)
 
     End Function
 

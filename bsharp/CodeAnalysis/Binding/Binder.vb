@@ -495,6 +495,16 @@ Namespace Bsharp.CodeAnalysis.Binding
       End Select
     End Function
 
+    Private Function BindSubscriptClause(syntax As SubscriptClauseSyntax) As (Lower As BoundExpression, Upper As BoundExpression)
+      If syntax Is Nothing Then Return Nothing
+      Dim lower As BoundExpression = Nothing
+      If syntax.Lower IsNot Nothing Then
+        lower = BindExpression(syntax.Lower.Lower)
+      End If
+      Dim upper = BindExpression(syntax.Upper)
+      Return (lower, upper)
+    End Function
+
     Private Function BindAsClause(syntax As AsClauseSyntax) As TypeSymbol
       If syntax Is Nothing Then Return Nothing
       Dim type = LookupType(syntax.Identifier.Text)
@@ -1098,12 +1108,58 @@ Namespace Bsharp.CodeAnalysis.Binding
 
     Private Function BindVariableDeclaration(syntax As VariableDeclarationSyntax) As BoundStatement
       Dim isReadOnly = (syntax.KeywordToken.Kind = SyntaxKind.ConstKeyword)
+      Dim subscript = BindSubscriptClause(syntax.SubscriptClause)
       Dim type = BindAsClause(syntax.AsClause)
-      Dim initializer = BindExpression(syntax.Initializer)
-      Dim variableType = If(type, initializer.Type)
-      Dim variable = BindVariableDeclaration(syntax.IdentifierToken, isReadOnly, variableType)
-      Dim convertedInitializer = BindConversion(syntax.Initializer.Location, initializer, variableType)
-      Return New BoundVariableDeclaration(variable, convertedInitializer)
+      Dim initializer As BoundExpression = Nothing
+      If syntax.InitClause IsNot Nothing Then
+        initializer = BindExpression(syntax.InitClause.Initializer)
+      End If
+      Dim variableType = If(type, initializer?.Type)
+      If variableType Is Nothing Then
+        Dim suffix = syntax.IdentifierToken.Text.Last
+        Select Case suffix
+          Case "%"c : variableType = TypeSymbol.Integer
+          Case "&"c : variableType = TypeSymbol.Long
+          Case "!"c : variableType = TypeSymbol.Single
+          Case "#"c : variableType = TypeSymbol.Double
+          Case "$"c : variableType = TypeSymbol.String
+          Case Else
+            'TODO: This needs to be set based on current DEFINT, etc.
+            variableType = TypeSymbol.Single
+        End Select
+      Else
+        ' A type was specified, but the identifier also contains a type specifier???
+        Dim suffix = syntax.IdentifierToken.Text.Last
+        Select Case suffix
+          Case "%"c, "&"c, "!"c, "#"c, "$"c
+            'TODO: An error????
+          Case Else
+            ' all good...
+        End Select
+      End If
+      If subscript.Upper IsNot Nothing Then
+        ' Array
+        Dim variable = BindArrayDeclaration(syntax.IdentifierToken, variableType, subscript.Lower, subscript.Upper)
+        'Dim convertedInitializer = BindConversion(syntax.Initializer.Location, initializer, variableType)
+        Return New BoundVariableDeclaration(variable, Nothing)
+      Else
+        Dim variable = BindVariableDeclaration(syntax.IdentifierToken, isReadOnly, variableType)
+        Dim convertedInitializer As BoundExpression = Nothing
+        If syntax.InitClause IsNot Nothing Then convertedInitializer = BindConversion(syntax.InitClause.Initializer.Location, initializer, variableType)
+        Return New BoundVariableDeclaration(variable, convertedInitializer)
+      End If
+    End Function
+
+    Private Function BindArrayDeclaration(identifier As SyntaxToken, type As TypeSymbol, lower As BoundExpression, upper As BoundExpression) As VariableSymbol
+      Dim name = If(identifier.Text, "?")
+      Dim [declare] = Not identifier.IsMissing
+      Dim variable = If(m_function Is Nothing,
+                        DirectCast(New GlobalArraySymbol(name, type, lower, upper), VariableSymbol),
+                        DirectCast(New LocalArraySymbol(name, type, lower, upper), VariableSymbol))
+      If [declare] AndAlso Not m_scope.TryDeclareVariable(variable) Then
+        Diagnostics.ReportSymbolAlreadyDeclared(identifier.Location, name)
+      End If
+      Return variable
     End Function
 
     Private Function BindVariableDeclaration(identifier As SyntaxToken, isReadOnly As Boolean, type As TypeSymbol, Optional constant As BoundConstant = Nothing) As VariableSymbol
@@ -1139,9 +1195,6 @@ Namespace Bsharp.CodeAnalysis.Binding
               'TODO: This needs to be set based on current DEFINT, etc.
               type = TypeSymbol.Single
           End Select
-          'If Not identifierToken.Text.EndsWith("$") Then
-          '  type = TypeSymbol.Double
-          'End If
           Dim variable = BindVariableDeclaration(identifierToken, False, type)
           If variable Is Nothing Then
             Diagnostics.ReportUndefinedVariable(identifierToken.Location, name)

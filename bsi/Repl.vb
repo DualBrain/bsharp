@@ -40,7 +40,7 @@ Namespace Bsharp
 
     End Sub
 
-    Friend m_fullScreenEditor As Boolean
+    Friend m_fullScreenEditor As Boolean = False
 
     Public Sub Run()
 
@@ -160,14 +160,14 @@ Namespace Bsharp
       Private m_currentLine As Integer
       Private m_currentCharacter As Integer
 
-      Private m_maxLeft As Integer
-      Private m_maxTop As Integer
+      'Private ReadOnly m_maxLeft As Integer
+      Private ReadOnly m_maxTop As Integer
 
       Sub New(lineRenderer As LineRenderHandler, submissionDocument As ObservableCollection(Of String))
         m_lineRenderer = lineRenderer
         Me.SubmissionDocument = submissionDocument
         'm_cursorTop = Console.CursorTop
-        m_maxLeft = Console.WindowWidth - 2
+        'm_maxLeft = Console.WindowWidth - 2
         m_maxTop = Console.WindowHeight - 4
         Render()
       End Sub
@@ -290,6 +290,8 @@ Namespace Bsharp
       End Sub
 
       Private Sub HandleLeftArrow(document As ObservableCollection(Of String))
+        If document Is Nothing Then
+        End If
         If Me.CurrentCharacter > 0 Then
           Me.CurrentCharacter -= 1
         End If
@@ -303,6 +305,8 @@ Namespace Bsharp
       End Sub
 
       Private Sub HandleUpArrow(document As ObservableCollection(Of String))
+        If document Is Nothing Then
+        End If
         If Me.CurrentLine > 0 Then
           Me.CurrentLine -= 1
         End If
@@ -351,6 +355,8 @@ Namespace Bsharp
       End Sub
 
       Private Sub HandleHome(document As ObservableCollection(Of String))
+        If document Is Nothing Then
+        End If
         Me.CurrentCharacter = 0
       End Sub
 
@@ -358,10 +364,14 @@ Namespace Bsharp
         Me.CurrentCharacter = document(Me.CurrentLine).Length
       End Sub
 
-      Private Sub HandlePageUp(document As ObservableCollection(Of String))
+      Private Shared Sub HandlePageUp(document As ObservableCollection(Of String))
+        If document Is Nothing Then
+        End If
       End Sub
 
-      Private Sub HandlePageDown(document As ObservableCollection(Of String))
+      Private Shared Sub HandlePageDown(document As ObservableCollection(Of String))
+        If document Is Nothing Then
+        End If
       End Sub
 
       Private Sub InsertLine(document As ObservableCollection(Of String))
@@ -572,7 +582,7 @@ Namespace Bsharp
       End If
     End Sub
 
-    Private Sub HandleEscape(document As ObservableCollection(Of String), view As SubmissionView)
+    Private Shared Sub HandleEscape(document As ObservableCollection(Of String), view As SubmissionView)
       document.Clear()
       document.Add(String.Empty)
       view.CurrentLine = 0
@@ -588,7 +598,7 @@ Namespace Bsharp
       InsertLine(document, view)
     End Sub
 
-    Private Sub HandleControlEnter(document As ObservableCollection(Of String), view As SubmissionView)
+    Private Shared Sub HandleControlEnter(document As ObservableCollection(Of String), view As SubmissionView)
       InsertLine(document, view)
     End Sub
 
@@ -601,32 +611,36 @@ Namespace Bsharp
       view.CurrentLine = lineIndex
     End Sub
 
-    Private Sub HandleLeftArrow(document As ObservableCollection(Of String), view As SubmissionView)
+    Private Shared Sub HandleLeftArrow(document As ObservableCollection(Of String), view As SubmissionView)
+      If document Is Nothing Then
+      End If
       If view.CurrentCharacter > 0 Then
         view.CurrentCharacter -= 1
       End If
     End Sub
 
-    Private Sub HandleRightArrow(document As ObservableCollection(Of String), view As SubmissionView)
+    Private Shared Sub HandleRightArrow(document As ObservableCollection(Of String), view As SubmissionView)
       Dim line = document(view.CurrentLine)
       If view.CurrentCharacter <= line.Length - 1 Then
         view.CurrentCharacter += 1
       End If
     End Sub
 
-    Private Sub HandleUpArrow(document As ObservableCollection(Of String), view As SubmissionView)
+    Private Shared Sub HandleUpArrow(document As ObservableCollection(Of String), view As SubmissionView)
+      If document Is Nothing Then
+      End If
       If view.CurrentLine > 0 Then
         view.CurrentLine -= 1
       End If
     End Sub
 
-    Private Sub HandleDownArrow(document As ObservableCollection(Of String), view As SubmissionView)
+    Private Shared Sub HandleDownArrow(document As ObservableCollection(Of String), view As SubmissionView)
       If view.CurrentLine < document.Count - 1 Then
         view.CurrentLine += 1
       End If
     End Sub
 
-    Private Sub HandleBackspace(document As ObservableCollection(Of String), view As SubmissionView)
+    Private Shared Sub HandleBackspace(document As ObservableCollection(Of String), view As SubmissionView)
       Dim start = view.CurrentCharacter
       If start = 0 Then
         If view.CurrentLine = 0 Then Return
@@ -646,7 +660,7 @@ Namespace Bsharp
       End If
     End Sub
 
-    Private Sub HandleDelete(document As ObservableCollection(Of String), view As SubmissionView)
+    Private Shared Sub HandleDelete(document As ObservableCollection(Of String), view As SubmissionView)
       Dim lineIndex = view.CurrentLine
       Dim line = document(lineIndex)
       Dim start = view.CurrentCharacter
@@ -662,11 +676,13 @@ Namespace Bsharp
       document(lineIndex) = before & after
     End Sub
 
-    Private Sub HandleHome(document As ObservableCollection(Of String), view As SubmissionView)
+    Private Shared Sub HandleHome(document As ObservableCollection(Of String), view As SubmissionView)
+      If document Is Nothing Then
+      End If
       view.CurrentCharacter = 0
     End Sub
 
-    Private Sub HandleEnd(document As ObservableCollection(Of String), view As SubmissionView)
+    Private Shared Sub HandleEnd(document As ObservableCollection(Of String), view As SubmissionView)
       view.CurrentCharacter = document(view.CurrentLine).Length
     End Sub
 
@@ -698,7 +714,7 @@ Namespace Bsharp
       view.CurrentCharacter = document(view.CurrentLine).Length
     End Sub
 
-    Private Sub HandleTab(document As ObservableCollection(Of String), view As SubmissionView)
+    Private Shared Sub HandleTab(document As ObservableCollection(Of String), view As SubmissionView)
       Const TAB_WIDTH As Integer = 2
       Dim start = view.CurrentCharacter
       Dim remainingSpaces = TAB_WIDTH - start Mod TAB_WIDTH
@@ -707,7 +723,7 @@ Namespace Bsharp
       view.CurrentCharacter += remainingSpaces
     End Sub
 
-    Private Sub HandleTyping(document As ObservableCollection(Of String), view As SubmissionView, text As String)
+    Private Shared Sub HandleTyping(document As ObservableCollection(Of String), view As SubmissionView, text As String)
       Dim lineIndex = view.CurrentLine
       Dim start = view.CurrentCharacter
       document(lineIndex) = document(lineIndex).Insert(start, text)

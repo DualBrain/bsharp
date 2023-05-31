@@ -13,4 +13,15 @@ Namespace Bsharp.CodeAnalysis.Symbols
 
   End Class
 
+  Public Class LocalArraySymbol
+    Inherits VariableSymbol
+
+    Friend Sub New(name As String, type As TypeSymbol, lower As BoundExpression, upper As BoundExpression)
+      MyBase.New(name, True, type, lower, upper)
+    End Sub
+
+    Public Overrides ReadOnly Property Kind As SymbolKind = SymbolKind.LocalVariable
+
+  End Class
+
 End Namespace

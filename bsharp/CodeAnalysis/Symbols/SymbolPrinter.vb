@@ -9,8 +9,8 @@ Namespace Bsharp.CodeAnalysis.Symbols
     Public Sub WriteTo(symbol As Symbol, writer As TextWriter)
       Select Case symbol.Kind
         Case SymbolKind.Function : WriteFunctionTo(CType(symbol, FunctionSymbol), writer)
-        Case SymbolKind.GlobalVariable : WriteGlobalVariableTo(CType(symbol, GlobalVariableSymbol), writer)
-        Case SymbolKind.LocalVariable : WriteLocalVariableTo(CType(symbol, LocalVariableSymbol), writer)
+        Case SymbolKind.GlobalVariable : WriteGlobalVariableTo(CType(symbol, VariableSymbol), writer)
+        Case SymbolKind.LocalVariable : WriteLocalVariableTo(CType(symbol, VariableSymbol), writer)
         Case SymbolKind.Parameter : WriteParameterTo(CType(symbol, ParameterSymbol), writer)
         Case SymbolKind.Type : WriteTypeTo(CType(symbol, TypeSymbol), writer)
         Case Else
@@ -45,16 +45,29 @@ Namespace Bsharp.CodeAnalysis.Symbols
 
     End Sub
 
-    Private Sub WriteGlobalVariableTo(symbol As GlobalVariableSymbol, writer As TextWriter)
+    Private Sub WriteGlobalVariableTo(symbol As VariableSymbol, writer As TextWriter)
       writer.WriteKeyword(If(symbol.IsReadOnly, SyntaxKind.ConstKeyword, SyntaxKind.DimKeyword))
       writer.WriteSpace()
       writer.WriteIdentifier(symbol.Name)
+      If symbol.IsArray Then
+        writer.WritePunctuation(SyntaxKind.OpenParenToken)
+        writer.Write(If(symbol.Lower?.ToString, "?"))
+        writer.WriteSpace
+        writer.WriteKeyword(SyntaxKind.ToKeyword)
+        writer.WriteSpace
+        writer.Write(If(symbol.Upper?.ToString, "?"))
+        writer.WritePunctuation(SyntaxKind.CloseParenToken)
+      End If
       writer.WritePunctuation(SyntaxKind.ColonToken)
       writer.WriteSpace
-      symbol.Type.WriteTo(writer)
+      If symbol.Type Is Nothing Then
+        writer.Write("????")
+      Else
+        symbol.Type.WriteTo(writer)
+      End If
     End Sub
 
-    Private Sub WriteLocalVariableTo(symbol As LocalVariableSymbol, writer As TextWriter)
+    Private Sub WriteLocalVariableTo(symbol As VariableSymbol, writer As TextWriter)
       writer.WriteKeyword(If(symbol.IsReadOnly, SyntaxKind.ConstKeyword, SyntaxKind.DimKeyword))
       writer.WriteSpace
       writer.WriteIdentifier(symbol.Name)

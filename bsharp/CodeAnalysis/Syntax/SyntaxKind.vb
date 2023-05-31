@@ -144,8 +144,11 @@
     DefDeclaration
     FunctionDeclaration
     GlobalStatement
+    InitClause
+    LowerSubscriptClause
     Parameter
     SingleLineElseClause
+    SubscriptClause
     UntilClause
     WhileClause
 

@@ -382,7 +382,16 @@ Namespace Bsharp.CodeAnalysis
     End Sub
 
     Private Sub EvaluateVariableDeclaration(node As BoundVariableDeclaration)
-      Dim value = EvaluateExpression(node.Initializer)
+      Dim value As Object
+      If node.Initializer IsNot Nothing Then
+        value = EvaluateExpression(node.Initializer)
+      Else
+        If node.Variable.Type Is TypeSymbol.String Then
+          value = ""
+        Else
+          value = 0
+        End If
+      End If
       Debug.Assert(value IsNot Nothing)
       m_lastValue = value
       Assign(node.Variable, value)
