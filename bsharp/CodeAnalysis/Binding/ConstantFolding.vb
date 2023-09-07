@@ -122,6 +122,20 @@ Namespace Bsharp.CodeAnalysis.Binding
             Case TypeSymbol.Type.SByte : Return New BoundConstant(CSByte(l) / CSByte(r))
             Case TypeSymbol.Type.Byte : Return New BoundConstant(CByte(l) / CByte(r))
           End Select
+        Case BoundBinaryOperatorKind.IntegerDivision
+          Select Case TypeSymbol.TypeSymbolToType(left.Type)
+            Case TypeSymbol.Type.Decimal : Return New BoundConstant(CLng(l) \ CLng(r))
+            Case TypeSymbol.Type.Double : Return New BoundConstant(CLng(l) \ CLng(r))
+            Case TypeSymbol.Type.Single : Return New BoundConstant(CInt(l) \ CInt(r))
+            Case TypeSymbol.Type.ULong64 : Return New BoundConstant(CULng(l) \ CULng(r))
+            Case TypeSymbol.Type.Long64 : Return New BoundConstant(CLng(l) \ CLng(r))
+            Case TypeSymbol.Type.ULong : Return New BoundConstant(CUInt(l) \ CUInt(r))
+            Case TypeSymbol.Type.Long : Return New BoundConstant(CInt(l) \ CInt(r))
+            Case TypeSymbol.Type.UInteger : Return New BoundConstant(CUShort(l) \ CUShort(r))
+            Case TypeSymbol.Type.Integer : Return New BoundConstant(CShort(l) \ CShort(r))
+            Case TypeSymbol.Type.SByte : Return New BoundConstant(CSByte(l) \ CSByte(r))
+            Case TypeSymbol.Type.Byte : Return New BoundConstant(CByte(l) \ CByte(r))
+          End Select
         Case BoundBinaryOperatorKind.BitwiseAnd
           Select Case TypeSymbol.TypeSymbolToType(left.Type)
             Case TypeSymbol.Type.ULong64 : Return New BoundConstant(CULng(l) And CULng(r))

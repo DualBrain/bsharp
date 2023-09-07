@@ -527,6 +527,7 @@ Namespace Bsharp.CodeAnalysis
 
         Case BoundBinaryOperatorKind.IntegerDivision
           Select Case TypeSymbol.TypeSymbolToType(node.Type)
+            Case TypeSymbol.Type.Single : Return CInt(left) \ CInt(right)
             Case TypeSymbol.Type.ULong64 : Return (CULng(left) \ CULng(right))
             Case TypeSymbol.Type.Long64 : Return (CLng(left) \ CLng(right))
             Case TypeSymbol.Type.ULong : Return (CUInt(left) \ CUInt(right))
