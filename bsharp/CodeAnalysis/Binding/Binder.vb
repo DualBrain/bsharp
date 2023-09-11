@@ -883,11 +883,10 @@ Namespace Bsharp.CodeAnalysis.Binding
             Case Else
               'TODO: This needs to be set based on current DEFINT, etc.
               type = TypeSymbol.Single
+              'TODO: Infer????
+              'type = boundExpression.Type
           End Select
-          'If Not syntax.IdentifierToken.Text.EndsWith("$") Then
-          '  type = TypeSymbol.Double
-          'End If
-          variable = BindVariableDeclaration(syntax.IdentifierToken, False, type) ' boundExpression.Type
+          variable = BindVariableDeclaration(syntax.IdentifierToken, False, type)
         End If
       End If
       If variable Is Nothing Then
