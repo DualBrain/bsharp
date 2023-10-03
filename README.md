@@ -10,7 +10,7 @@ I've had an idea for several years now to create what most people would consider
 
 The initial goal of the project is to recreate the *classic* BASIC experience but have this experience as a first-class citizen of .NET.  Once done, then move the project "forward" through time adding new features/capabilities without breaking this original *classic* experience.
 
-Additionally, this project will strive to remain true to the original spirit of BASIC; as defined by the original creators of the language:
+Additionally, this project will strive to adhere to the original principles of BASIC; as defined by the original creators of the language:
 
 1. It should be easy to learn for the beginner.
 2. It should be a general-purpose language, allowing the writing of any program.
@@ -21,7 +21,9 @@ Additionally, this project will strive to remain true to the original spirit of 
 7. No understanding of the hardware should be necessary.
 8. It should shield the user from the operating system.
 
-Finally, it has struck me as *odd* that given the power/capability of modern VB that such a project is written in a more evolved version of BASIC such as VB; the VB compiler, after all, is also written in VB... 
+As well as the above principles, I truly believe that BASIC would not have thrived without the work done by Microsoft; so this project will also be heavily influenced by the breadth of versions of Microsoft BASIC. Although the Dartmouth crowd had a negative view on what they referred to as "Street BASIC", I believe that the topic of BASIC today wouldn't even be an ongoing thriving topic if it weren't existence of these "Street BASIC"'s (namely the Microsoft variety).
+
+Finally, it has struck me as *odd* that given the power/capability of modern VB that such a project is written in a more evolved version of BASIC such as VB; the VB compiler, after all, is also written in VB...
 
 ## Plan
 
